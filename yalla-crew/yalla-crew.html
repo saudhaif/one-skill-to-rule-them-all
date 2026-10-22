@@ -1,0 +1,536 @@
+<title>YALLA CREW · يلا كرو</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: skyline masthead of UAE landmarks, then a single column of ride cards, each pairing details with its route map. */
+:root {
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --ink: #12211f;
+  --muted: #5b6b68;
+  --line: #d3dcda;
+  --accent: #0b7a72;        /* Gulf water */
+  --accent-ink: #ffffff;
+  --sun: #d9821e;           /* dawn ride light */
+  --skyline: #1c3330;
+  --sky-a: #f6dcb5;
+  --sky-b: #eef2f1;
+  --danger: #b4372f;
+  --font-display: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1716; --surface: #142321; --ink: #e6efed; --muted: #93a6a2; --line: #26403c;
+    --accent: #3fb8ad; --accent-ink: #062320; --sun: #f0a14a; --skyline: #050c0b;
+    --sky-a: #3b2a1b; --sky-b: #0d1716; --danger: #ef7d74; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1716; --surface: #142321; --ink: #e6efed; --muted: #93a6a2; --line: #26403c;
+  --accent: #3fb8ad; --accent-ink: #062320; --sun: #f0a14a; --skyline: #050c0b;
+  --sky-a: #3b2a1b; --sky-b: #0d1716; --danger: #ef7d74; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font-body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mast { background: linear-gradient(to bottom, var(--sky-a), var(--sky-b)); border-bottom: 1px solid var(--line); }
+.mast .wrap { padding-block: 28px 0; display: grid; gap: 6px; }
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font: 700 clamp(30px, 6vw, 46px)/1.1 var(--font-display); letter-spacing: .01em; text-wrap: balance; }
+.brand .latin { font: 500 13px var(--font-data); letter-spacing: .2em; color: var(--muted); direction: ltr; }
+.tag { margin: 0; color: var(--muted); max-width: 60ch; }
+.skyline { display: block; width: 100%; height: auto; margin-top: 10px; }
+.skyline .b { fill: var(--skyline); }
+.skyline .sun { fill: var(--sun); opacity: .85; }
+main .wrap { padding-block: 24px 48px; display: grid; gap: 22px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.stat b { display: block; font: 500 24px var(--font-data); font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 13px; }
+.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.spacer { flex: 1; }
+button.primary, .btn { border: 0; border-radius: 8px; padding: 9px 16px; font: 600 14px var(--font-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+button.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 8px; padding: 8px 14px; font: 500 14px var(--font-body); cursor: pointer; }
+button.link { border: 0; background: none; color: var(--danger); font: inherit; font-size: 13px; cursor: pointer; padding: 0; }
+button:focus-visible, .chip:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+button:disabled { opacity: .55; cursor: default; }
+.notice { border: 1px dashed var(--line); border-radius: var(--r); padding: 14px 16px; color: var(--muted); background: var(--surface); }
+.notice strong { color: var(--ink); }
+.rides { display: grid; gap: 16px; }
+.ride { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); overflow: hidden; }
+.ride.past { opacity: .72; }
+.ride .info { padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.ride h3 { margin: 0; font: 700 20px/1.3 var(--font-display); text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 13px; }
+.pill { display: inline-block; font-size: 12px; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
+.pill.example { border-color: var(--sun); color: var(--sun); }
+.pill.done { color: var(--muted); }
+.nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-block: 1px solid var(--line); padding-block: 10px; }
+.nums div { display: grid; }
+.nums b { font: 500 20px var(--font-data); font-variant-numeric: tabular-nums; }
+.nums span { font-size: 12px; color: var(--muted); }
+.notes { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.crew { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.faces { display: flex; }
+.faces img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--surface); margin-inline-start: -8px; background: var(--line); }
+.faces img:first-child { margin-inline-start: 0; }
+.crew .count { font-size: 13px; color: var(--muted); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ai { border-inline-start: 3px solid var(--accent); padding: 8px 12px; background: var(--bg); border-radius: 6px; white-space: pre-wrap; font-size: 14px; overflow-wrap: anywhere; }
+.map { background: var(--bg); border-inline-start: 1px solid var(--line); display: grid; align-content: center; padding: 10px; min-width: 0; }
+.map svg { width: 100%; height: auto; display: block; }
+.map .grid { stroke: var(--line); stroke-width: 1; }
+.map .route { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+.map .start { fill: var(--sun); }
+.map .end { fill: var(--ink); }
+.map .lbl { fill: var(--muted); font: 11px var(--font-data); }
+.map .scale { stroke: var(--ink); stroke-width: 2; }
+.map .empty { fill: var(--muted); font: 13px var(--font-body); }
+.map a { font-size: 12px; color: var(--accent); justify-self: start; margin-top: 4px; }
+form.add { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; }
+form.add h2 { margin: 0; font: 700 20px var(--font-display); }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fields .full { grid-column: 1 / -1; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input, select, textarea { font: 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+textarea { min-height: 70px; resize: vertical; }
+.garmin { border: 1px dashed var(--accent); border-radius: 8px; padding: 12px; display: grid; gap: 6px; }
+.garmin.drag { background: var(--bg); }
+.garmin p { margin: 0; font-size: 13px; color: var(--muted); }
+.garmin .ok { color: var(--accent); font-weight: 600; }
+.err { color: var(--danger); font-size: 13px; min-height: 1em; margin: 0; }
+footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
+@media (max-width: 720px) {
+  .ride { grid-template-columns: minmax(0, 1fr); }
+  .map { border-inline-start: 0; border-top: 1px solid var(--line); }
+  .fields { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat b { font-size: 19px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ride { transition: border-color .2s; }
+  .ride:hover { border-color: var(--accent); }
+}
+</style>
+
+<div dir="rtl" lang="ar">
+  <header class="mast">
+    <div class="wrap">
+      <div class="brand">
+        <h1>يلا كرو</h1>
+        <span class="latin">YALLA CREW</span>
+      </div>
+      <p class="tag">طلعات السياكل في الإمارات: حدّد الطلعة، ارفع مسارك من Garmin، وشوف كم واحد ماشي معك.</p>
+      <svg class="skyline" viewBox="0 0 1200 190" preserveAspectRatio="xMidYMax meet" role="img" aria-label="خط أفق لمعالم الإمارات: إطار دبي، متحف المستقبل، برج خليفة، برج العرب، وجامع الشيخ زايد">
+        <circle class="sun" cx="640" cy="150" r="46"/>
+        <!-- Dubai Frame -->
+        <path class="b" d="M70 190V70h90v120h-14V84H84v106z"/>
+        <rect class="b" x="70" y="62" width="90" height="12"/>
+        <!-- filler towers -->
+        <rect class="b" x="180" y="120" width="26" height="70"/>
+        <rect class="b" x="210" y="100" width="20" height="90"/>
+        <!-- Museum of the Future: torus -->
+        <path class="b" fill-rule="evenodd" d="M300 190c-34-6-52-36-46-70 6-36 40-58 74-52 34 6 54 40 46 74-4 20-16 36-32 48zm16-26c18-2 30-20 28-40-3-20-20-34-38-32-20 3-32 22-28 42 3 18 20 32 38 30z"/>
+        <rect class="b" x="296" y="180" width="40" height="10"/>
+        <rect class="b" x="400" y="110" width="24" height="80"/>
+        <rect class="b" x="428" y="132" width="22" height="58"/>
+        <!-- Burj Khalifa: stepped setbacks to spire -->
+        <path class="b" d="M500 190V150h10v-26h8V96h7V66h6V40h4V14h2V2h2v12h2v26h4v26h6v30h7v28h8v26h10v40z"/>
+        <rect class="b" x="580" y="128" width="22" height="62"/>
+        <rect class="b" x="606" y="112" width="18" height="78"/>
+        <!-- Burj Al Arab: mast and sail -->
+        <path class="b" d="M760 190V40h6v12c40 20 62 66 58 138z"/>
+        <path class="b" d="M752 190V58h6v132z"/>
+        <rect class="b" x="740" y="184" width="96" height="6"/>
+        <rect class="b" x="860" y="140" width="22" height="50"/>
+        <!-- Sheikh Zayed Grand Mosque: domes and minarets -->
+        <rect class="b" x="930" y="70" width="8" height="120"/><path class="b" d="M928 70l6-14 6 14z"/>
+        <rect class="b" x="1132" y="70" width="8" height="120"/><path class="b" d="M1130 70l6-14 6 14z"/>
+        <rect class="b" x="944" y="150" width="182" height="40"/>
+        <path class="b" d="M990 150a45 45 0 0 1 90 0z"/>
+        <path class="b" d="M1033 106h4v-10h-4z"/>
+        <path class="b" d="M950 150a20 20 0 0 1 40 0z"/>
+        <path class="b" d="M1080 150a20 20 0 0 1 40 0z"/>
+        <rect class="b" x="0" y="188" width="1200" height="2"/>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="stats" aria-label="ملخص">
+        <div class="stat"><b id="st-rides">0</b><span>طلعة قادمة</span></div>
+        <div class="stat"><b id="st-km">0</b><span>كم مخطّط لها</span></div>
+        <div class="stat"><b id="st-riders">0</b><span>تسجيل مشارك</span></div>
+      </section>
+
+      <div id="status" class="notice" hidden></div>
+
+      <div class="bar" role="toolbar" aria-label="تصفية حسب الإمارة">
+        <div id="filters" class="bar"></div>
+        <span class="spacer"></span>
+        <button class="primary" id="openForm" type="button">+ طلعة جديدة</button>
+      </div>
+
+      <form class="add" id="addForm" hidden novalidate>
+        <h2>طلعة جديدة</h2>
+        <div class="fields">
+          <label class="full">اسم الطلعة<input id="f-title" maxlength="80" placeholder="طلعة الفجر – القدرة" required></label>
+          <label>الإمارة<select id="f-emirate"></select></label>
+          <label>المستوى<select id="f-level"><option>مبتدئ</option><option selected>متوسط</option><option>متقدم</option></select></label>
+          <label>التاريخ<input id="f-date" type="date" required></label>
+          <label>وقت الانطلاق<input id="f-time" type="time" value="05:30" required></label>
+          <label class="full">نقطة التجمّع<input id="f-meet" maxlength="120" placeholder="مواقف حلبة القدرة للدراجات" required></label>
+          <label>المسافة (كم)<input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
+          <label>متوسط السرعة (كم/س)<input id="f-pace" type="number" min="10" max="50" step="1" value="28"></label>
+          <div class="garmin full" id="drop">
+            <strong>مسار من Garmin (اختياري)</strong>
+            <p>من Garmin Connect افتح النشاط أو المسار، ثم ⚙ ← تصدير GPX، وارفع الملف هنا أو اسحبه. المسافة تنحسب تلقائياً.</p>
+            <input id="f-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+            <p id="gpxInfo"></p>
+          </div>
+          <label class="full">ملاحظات<textarea id="f-notes" maxlength="600" placeholder="خوذة إجبارية، أضواء أمامية وخلفية، ماء 2 لتر على الأقل"></textarea></label>
+        </div>
+        <p class="err" id="formErr"></p>
+        <div class="actions">
+          <button class="primary" type="submit" id="saveBtn">انشر الطلعة</button>
+          <button class="ghost" type="button" id="cancelForm">إلغاء</button>
+        </div>
+      </form>
+
+      <section class="rides" id="rides" aria-live="polite"></section>
+    </div>
+  </main>
+  <footer><div class="wrap">مسارات الخريطة مرسومة من ملفات GPX. اقتراحات المساعد تجي من Claude على حسابك.</div></footer>
+</div>
+
+<script>
+(() => {
+  const EMIRATES = ["أبوظبي", "دبي", "الشارقة", "عجمان", "أم القيوين", "رأس الخيمة", "الفجيرة"];
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtDate = new Intl.DateTimeFormat("ar-AE-u-nu-latn", { weekday: "long", day: "numeric", month: "long" });
+  const fmtTime = new Intl.DateTimeFormat("ar-AE-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+
+  // Shown only when the shared store is not reachable (preview, signed out).
+  const EXAMPLE = {
+    id: "example", example: true, title: "طلعة الفجر – حلبة القدرة", emirate: "دبي", level: "متوسط",
+    meetPoint: "مواقف حلبة القدرة للدراجات", distanceKm: 50, paceKmh: 28, gainM: 120,
+    startAt: nextFriday(), notes: "خوذة إجبارية وأضواء. نرجع قبل ما تشتد الحرارة.",
+    route: loop(24.835, 55.375, 0.055, 0.08, 60)
+  };
+
+  const state = { mode: "pending", rides: [], joins: [], me: null, canWrite: true, filter: "الكل", ai: {}, gpx: null };
+  let db = null, user = null, sample = null, writeChain = Promise.resolve();
+
+  function nextFriday() {
+    const d = new Date(); d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7)); d.setHours(5, 30, 0, 0);
+    return d.toISOString();
+  }
+  function loop(lat, lon, dLat, dLon, n) {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = (i / n) * Math.PI * 2;
+      pts.push([+(lat + dLat * Math.sin(t) * (1 + 0.15 * Math.cos(3 * t))).toFixed(5), +(lon + dLon * Math.cos(t)).toFixed(5)]);
+    }
+    return pts;
+  }
+  function haversine(a, b) {
+    const R = 6371, r = Math.PI / 180;
+    const dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function parseGpx(text) {
+    const doc = new DOMParser().parseFromString(text, "application/xml");
+    if (doc.querySelector("parsererror")) throw new Error("الملف مو GPX صالح.");
+    const raw = [...doc.querySelectorAll("trkpt, rtept")].map((p) => {
+      const e = p.querySelector("ele");
+      return [parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon")), e ? parseFloat(e.textContent) : NaN];
+    }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
+    if (raw.length < 2) throw new Error("ما لقيت نقاط مسار في الملف.");
+    let km = 0, gain = 0;
+    for (let i = 1; i < raw.length; i++) {
+      km += haversine(raw[i - 1], raw[i]);
+      const de = raw[i][2] - raw[i - 1][2];
+      if (de > 0) gain += de;
+    }
+    const step = Math.ceil(raw.length / 400);
+    const route = raw.filter((_, i) => i % step === 0 || i === raw.length - 1).map((p) => [+p[0].toFixed(5), +p[1].toFixed(5)]);
+    const name = doc.querySelector("trk > name, rte > name, metadata > name")?.textContent?.trim() || "";
+    return { route, km: Math.round(km * 10) / 10, gain: Math.round(gain), name };
+  }
+
+  function niceScale(widthKm) {
+    const target = widthKm / 4;
+    for (const s of [0.5, 1, 2, 5, 10, 20, 50]) if (s >= target) return s;
+    return 100;
+  }
+  function routeSvg(route) {
+    const W = 360, H = 220, P = 18;
+    if (!route || route.length < 2) {
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="لا يوجد مسار"><text class="empty" x="${W / 2}" y="${H / 2}" text-anchor="middle">ما فيه مسار مرفوع لهالطلعة</text></svg>`;
+    }
+    const lats = route.map((p) => p[0]), lons = route.map((p) => p[1]);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLon = Math.min(...lons), maxLon = Math.max(...lons);
+    const k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+    const spanX = Math.max((maxLon - minLon) * k, 1e-4), spanY = Math.max(maxLat - minLat, 1e-4);
+    const s = Math.min((W - 2 * P) / spanX, (H - 2 * P - 16) / spanY);
+    const ox = (W - spanX * s) / 2, oy = (H - 16 - spanY * s) / 2;
+    const xy = (p) => [ox + (p[1] - minLon) * k * s, oy + (maxLat - p[0]) * s];
+    const d = route.map((p, i) => { const [x, y] = xy(p); return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }).join("");
+    const [sx, sy] = xy(route[0]), [ex, ey] = xy(route[route.length - 1]);
+    const kmPerPx = 111.32 / s;
+    const scaleKm = niceScale(kmPerPx * (W - 2 * P));
+    const scalePx = scaleKm / kmPerPx;
+    let grid = "";
+    for (let gx = P; gx <= W - P; gx += 40) grid += `<line class="grid" x1="${gx}" y1="${P}" x2="${gx}" y2="${H - 30}"/>`;
+    for (let gy = P; gy <= H - 30; gy += 40) grid += `<line class="grid" x1="${P}" y1="${gy}" x2="${W - P}" y2="${gy}"/>`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة المسار">${grid}
+      <path class="route" d="${d}"/>
+      <rect class="end" x="${(ex - 5).toFixed(1)}" y="${(ey - 5).toFixed(1)}" width="10" height="10"/>
+      <circle class="start" cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5"/>
+      <line class="scale" x1="${P}" y1="${H - 10}" x2="${(P + scalePx).toFixed(1)}" y2="${H - 10}"/>
+      <text class="lbl" x="${(P + scalePx + 6).toFixed(1)}" y="${H - 6}" direction="ltr">${scaleKm} km</text>
+      <text class="lbl" x="${W - P}" y="${H - 6}" text-anchor="end">● البداية  ■ النهاية</text></svg>`;
+  }
+
+  function riders(rideId) { return state.joins.filter((j) => j.rides && j.rides[rideId] === true).map((j) => j.id); }
+  function visibleRides() {
+    const list = state.mode === "live" ? state.rides : [EXAMPLE];
+    return state.filter === "الكل" ? list : state.filter === "طلعاتي"
+      ? list.filter((r) => riders(r.id).includes(state.me) || r.createdBy === state.me)
+      : list.filter((r) => r.emirate === state.filter);
+  }
+
+  function renderFilters() {
+    const opts = ["الكل", ...(state.me ? ["طلعاتي"] : []), ...EMIRATES];
+    $("#filters").innerHTML = opts.map((o) => `<button type="button" class="chip" data-f="${esc(o)}" aria-pressed="${o === state.filter}">${esc(o)}</button>`).join("");
+  }
+
+  function renderStats() {
+    const now = Date.now();
+    const list = state.mode === "live" ? state.rides : [];
+    const up = list.filter((r) => Date.parse(r.startAt) >= now);
+    $("#st-rides").textContent = up.length;
+    $("#st-km").textContent = Math.round(up.reduce((a, r) => a + (+r.distanceKm || 0), 0));
+    $("#st-riders").textContent = up.reduce((a, r) => a + riders(r.id).length, 0);
+  }
+
+  function renderStatus() {
+    const el = $("#status");
+    let html = "";
+    if (state.mode === "pending") html = "جاري تحميل الطلعات…";
+    else if (state.mode === "example") html = "<strong>هذا مثال توضيحي.</strong> الطلعات المشتركة تظهر لما تفتح الصفحة وأنت مسجّل دخول في Claude.";
+    else if (state.mode === "live" && !state.rides.length) html = "<strong>ما فيه طلعات للحين.</strong> اضغط «+ طلعة جديدة» وانشر أول طلعة للكرو.";
+    else if (state.mode === "live" && !state.canWrite) html = "تقدر تشوف الطلعات بس، ما عندك صلاحية تضيف أو تسجّل.";
+    el.innerHTML = html; el.hidden = !html;
+    $("#openForm").hidden = state.mode !== "live" || !state.canWrite;
+  }
+
+  function rideCard(r) {
+    const start = new Date(r.startAt);
+    const past = start.getTime() < Date.now();
+    const ids = riders(r.id);
+    const joined = state.me && ids.includes(state.me);
+    const hours = r.paceKmh ? (r.distanceKm / r.paceKmh) : null;
+    const dur = hours ? `${Math.floor(hours)}:${String(Math.round((hours % 1) * 60)).padStart(2, "0")}` : "—";
+    const live = state.mode === "live";
+    const maps = r.route?.length ? `https://www.google.com/maps/search/?api=1&query=${r.route[0][0]},${r.route[0][1]}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.meetPoint + " " + r.emirate)}`;
+    return `<article class="ride${past ? " past" : ""}" data-id="${esc(r.id)}">
+      <div class="info">
+        <div class="meta">
+          <span class="pill">${esc(r.emirate)}</span><span class="pill">${esc(r.level)}</span>
+          ${r.example ? '<span class="pill example">مثال</span>' : ""}${past ? '<span class="pill done">انتهت</span>' : ""}
+        </div>
+        <h3>${esc(r.title)}</h3>
+        <div class="meta"><span>${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}</span><span>التجمّع: ${esc(r.meetPoint)}</span></div>
+        <div class="nums">
+          <div><b>${esc(r.distanceKm)}</b><span>كم</span></div>
+          <div><b>${esc(r.paceKmh || "—")}</b><span>كم/س متوسط</span></div>
+          <div><b>${esc(dur)}</b><span>${r.gainM ? `مدة تقريبية · ${esc(r.gainM)} م صعود` : "مدة تقريبية"}</span></div>
+        </div>
+        ${r.notes ? `<p class="notes">${esc(r.notes)}</p>` : ""}
+        <div class="crew">
+          <div class="faces" data-faces="${esc(ids.slice(0, 8).join(","))}"></div>
+          <span class="count"><b>${ids.length}</b> ${ids.length === 1 ? "مشارك" : "مشاركين"}</span>
+        </div>
+        <div class="actions">
+          ${live && state.canWrite && state.me && !past ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${joined ? "انسحب" : "أنا معكم"}</button>` : ""}
+          ${sample ? `<button type="button" class="ghost" data-act="ai">اقتراحات المساعد</button>` : ""}
+          ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="link" data-act="del">حذف الطلعة</button>` : ""}
+        </div>
+        ${state.ai[r.id] ? `<div class="ai" data-ai>${esc(state.ai[r.id])}</div>` : ""}
+      </div>
+      <div class="map">${routeSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">افتح نقطة التجمّع في الخرائط</a></div>
+    </article>`;
+  }
+
+  function render() {
+    renderFilters(); renderStats(); renderStatus();
+    const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+    const now = Date.now();
+    const ordered = [...list.filter((r) => Date.parse(r.startAt) >= now), ...list.filter((r) => Date.parse(r.startAt) < now).reverse()];
+    $("#rides").innerHTML = ordered.map(rideCard).join("") ||
+      (state.mode === "live" && state.rides.length ? '<p class="notice">ما فيه طلعات بهالتصفية.</p>' : "");
+    fillFaces();
+  }
+
+  async function fillFaces() {
+    if (!user) return;
+    const boxes = [...document.querySelectorAll("[data-faces]")].filter((b) => b.dataset.faces);
+    const ids = [...new Set(boxes.flatMap((b) => b.dataset.faces.split(",")))];
+    if (!ids.length) return;
+    const ps = await user.profiles(ids);
+    for (const b of boxes) {
+      b.replaceChildren(...b.dataset.faces.split(",").map((id) => {
+        const img = document.createElement("img");
+        img.src = ps[id]?.avatarUrl || ""; img.alt = ps[id]?.name || "مشارك"; img.title = ps[id]?.name || "مشارك";
+        return img;
+      }));
+    }
+  }
+
+  function queueWrite(fn) { writeChain = writeChain.then(fn, fn); return writeChain; }
+
+  async function toggleJoin(rideId) {
+    if (!db || !state.me) return;
+    const mine = state.joins.find((j) => j.id === state.me);
+    const on = !(mine?.rides?.[rideId] === true);
+    const ref = db.doc("joins/" + state.me);
+    try {
+      await queueWrite(() => mine ? ref.update({ rides: { [rideId]: on } }) : ref.set({ rides: { [rideId]: on } }));
+    } catch (e) { flash(e.code === "invalid_argument" ? "ما عندك صلاحية تسجّل في الطلعات." : "ما انحفظ التسجيل، جرّب مرة ثانية."); }
+  }
+
+  async function deleteRide(rideId, btn) {
+    if (btn.dataset.confirm !== "1") { btn.dataset.confirm = "1"; btn.textContent = "متأكد؟ اضغط مرة ثانية للحذف"; return; }
+    try { await db.doc("rides/" + rideId).delete(); } catch { flash("ما انحذفت الطلعة، جرّب مرة ثانية."); }
+  }
+
+  async function askAi(r, btn) {
+    btn.disabled = true;
+    state.ai[r.id] = "يفكّر…"; render();
+    const start = new Date(r.startAt);
+    const prompt = `أنت مساعد لمجموعة دراجات هوائية في الإمارات اسمها يلا كرو. اكتب بالعربي الخليجي البسيط 6 نقاط قصيرة لتجهيز هذه الطلعة: الماء والتغذية حسب حرارة الإمارات ووقت الانطلاق، التجهيزات، تقسيم مجموعات السرعة، والسلامة على الطريق. نص عادي بدون تنسيق Markdown، كل نقطة في سطر يبدأ بـ «•».
+
+الطلعة: ${r.title}
+الإمارة: ${r.emirate}
+نقطة التجمع: ${r.meetPoint}
+الموعد: ${fmtDate.format(start)} الساعة ${fmtTime.format(start)}
+المسافة: ${r.distanceKm} كم، متوسط السرعة ${r.paceKmh || "غير محدد"} كم/س، الصعود ${r.gainM || "غير معروف"} م
+المستوى: ${r.level}
+ملاحظات المنظم: ${r.notes || "لا يوجد"}`;
+    try {
+      const { text } = await sample(prompt, { modelTier: "quick", onText: ({ text }) => {
+        state.ai[r.id] = text;
+        const box = document.querySelector(`.ride[data-id="${CSS.escape(r.id)}"] [data-ai]`);
+        if (box) box.textContent = text;
+      } });
+      state.ai[r.id] = text;
+    } catch (e) {
+      if (e.code === "not_granted" || e.code === "sampling_disabled" || e.code === "capability_disabled") { sample = null; delete state.ai[r.id]; }
+      else state.ai[r.id] = e.text || (e.code === "rate_limited" ? "وصلت الحد المسموح، جرّب بعد شوي." : "ما وصل رد المساعد، جرّب مرة ثانية.");
+    }
+    render();
+  }
+
+  function flash(msg) { const el = $("#status"); el.textContent = msg; el.hidden = false; }
+
+  // Events
+  $("#filters").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]"); if (!b) return;
+    state.filter = b.dataset.f; render();
+  });
+  $("#rides").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const id = b.closest(".ride").dataset.id;
+    const r = state.mode === "live" ? state.rides.find((x) => x.id === id) : EXAMPLE;
+    if (b.dataset.act === "join") toggleJoin(id);
+    else if (b.dataset.act === "del") deleteRide(id, b);
+    else if (b.dataset.act === "ai" && r) askAi(r, b);
+  });
+
+  const form = $("#addForm");
+  $("#f-emirate").innerHTML = EMIRATES.map((e) => `<option${e === "دبي" ? " selected" : ""}>${e}</option>`).join("");
+  $("#openForm").addEventListener("click", () => {
+    form.hidden = false;
+    if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
+    $("#f-title").focus();
+  });
+  $("#cancelForm").addEventListener("click", () => { form.hidden = true; $("#formErr").textContent = ""; });
+
+  async function takeGpx(file) {
+    const info = $("#gpxInfo");
+    try {
+      const g = parseGpx(await file.text());
+      state.gpx = g;
+      $("#f-km").value = g.km;
+      if (!$("#f-title").value && g.name) $("#f-title").value = g.name.slice(0, 80);
+      info.className = "ok";
+      info.textContent = `تم: ${g.km} كم · ${g.gain} م صعود · ${g.route.length} نقطة على الخريطة`;
+    } catch (err) {
+      state.gpx = null; info.className = "err"; info.textContent = err.message || "ما قدرت أقرأ الملف.";
+    }
+  }
+  $("#f-gpx").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) takeGpx(f); });
+  const drop = $("#drop");
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("drag"); const f = e.dataTransfer.files[0]; if (f) takeGpx(f); });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#formErr");
+    const title = $("#f-title").value.trim(), meet = $("#f-meet").value.trim();
+    const km = parseFloat($("#f-km").value), pace = parseFloat($("#f-pace").value);
+    const date = $("#f-date").value, time = $("#f-time").value;
+    if (!title || !meet || !date || !time) { err.textContent = "عبّ الاسم ونقطة التجمّع والتاريخ والوقت."; return; }
+    if (!(km > 0)) { err.textContent = "حط المسافة بالكيلومتر، أو ارفع ملف GPX."; return; }
+    const startAt = new Date(`${date}T${time}`);
+    if (isNaN(startAt)) { err.textContent = "التاريخ أو الوقت مو صحيح."; return; }
+    err.textContent = "";
+    const btn = $("#saveBtn"); btn.disabled = true;
+    try {
+      await db.collection("rides").add({
+        title, meetPoint: meet, emirate: $("#f-emirate").value, level: $("#f-level").value,
+        startAt: startAt.toISOString(), distanceKm: Math.round(km * 10) / 10,
+        paceKmh: pace > 0 ? Math.round(pace) : null, gainM: state.gpx?.gain ?? null,
+        notes: $("#f-notes").value.trim(), route: state.gpx?.route ?? [],
+        createdBy: state.me, createdAt: new Date().toISOString()
+      });
+      form.reset(); state.gpx = null; $("#gpxInfo").textContent = ""; form.hidden = true;
+    } catch (ex) {
+      err.textContent = ex.code === "invalid_argument" ? "ما عندك صلاحية تنشر طلعات." : ex.code === "quota_exceeded" ? "وصلت قاعدة البيانات حدها، احذف طلعات قديمة." : "ما انحفظت الطلعة، جرّب مرة ثانية.";
+    } finally { btn.disabled = false; }
+  });
+
+  // Boot
+  render();
+  (async () => {
+    if (!window.claude?.use) { state.mode = "example"; render(); return; }
+    [db, user, sample] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("sample")]);
+    if (!db) { state.mode = "example"; render(); return; }
+    state.me = user ? await user.id() : null;
+    const cw = user ? await user.can("data.write") : null;
+    state.canWrite = cw !== false && !!state.me;
+    const fail = (e) => { if (e.code === "revoked") { db = null; state.mode = "example"; render(); } else flash("انقطع الاتصال بالطلعات، حدّث الصفحة."); };
+    db.collection("rides").orderBy("startAt").onSnapshot((s) => {
+      state.rides = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      state.mode = "live"; render();
+    }, fail);
+    db.collection("joins").onSnapshot((s) => {
+      state.joins = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      render();
+    }, fail);
+  })();
+})();
+</script>
