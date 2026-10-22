@@ -2,338 +2,359 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Lalezar&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Teko:wght@500;600&family=Hind:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Hind:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: sunset sky with UAE landmark silhouettes, language switch and tabs; below, ride cards (details + route map) or a market grid. */
+/* Layout: a phone-app shell (max 520px): app bar, landmark silhouette strip, one scrolling screen, bottom tab bar and a + button; forms open as bottom sheets. */
 :root {
-  --bg: #f2f4f9;
-  --surface: #ffffff;
-  --ink: #0d1322;
-  --muted: #566078;
-  --line: #d9dfec;
-  --accent: #ff4d1a;        /* race orange: buttons, running */
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --ink: #111418;
+  --muted: #6b7280;
+  --line: #e6e8ec;
+  --accent: #ff5a1f;      /* one sporty orange for actions */
   --accent-ink: #ffffff;
-  --bike: #1b5cff;          /* electric blue: cycling */
-  --run: #ff4d1a;
-  --volt: #c4f22e;          /* finish-line highlight */
-  --volt-ink: #0d1322;
-  --sky-top: #ffd7b0;
-  --sky-mid: #ff9f68;
-  --sun: #ff6a2b;
-  --shadow: #10172a;        /* landmark silhouettes */
-  --shadow-far: #10172a;
-  --danger: #c22a1f;
-  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
-  --font-body: "Barlow", "Segoe UI", Arial, sans-serif;
-  --font-data: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
-  --r: 12px;
+  --accent-soft: #fff0ea;
+  --bike: #2563eb;
+  --run: #ff5a1f;
+  --ok: #16a34a;
+  --danger: #dc2626;
+  --sky: #ffe8da;
+  --shade: #1f2430;       /* landmark silhouettes */
+  --scrim: rgba(17, 20, 24, .45);
+  --font: "Barlow", system-ui, "Segoe UI", Roboto, sans-serif;
+  --logo: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --r: 16px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #090d18; --surface: #111a2d; --ink: #eef1f8; --muted: #98a2bb; --line: #222c45;
-    --accent: #ff6a3d; --accent-ink: #160803; --bike: #5a8bff; --run: #ff6a3d; --volt: #c9f53c; --volt-ink: #0d1322;
-    --sky-top: #1b1430; --sky-mid: #6b2a24; --sun: #ff7a3d; --shadow: #03050b; --shadow-far: #03050b; --danger: #ff7b70;
+    --bg: #0f1115; --card: #181b22; --ink: #f2f4f7; --muted: #9aa1ad; --line: #262a33;
+    --accent: #ff6b35; --accent-ink: #ffffff; --accent-soft: #2a1a12; --bike: #5b8cff; --run: #ff6b35;
+    --ok: #4ade80; --danger: #f87171; --sky: #1d1a1c; --shade: #000000; --scrim: rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #090d18; --surface: #111a2d; --ink: #eef1f8; --muted: #98a2bb; --line: #222c45;
-  --accent: #ff6a3d; --accent-ink: #160803; --bike: #5a8bff; --run: #ff6a3d; --volt: #c9f53c; --volt-ink: #0d1322;
-  --sky-top: #1b1430; --sky-mid: #6b2a24; --sun: #ff7a3d; --shadow: #03050b; --shadow-far: #03050b; --danger: #ff7b70;
+  --bg: #0f1115; --card: #181b22; --ink: #f2f4f7; --muted: #9aa1ad; --line: #262a33;
+  --accent: #ff6b35; --accent-ink: #ffffff; --accent-soft: #2a1a12; --bike: #5b8cff; --run: #ff6b35;
+  --ok: #4ade80; --danger: #f87171; --sky: #1d1a1c; --shade: #000000; --scrim: rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
-[lang="ar"] { --font-display: "Lalezar", "IBM Plex Sans Arabic", Tahoma, sans-serif; --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; }
-[lang="hi"] { --font-display: "Teko", "Hind", "Nirmala UI", sans-serif; --font-body: "Hind", "Nirmala UI", "Segoe UI", sans-serif; }
+[lang="ar"] { --font: "IBM Plex Sans Arabic", system-ui, Tahoma, sans-serif; }
+[lang="hi"] { --font: "Hind", "Nirmala UI", system-ui, sans-serif; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font-body); }
-#app { font-family: var(--font-body); }
-.wrap { max-width: 1020px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.mast { background: linear-gradient(to bottom, var(--sky-top), var(--sky-mid) 78%, var(--sky-mid)); position: relative; }
-.mast .wrap { padding-block: 22px 0; display: grid; gap: 6px; }
-.toprow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.brand h1 { margin: 0; font: 700 italic clamp(34px, 7vw, 54px)/1 "Barlow Condensed", "Arial Narrow", sans-serif; letter-spacing: .02em; text-transform: uppercase; color: var(--shadow); }
-.brand .ar { font: 400 clamp(24px, 5vw, 34px)/1 "Lalezar", "IBM Plex Sans Arabic", sans-serif; color: var(--shadow); }
-:root[data-theme="dark"] .brand h1, :root[data-theme="dark"] .brand .ar { color: var(--ink); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .brand h1, :root:not([data-theme="light"]) .brand .ar { color: var(--ink); } }
-.langs { display: flex; gap: 4px; background: color-mix(in srgb, var(--surface) 70%, transparent); border-radius: 999px; padding: 3px; }
-.langs button { border: 0; background: transparent; color: var(--ink); font: 600 13px var(--font-body); padding: 4px 11px; border-radius: 999px; cursor: pointer; }
-.langs button[aria-pressed="true"] { background: var(--accent); color: #ffffff; }
-.tag { margin: 0; color: var(--ink); max-width: 62ch; font-weight: 500; }
-.skyline { display: block; width: 100%; height: auto; margin-top: 4px; }
-.skyline .sun { fill: var(--sun); }
-.skyline .far { fill: var(--shadow-far); opacity: .28; }
-.skyline .near { fill: var(--shadow); }
-.skyline .stroke { fill: none; stroke: var(--shadow); }
-.tabs { display: flex; gap: 0; background: var(--shadow); }
-.tabs .wrap { display: flex; gap: 10px; padding-block: 10px; }
-.tabs button { flex: 1 1 0; max-width: 220px; border: 2px solid #ffffff; background: transparent; color: #ffffff; font: 700 20px/1 var(--font-display); letter-spacing: .03em; text-transform: uppercase; padding: 12px 18px 10px; border-radius: 999px; cursor: pointer; }
-.tabs button:hover { background: rgba(255, 255, 255, .12); }
-.tabs button[aria-selected="true"] { background: var(--volt); border-color: var(--volt); color: #0d1322; }
-main .wrap { padding-block: 22px 44px; display: grid; gap: 20px; }
-.tabpanel { display: grid; gap: 20px; }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.stat { background: var(--surface); border-radius: var(--r); padding: 12px 14px; border-top: 4px solid var(--accent); }
-.stat:nth-child(2) { border-top-color: var(--bike); }
-.stat:nth-child(3) { border-top-color: var(--volt); }
-.stat b { display: block; font: 700 30px/1.1 var(--font-data); font-variant-numeric: tabular-nums; }
-.stat span { color: var(--muted); font-size: 13px; }
-.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 13px; font: 600 13px var(--font-body); cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-.chip[data-f="bike"][aria-pressed="true"] { background: var(--bike); border-color: var(--bike); color: #fff; }
-.chip[data-f="run"][aria-pressed="true"] { background: var(--run); border-color: var(--run); color: #fff; }
-.spacer { flex: 1; }
-button.primary { border: 0; border-radius: 8px; padding: 9px 16px; font: 700 14px var(--font-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
-button.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 8px; padding: 8px 14px; font: 600 14px var(--font-body); cursor: pointer; }
-button.link { border: 0; background: none; color: var(--danger); font: inherit; font-size: 13px; cursor: pointer; padding: 0; }
-button:focus-visible, .chip:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--volt); outline-offset: 2px; }
-button:disabled { opacity: .55; cursor: default; }
-select.mini { width: auto; padding: 5px 10px; font-size: 13px; border-radius: 999px; background: var(--surface); }
-input.search { width: auto; flex: 1 1 180px; padding: 6px 12px; border-radius: 999px; background: var(--surface); font-size: 14px; }
-.notice { border: 1px dashed var(--line); border-radius: var(--r); padding: 14px 16px; color: var(--muted); background: var(--surface); }
+html, body { background: var(--bg); }
+body { color: var(--ink); font: 15px/1.5 var(--font); -webkit-tap-highlight-color: transparent; }
+#app { font-family: var(--font); max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--bg); position: relative; }
+.pad { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button { font-family: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* App bar */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sky); }
+.appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--sky); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px 6px; }
+.logo { margin: 0; white-space: nowrap; font: italic 700 24px/1 var(--logo); letter-spacing: .02em; text-transform: uppercase; display: flex; align-items: baseline; gap: 8px; }
+.logo span { font: 700 18px/1 "IBM Plex Sans Arabic", sans-serif; font-style: normal; text-transform: none; color: var(--accent); }
+.langsel { width: auto; flex: none; appearance: none; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 600 13px var(--font); }
+.hero { background: var(--sky); }
+.skyline { display: block; width: 100%; height: auto; }
+.skyline .s { fill: var(--shade); }
+.skyline .o { fill: none; stroke: var(--shade); }
+.skyline .sun { fill: var(--accent); opacity: .9; }
+
+/* Screen */
+main { padding-block: 14px calc(96px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
+.screen { display: grid; gap: 14px; }
+.h2 { margin: 0; font: 700 20px/1.2 var(--font); }
+.sub { margin: 0; color: var(--muted); font-size: 13px; }
+.notice { background: var(--card); border-radius: var(--r); padding: 14px 16px; color: var(--muted); font-size: 14px; }
 .notice strong { color: var(--ink); }
-.rides { display: grid; gap: 16px; }
-.ride { background: var(--surface); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); overflow: hidden; border-inline-start: 6px solid var(--bike); --sport: var(--bike); }
-.ride.run { border-inline-start-color: var(--run); --sport: var(--run); }
-.ride.past { opacity: .7; }
-.ride.target { box-shadow: 0 0 0 3px var(--volt); }
-.ride .info { padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
-.ride h3 { margin: 0; font: 700 24px/1.15 var(--font-display); text-wrap: balance; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 13px; align-items: center; }
-.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
-.pill.sport { background: var(--sport); border-color: var(--sport); color: #fff; }
-.pill.example { background: var(--volt); border-color: var(--volt); color: var(--volt-ink); }
-.pill.done { color: var(--muted); }
-.nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-block: 1px solid var(--line); padding-block: 10px; }
-.nums div { display: grid; }
-.nums b { font: 700 26px/1.1 var(--font-data); font-variant-numeric: tabular-nums; color: var(--sport); }
-.nums span { font-size: 12px; color: var(--muted); }
-.notes { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.crew { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--card); border-radius: var(--r); padding: 12px 4px; }
+.stat { text-align: center; display: grid; gap: 2px; }
+.stat + .stat { border-inline-start: 1px solid var(--line); }
+.stat b { font: 700 22px/1.1 var(--font); font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 12px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 2px; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 7px 14px; font: 600 13px var(--font); cursor: pointer; white-space: nowrap; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+select.chip { width: auto; appearance: none; padding: 7px 14px; border-radius: 999px; }
+.search { width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 12px; padding: 11px 14px; font: 15px var(--font); }
+
+/* Ride cards */
+.list { display: grid; gap: 12px; }
+.card { background: var(--card); border-radius: var(--r); overflow: hidden; }
+.ride { padding: 14px 16px; display: grid; gap: 10px; --sport: var(--bike); }
+.ride.run { --sport: var(--run); }
+.ride.past { opacity: .6; }
+.ride.target { box-shadow: 0 0 0 2px var(--accent); }
+.ride .top { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; color: var(--sport); }
+.tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sport); }
+.badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.badge.muted { background: var(--bg); color: var(--muted); }
+.ride h3 { margin: 0; font: 700 18px/1.3 var(--font); }
+.ride .when { margin: 0; color: var(--muted); font-size: 13px; }
+.nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.nums div { background: var(--bg); border-radius: 10px; padding: 8px 10px; display: grid; }
+.nums b { font: 700 18px/1.2 var(--font); font-variant-numeric: tabular-nums; }
+.nums span { font-size: 11px; color: var(--muted); }
+.row { display: flex; align-items: center; gap: 10px; }
 .faces { display: flex; }
-.faces img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--surface); margin-inline-start: -8px; background: var(--line); }
+.faces img { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--card); margin-inline-start: -8px; background: var(--line); }
 .faces img:first-child { margin-inline-start: 0; }
-.crew .count { font-size: 13px; color: var(--muted); }
-.full-tag { color: var(--danger); font-size: 13px; font-weight: 600; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.ai { border-inline-start: 3px solid var(--sport); padding: 8px 12px; background: var(--bg); border-radius: 6px; white-space: pre-wrap; font-size: 14px; overflow-wrap: anywhere; }
-.map { background: var(--bg); display: grid; align-content: center; padding: 10px; min-width: 0; }
+.count { font-size: 13px; color: var(--muted); flex: 1; min-width: 0; }
+.full-tag { color: var(--danger); font-weight: 600; }
+.btn { border: 0; border-radius: 12px; padding: 10px 16px; font: 700 14px var(--font); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn.soft { background: var(--bg); color: var(--ink); }
+.btn.block { width: 100%; padding-block: 14px; font-size: 16px; }
+.btn:disabled { opacity: .5; }
+.links { display: flex; gap: 16px; flex-wrap: wrap; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); font: 600 13px var(--font); cursor: pointer; }
+.linkbtn.danger { color: var(--danger); }
+.details { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; }
+.notes { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.ai { background: var(--bg); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; font-size: 14px; overflow-wrap: anywhere; }
+.map { background: var(--bg); border-radius: 12px; padding: 6px; }
 .map svg { width: 100%; height: auto; display: block; }
 .map .grid { stroke: var(--line); stroke-width: 1; }
 .map .route { fill: none; stroke: var(--sport); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
-.map .start { fill: var(--volt); stroke: var(--ink); stroke-width: 1.5; }
+.map .start { fill: var(--ok); }
 .map .end { fill: var(--ink); }
-.map .lbl { fill: var(--muted); font: 600 11px var(--font-data); }
+.map .lbl { fill: var(--muted); font: 600 11px var(--font); }
 .map .scale { stroke: var(--ink); stroke-width: 2; }
-.map .empty { fill: var(--muted); font: 13px var(--font-body); }
-.map .elev { fill: var(--sport); opacity: .2; }
+.map .empty { fill: var(--muted); font: 13px var(--font); }
+.map .elev { fill: var(--sport); opacity: .18; }
 .map .elev-line { fill: none; stroke: var(--sport); stroke-width: 1.5; }
-.map a { font-size: 12px; color: var(--sport); justify-self: start; margin-top: 4px; font-weight: 600; }
-form.add { background: var(--surface); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; border-top: 4px solid var(--accent); }
-form.add h2 { margin: 0; font: 700 24px var(--font-display); }
-.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.fields .full { grid-column: 1 / -1; }
-label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-input, select, textarea { font: 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
-textarea { min-height: 70px; resize: vertical; }
-.garmin { border: 1px dashed var(--bike); border-radius: 8px; padding: 12px; display: grid; gap: 6px; }
-.garmin.drag { background: var(--bg); }
-.garmin p { margin: 0; font-size: 13px; color: var(--muted); }
-.garmin .ok { color: var(--bike); font-weight: 600; }
-.err { color: var(--danger); font-size: 13px; min-height: 1em; margin: 0; }
-.board { background: var(--surface); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; border-top: 4px solid var(--volt); }
-.board h2 { margin: 0; font: 700 24px var(--font-display); }
-.board p { margin: 0; color: var(--muted); font-size: 13px; }
-.board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
-.board li { display: grid; grid-template-columns: 2.5ch 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
-.board li .rk { font: 700 18px var(--font-data); color: var(--muted); }
-.board li:first-child .rk { color: var(--accent); }
-.board li img { width: 28px; height: 28px; border-radius: 50%; background: var(--line); }
-.board li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.board li .km { font: 700 16px var(--font-data); font-variant-numeric: tabular-nums; }
-.market { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
-.item { background: var(--surface); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
-.item.sold { opacity: .6; }
-.item .ph { aspect-ratio: 4 / 3; max-width: 100%; background: var(--bg); display: grid; place-items: center; color: var(--muted); font-size: 13px; position: relative; }
+.ai-btn { justify-self: start; }
+
+/* Market */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.item { display: grid; grid-template-rows: auto 1fr; }
+.item.sold { opacity: .55; }
+.item .ph { aspect-ratio: 1; max-width: 100%; background: var(--line); display: grid; place-items: center; color: var(--muted); font-size: 12px; position: relative; }
 .item .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.item .ph .badge { position: absolute; inset-inline-start: 8px; top: 8px; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.item .ph .badge { position: absolute; top: 8px; inset-inline-start: 8px; }
 .item .ph .badge.sold { background: var(--danger); color: #fff; }
-.item .ph .badge.example { background: var(--volt); color: var(--volt-ink); }
-.item .body { padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
-.item h3 { margin: 0; font: 600 16px/1.35 var(--font-body); overflow-wrap: anywhere; }
-.item .price { font: 700 24px/1.1 var(--font-data); font-variant-numeric: tabular-nums; color: var(--accent); }
-.item .price small { font: 600 13px var(--font-body); color: var(--muted); }
-.item .desc { margin: 0; font-size: 13px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
-.item .pill.bike { background: var(--bike); border-color: var(--bike); color: #fff; }
-.item .pill.run { background: var(--run); border-color: var(--run); color: #fff; }
-.item .pill.both { background: linear-gradient(90deg, var(--bike), var(--run)); border-color: transparent; color: #fff; }
-.contact { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
-.contact .num { font: 600 15px var(--font-data); direction: ltr; unicode-bidi: isolate; user-select: all; }
-.contact a { color: var(--bike); font-weight: 600; }
-.contact button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 8px; font: 600 12px var(--font-body); cursor: pointer; }
-footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
-@media (max-width: 720px) {
-  .ride { grid-template-columns: minmax(0, 1fr); }
-  .fields { grid-template-columns: minmax(0, 1fr); }
-  .stat b { font-size: 24px; }
-  .tabs button { font-size: 18px; padding-inline: 12px; max-width: none; }
+.item .body { padding: 10px 12px 12px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.item .price { font: 700 17px/1.2 var(--font); font-variant-numeric: tabular-nums; }
+.item .price small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.item h3 { margin: 0; font: 500 14px/1.35 var(--font); overflow-wrap: anywhere; }
+.item .meta { font-size: 11px; color: var(--muted); }
+.item .desc { margin: 0; font-size: 12px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.item .tag { font-size: 11px; }
+.item.both { --sport: var(--accent); }
+.item.bike { --sport: var(--bike); }
+.item.run { --sport: var(--run); }
+.contact { display: grid; gap: 6px; margin-top: 6px; }
+.contact .num { font: 600 13px var(--font); direction: ltr; unicode-bidi: isolate; user-select: all; overflow-wrap: anywhere; }
+.contact .acts { display: flex; gap: 6px; }
+.contact .acts > * { flex: 1; text-align: center; border-radius: 10px; padding: 7px 6px; font: 700 12px var(--font); text-decoration: none; cursor: pointer; border: 0; }
+.contact .wa { background: var(--ok); color: #fff; }
+.contact .cp { background: var(--bg); color: var(--ink); }
+
+/* Ranking */
+.rank { padding: 6px 0; }
+.rank ol { margin: 0; padding: 0; list-style: none; }
+.rank li { display: grid; grid-template-columns: 28px 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 16px; }
+.rank li + li { border-top: 1px solid var(--line); }
+.rank .rk { font: 700 16px var(--font); color: var(--muted); text-align: center; }
+.rank li:nth-child(1) .rk { color: var(--accent); }
+.rank img { width: 36px; height: 36px; border-radius: 50%; background: var(--line); }
+.rank .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.rank .km { font: 700 14px var(--font); font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Bottom bar + FAB */
+.tabbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 6; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+.tabbar button { border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 3px; padding: 9px 4px 8px; font: 600 12px var(--font); cursor: pointer; }
+.tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar button[aria-current="page"] { color: var(--accent); }
+.fab-wrap { position: fixed; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; z-index: 6; pointer-events: none; }
+.fab-wrap .in { max-width: 520px; margin: 0 auto; display: flex; justify-content: flex-end; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.fab { pointer-events: auto; width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); font: 400 32px/1 var(--font); cursor: pointer; box-shadow: 0 6px 18px rgba(255, 90, 31, .35); }
+
+/* Bottom sheet */
+.sheet-bg { position: fixed; inset: 0; z-index: 20; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; background: var(--card); border-radius: 22px 22px 0 0; padding-top: 8px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); justify-self: center; }
+.sheet header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.close { border: 0; background: var(--bg); color: var(--ink); width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+.fields { display: grid; gap: 12px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; color: var(--muted); }
+input, select, textarea { font: 16px var(--font); color: var(--ink); background: var(--bg); border: 1px solid transparent; border-radius: 12px; padding: 11px 12px; width: 100%; }
+textarea { min-height: 80px; resize: vertical; }
+.garmin { background: var(--bg); border-radius: 12px; padding: 12px; display: grid; gap: 6px; border: 1px dashed var(--line); }
+.garmin.drag { border-color: var(--accent); }
+.garmin p { margin: 0; font-size: 12px; color: var(--muted); }
+.garmin input { background: var(--card); }
+.garmin .ok { color: var(--ok); font-weight: 600; }
+.err { color: var(--danger); font-size: 13px; margin: 0; min-height: 1em; }
+.foot { color: var(--muted); font-size: 12px; text-align: center; margin: 4px 0 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: up .22s ease-out; }
+  @keyframes up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
 }
 </style>
 
 <div id="app" dir="rtl" lang="ar">
-  <header class="mast">
-    <div class="wrap">
-      <div class="toprow">
-        <div class="brand"><h1>Yalla Crew</h1><span class="ar">يلا كرو</span></div>
-        <div class="langs" role="group" id="langs" data-i18n-aria="langLabel">
-          <button type="button" data-lang="ar" lang="ar">عربي</button>
-          <button type="button" data-lang="en" lang="en">English</button>
-          <button type="button" data-lang="fil" lang="fil">Filipino</button>
-          <button type="button" data-lang="hi" lang="hi">हिन्दी</button>
-        </div>
-      </div>
-    </div>
-    <svg class="skyline" viewBox="0 0 1200 230" preserveAspectRatio="xMidYMax slice" role="img" data-i18n-aria="skyline">
-      <circle class="sun" cx="610" cy="176" r="62"/>
-      <!-- far layer: generic towers for depth -->
-      <path class="far" d="M0 230V190h24v-22h18v40h20v-58h16v58h22v-30h18v52h40V170h14v-24h10v84h26v-40h20v40h50v-62h18v-18h8v80h40V180h22v50h40v-70h12v-30h8v100h50v-56h26v56h60V172h18v-40h12v98h40v-62h24v62h40V160h10v-22h8v92h44v-48h30v48h40v-70h18v70h50V176h20v54h40v-80h16v80h40V184h26v46h40v-38h20v38h30z"/>
-      <!-- Dubai Frame: two towers joined by a sky bridge -->
-      <path class="near" fill-rule="evenodd" d="M70 230V72h96v158zm15-142v142h66V88z"/>
-      <rect class="near" x="66" y="66" width="104" height="9"/>
-      <!-- Museum of the Future: elliptical torus with void, on a mound -->
-      <path class="near" fill-rule="evenodd" d="M262 197c-6-36 14-74 52-84 40-10 78 12 86 48 6 30-8 56-34 66zm46-18c20 6 46-4 52-26 5-17-8-30-28-31-24-1-46 16-46 36 0 9 8 18 22 21z"/>
-      <path class="near" d="M226 230c30-30 80-38 116-38s86 8 116 38z"/>
-      <!-- Emirates Towers style twin wedges -->
-      <path class="near" d="M470 230V118l12-26 12 26v112z"/>
-      <path class="near" d="M500 230V138l9-20 9 20v92z"/>
-      <!-- Burj Khalifa: Y-plan setbacks rising to the spire -->
-      <path class="near" d="M562 230v-30h6v-22h5v-22h5v-22h4v-22h4v-20h3v-20h3v-18h2v-16h2v-14h1.5V8h1V0h1v8h1v16h1.5v14h2v16h2v18h3v20h3v20h4v22h4v22h5v22h5v22h6v30z"/>
-      <path class="near" d="M650 230V150h18v-14h10v94z"/>
-      <path class="near" d="M690 230V162l14-10 14 10v68z"/>
-      <!-- Burj Al Arab: sail on its own island, mast and helipad -->
-      <path class="near" d="M800 230V48h7v8c44 20 72 76 74 174z"/>
-      <rect class="near" x="796" y="34" width="4" height="196"/>
-      <rect class="near" x="776" y="80" width="22" height="4"/>
-      <ellipse class="near" cx="770" cy="82" rx="13" ry="3.5"/>
-      <path class="near" d="M760 230c10-12 40-16 70-16s70 4 82 16z"/>
-      <!-- Ain Dubai: observation wheel on A-frame legs -->
-      <circle class="stroke" cx="985" cy="138" r="58" stroke-width="4"/>
-      <circle class="stroke" cx="985" cy="138" r="50" stroke-width="1.5"/>
-      <g class="stroke" stroke-width="1.6">
-        <path d="M985 80v116M927 138h116M944 97l82 82M1026 97l-82 82M963 84l44 108M1007 84l-44 108M931 116l108 44M1039 116l-108 44"/>
+  <div class="appbar pad">
+    <h1 class="logo">Yalla Crew <span>يلا كرو</span></h1>
+    <select id="langSel" class="langsel" data-i18n-aria="langLabel">
+      <option value="ar" lang="ar">عربي</option>
+      <option value="en" lang="en">English</option>
+      <option value="fil" lang="fil">Filipino</option>
+      <option value="hi" lang="hi">हिन्दी</option>
+    </select>
+  </div>
+  <div class="hero">
+    <svg class="skyline" viewBox="0 0 1200 170" preserveAspectRatio="xMidYMax meet" role="img" data-i18n-aria="skyline">
+      <circle class="sun" cx="610" cy="130" r="40"/>
+      <g transform="translate(0 -60)">
+      <!-- Dubai Frame -->
+      <path class="s" fill-rule="evenodd" d="M70 230V72h96v158zm15-142v142h66V88z"/>
+      <rect class="s" x="66" y="66" width="104" height="9"/>
+      <!-- Museum of the Future -->
+      <path class="s" fill-rule="evenodd" d="M262 197c-6-36 14-74 52-84 40-10 78 12 86 48 6 30-8 56-34 66zm46-18c20 6 46-4 52-26 5-17-8-30-28-31-24-1-46 16-46 36 0 9 8 18 22 21z"/>
+      <path class="s" d="M226 230c30-30 80-38 116-38s86 8 116 38z"/>
+      <!-- Emirates Towers -->
+      <path class="s" d="M470 230V118l12-26 12 26v112z"/>
+      <path class="s" d="M500 230V138l9-20 9 20v92z"/>
+      <!-- Burj Khalifa -->
+      <path class="s" d="M562 230v-30h6v-22h5v-22h5v-22h4v-22h4v-20h3v-20h3v-18h2v-16h2v-14h1.5V8h1V0h1v8h1v16h1.5v14h2v16h2v18h3v20h3v20h4v22h4v22h5v22h5v22h6v30z"/>
+      <!-- Burj Al Arab -->
+      <path class="s" d="M800 230V48h7v8c44 20 72 76 74 174z"/>
+      <rect class="s" x="796" y="34" width="4" height="196"/>
+      <rect class="s" x="776" y="80" width="22" height="4"/>
+      <ellipse class="s" cx="770" cy="82" rx="13" ry="3.5"/>
+      <path class="s" d="M760 230c10-12 40-16 70-16s70 4 82 16z"/>
+      <!-- Ain Dubai -->
+      <circle class="o" cx="985" cy="138" r="58" stroke-width="4"/>
+      <path class="o" stroke-width="1.6" d="M985 80v116M927 138h116M944 97l82 82M1026 97l-82 82"/>
+      <path class="s" d="M985 138l-30 92h8l22-76 22 76h8z"/>
+      <!-- Sheikh Zayed Grand Mosque -->
+      <path class="s" d="M1052 230V104l3-6h5l3 6v126zM1054 98l3.5-14 3.5 14zM1186 230V104l3-6h5l3 6v126zM1188 98l3.5-14 3.5 14z"/>
+      <rect class="s" x="1066" y="196" width="118" height="34"/>
+      <path class="s" d="M1094 196c0-28 14-44 31-50 17 6 31 22 31 50zM1070 196c0-14 6-22 13-24 7 2 13 10 13 24zM1154 196c0-14 6-22 13-24 7 2 13 10 13 24z"/>
+      <rect class="s" x="1124" y="130" width="2" height="16"/>
+      <rect class="s" x="0" y="226" width="1200" height="4"/>
       </g>
-      <path class="near" d="M985 138l-30 92h8l22-76 22 76h8z"/>
-      <!-- Sheikh Zayed Grand Mosque: main dome, side domes, four minarets -->
-      <path class="near" d="M1052 230V104l3-6h5l3 6v126z"/>
-      <path class="near" d="M1050 128h15v4h-15zM1050 158h15v4h-15zM1054 98l3.5-14 3.5 14z"/>
-      <path class="near" d="M1186 230V104l3-6h5l3 6v126z"/>
-      <path class="near" d="M1184 128h15v4h-15zM1184 158h15v4h-15zM1188 98l3.5-14 3.5 14z"/>
-      <rect class="near" x="1066" y="196" width="118" height="34"/>
-      <path class="near" d="M1094 196c0-28 14-44 31-50 17 6 31 22 31 50z"/>
-      <rect class="near" x="1124" y="130" width="2" height="16"/>
-      <circle class="near" cx="1125" cy="128" r="3"/>
-      <path class="near" d="M1070 196c0-14 6-22 13-24 7 2 13 10 13 24zM1154 196c0-14 6-22 13-24 7 2 13 10 13 24z"/>
-      <rect class="near" x="0" y="226" width="1200" height="4"/>
     </svg>
-    <nav class="tabs" role="tablist">
-      <div class="wrap">
-        <button type="button" role="tab" id="tabBtn-rides" aria-controls="tab-rides" aria-selected="true" data-tab="rides" data-i18n="tabRides"></button>
-        <button type="button" role="tab" id="tabBtn-market" aria-controls="tab-market" aria-selected="false" data-tab="market" data-i18n="tabMarket"></button>
+  </div>
+
+  <main class="pad">
+    <div id="status" class="notice" hidden></div>
+
+    <section class="screen" id="tab-rides">
+      <div class="stats">
+        <div class="stat"><b id="st-rides">0</b><span data-i18n="stUpcoming"></span></div>
+        <div class="stat"><b id="st-km">0</b><span data-i18n="stKm"></span></div>
+        <div class="stat"><b id="st-riders">0</b><span data-i18n="stSignups"></span></div>
       </div>
-    </nav>
-  </header>
+      <div class="chips" id="filters"></div>
+      <div class="list" id="rides" aria-live="polite"></div>
+    </section>
 
-  <main>
-    <div class="wrap">
-      <div id="status" class="notice" hidden></div>
+    <section class="screen" id="tab-market" hidden>
+      <input id="mSearch" class="search" type="search" data-i18n-ph="mSearchPh" data-i18n-aria="mSearchPh">
+      <div class="chips" id="mFilters"></div>
+      <div class="grid2" id="market" aria-live="polite"></div>
+      <p class="foot" data-i18n="marketFoot"></p>
+    </section>
 
-      <section class="tabpanel" id="tab-rides" role="tabpanel" aria-labelledby="tabBtn-rides">
-        <section class="stats">
-          <div class="stat"><b id="st-rides">0</b><span data-i18n="stUpcoming"></span></div>
-          <div class="stat"><b id="st-km">0</b><span data-i18n="stKm"></span></div>
-          <div class="stat"><b id="st-riders">0</b><span data-i18n="stSignups"></span></div>
-        </section>
-
-        <div class="bar" role="toolbar">
-          <div id="filters" class="bar"></div>
-          <select id="emirateFilter" class="mini" data-i18n-aria="fEmirate"></select>
-          <span class="spacer"></span>
-          <button class="primary" id="openForm" type="button" data-i18n="newRide"></button>
-        </div>
-
-        <form class="add" id="addForm" hidden novalidate>
-          <h2 data-i18n="formTitle"></h2>
-          <div class="fields">
-            <label class="full"><span data-i18n="fTitle"></span><input id="f-title" maxlength="80" data-i18n-ph="fTitlePh" required></label>
-            <label><span data-i18n="fSport"></span><select id="f-sport"></select></label>
-            <label><span data-i18n="fEmirate"></span><select id="f-emirate"></select></label>
-            <label><span data-i18n="fLevel"></span><select id="f-level"></select></label>
-            <label><span data-i18n="fDate"></span><input id="f-date" type="date" required></label>
-            <label><span data-i18n="fTime"></span><input id="f-time" type="time" value="05:30" required></label>
-            <label class="full"><span data-i18n="fMeet"></span><input id="f-meet" maxlength="120" required></label>
-            <label><span data-i18n="fKm"></span><input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
-            <label><span id="paceLbl"></span><input id="f-pace" type="number" min="10" max="50" step="1" value="28"></label>
-            <label><span data-i18n="fMax"></span><input id="f-max" type="number" min="2" max="500" step="1" inputmode="numeric" data-i18n-ph="fMaxPh"></label>
-            <div class="garmin full" id="drop">
-              <strong data-i18n="garminTitle"></strong>
-              <p data-i18n="garminHelp"></p>
-              <input id="f-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
-              <p id="gpxInfo"></p>
-            </div>
-            <label class="full"><span data-i18n="fNotes"></span><textarea id="f-notes" maxlength="600" data-i18n-ph="fNotesPh"></textarea></label>
-          </div>
-          <p class="err" id="formErr"></p>
-          <div class="actions">
-            <button class="primary" type="submit" id="saveBtn" data-i18n="publishRide"></button>
-            <button class="ghost" type="button" id="cancelForm" data-i18n="cancel"></button>
-          </div>
-        </form>
-
-        <section class="rides" id="rides" aria-live="polite"></section>
-
-        <section class="board" id="board" hidden>
-          <h2 data-i18n="boardTitle"></h2>
-          <p data-i18n="boardSub"></p>
-          <ol id="boardList"></ol>
-        </section>
-      </section>
-
-      <section class="tabpanel" id="tab-market" role="tabpanel" aria-labelledby="tabBtn-market" hidden>
-        <div class="bar" role="toolbar">
-          <div id="mFilters" class="bar"></div>
-          <select id="mCat" class="mini" data-i18n-aria="sCat"></select>
-          <input id="mSearch" class="search" type="search" data-i18n-ph="mSearchPh" data-i18n-aria="mSearchPh">
-          <button class="primary" id="openSell" type="button" data-i18n="sell"></button>
-        </div>
-
-        <form class="add" id="sellForm" hidden novalidate>
-          <h2 data-i18n="sellTitle"></h2>
-          <div class="fields">
-            <label class="full"><span data-i18n="sTitle"></span><input id="s-title" maxlength="80" data-i18n-ph="sTitlePh" required></label>
-            <label><span data-i18n="fSport"></span><select id="s-sport"></select></label>
-            <label><span data-i18n="sCat"></span><select id="s-cat"></select></label>
-            <label><span data-i18n="sPrice"></span><input id="s-price" type="number" min="0" max="200000" step="1" inputmode="numeric" required></label>
-            <label><span data-i18n="sCond"></span><select id="s-cond"></select></label>
-            <label><span data-i18n="fEmirate"></span><select id="s-emirate"></select></label>
-            <label><span data-i18n="sPhone"></span><input id="s-phone" type="tel" maxlength="20" placeholder="+971 50 123 4567" dir="ltr" required></label>
-            <label class="full" id="s-photo-wrap"><span data-i18n="sPhoto"></span><input id="s-photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
-            <p class="full notice" id="s-photo-off" hidden data-i18n="photoOff"></p>
-            <label class="full"><span data-i18n="sDesc"></span><textarea id="s-desc" maxlength="600" data-i18n-ph="sDescPh"></textarea></label>
-          </div>
-          <p class="err" id="sellErr"></p>
-          <div class="actions">
-            <button class="primary" type="submit" id="sellBtn" data-i18n="publishAd"></button>
-            <button class="ghost" type="button" id="cancelSell" data-i18n="cancel"></button>
-          </div>
-        </form>
-
-        <section class="market" id="market" aria-live="polite"></section>
-      </section>
-    </div>
+    <section class="screen" id="tab-board" hidden>
+      <div>
+        <h2 class="h2" data-i18n="boardTitle"></h2>
+        <p class="sub" data-i18n="boardSub"></p>
+      </div>
+      <div class="chips" id="bFilters"></div>
+      <div class="card rank"><ol id="boardList"></ol></div>
+      <p class="notice" id="boardEmpty" data-i18n="boardEmpty" hidden></p>
+    </section>
   </main>
-  <footer><div class="wrap" data-i18n="footer"></div></footer>
+
+  <div class="fab-wrap"><div class="in"><button class="fab" id="fab" type="button" aria-label="+">+</button></div></div>
+
+  <nav class="tabbar" aria-label="Yalla Crew">
+    <div class="in">
+      <button type="button" data-tab="rides">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l4-8h6l3 8M9.5 9l3 8h-7M14 6h3"/></svg>
+        <span data-i18n="tabRides"></span>
+      </button>
+      <button type="button" data-tab="market">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span data-i18n="tabMarket"></span>
+      </button>
+      <button type="button" data-tab="board">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg>
+        <span data-i18n="tabBoard"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- New ride sheet -->
+  <div class="sheet-bg" id="rideSheet" hidden>
+    <form class="sheet pad" id="addForm" novalidate>
+      <div class="grab"></div>
+      <header><h2 class="h2" data-i18n="formTitle"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="fields">
+        <label><span data-i18n="fTitle"></span><input id="f-title" maxlength="80" data-i18n-ph="fTitlePh" required></label>
+        <div class="two">
+          <label><span data-i18n="fSport"></span><select id="f-sport"></select></label>
+          <label><span data-i18n="fLevel"></span><select id="f-level"></select></label>
+        </div>
+        <div class="two">
+          <label><span data-i18n="fDate"></span><input id="f-date" type="date" required></label>
+          <label><span data-i18n="fTime"></span><input id="f-time" type="time" value="05:30" required></label>
+        </div>
+        <label><span data-i18n="fEmirate"></span><select id="f-emirate"></select></label>
+        <label><span data-i18n="fMeet"></span><input id="f-meet" maxlength="120" required></label>
+        <div class="garmin" id="drop">
+          <strong data-i18n="garminTitle"></strong>
+          <p data-i18n="garminHelp"></p>
+          <input id="f-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+          <p id="gpxInfo"></p>
+        </div>
+        <div class="two">
+          <label><span data-i18n="fKm"></span><input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
+          <label><span id="paceLbl"></span><input id="f-pace" type="number" min="10" max="50" step="1" value="28" inputmode="decimal"></label>
+        </div>
+        <label><span data-i18n="fMax"></span><input id="f-max" type="number" min="2" max="500" step="1" inputmode="numeric" data-i18n-ph="fMaxPh"></label>
+        <label><span data-i18n="fNotes"></span><textarea id="f-notes" maxlength="600" data-i18n-ph="fNotesPh"></textarea></label>
+      </div>
+      <p class="err" id="formErr"></p>
+      <button class="btn block" type="submit" id="saveBtn" data-i18n="publishRide"></button>
+    </form>
+  </div>
+
+  <!-- Sell sheet -->
+  <div class="sheet-bg" id="sellSheet" hidden>
+    <form class="sheet pad" id="sellForm" novalidate>
+      <div class="grab"></div>
+      <header><h2 class="h2" data-i18n="sellTitle"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="fields">
+        <label id="s-photo-wrap"><span data-i18n="sPhoto"></span><input id="s-photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
+        <p class="sub" id="s-photo-off" hidden data-i18n="photoOff"></p>
+        <label><span data-i18n="sTitle"></span><input id="s-title" maxlength="80" data-i18n-ph="sTitlePh" required></label>
+        <div class="two">
+          <label><span data-i18n="sPrice"></span><input id="s-price" type="number" min="0" max="200000" step="1" inputmode="numeric" required></label>
+          <label><span data-i18n="sCond"></span><select id="s-cond"></select></label>
+        </div>
+        <div class="two">
+          <label><span data-i18n="fSport"></span><select id="s-sport"></select></label>
+          <label><span data-i18n="sCat"></span><select id="s-cat"></select></label>
+        </div>
+        <div class="two">
+          <label><span data-i18n="fEmirate"></span><select id="s-emirate"></select></label>
+          <label><span data-i18n="sPhone"></span><input id="s-phone" type="tel" maxlength="20" placeholder="+971 50 123 4567" dir="ltr" required></label>
+        </div>
+        <label><span data-i18n="sDesc"></span><textarea id="s-desc" maxlength="600" data-i18n-ph="sDescPh"></textarea></label>
+      </div>
+      <p class="err" id="sellErr"></p>
+      <button class="btn block" type="submit" id="sellBtn" data-i18n="publishAd"></button>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -359,7 +380,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       fNotes: "ملاحظات", fNotesPh: "خوذة إجبارية، أضواء أمامية وخلفية، ماء 2 لتر على الأقل",
       publishRide: "انشر الطلعة", cancel: "إلغاء", loading: "جاري التحميل…",
       exampleNote: "<strong>هذي أمثلة توضيحية.</strong> الطلعات والإعلانات المشتركة تظهر لما تفتح الصفحة وأنت مسجّل دخول في Claude.",
-      noRides: "<strong>ما فيه طلعات للحين.</strong> اضغط «+ طلعة جديدة» وانشر أول طلعة للكرو.",
+      noRides: "<strong>ما فيه طلعات للحين.</strong> اضغط زر + وانشر أول طلعة للكرو.",
       readOnly: "تقدر تشوف بس، ما عندك صلاحية تضيف أو تسجّل.",
       example: "مثال", ended: "انتهت", km: "كم", kmh: "كم/س متوسط", minkm: "دقيقة/كم", dur: "مدة تقريبية",
       climb: "{n} م صعود", meetAt: "التجمّع: {p}",
@@ -382,7 +403,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       sPrice: "السعر (درهم)", sCond: "الحالة", cond_new: "جديد", cond_likenew: "مستعمل كالجديد", cond_used: "مستعمل",
       sPhone: "رقم التواصل (واتساب)", sPhoto: "صورة الغرض", sDesc: "الوصف",
       sDescPh: "المقاس، كم مرة استعملته، سبب البيع، التسليم أو الشحن", publishAd: "انشر الإعلان",
-      noListings: "<strong>ما فيه إعلانات للحين.</strong> اضغط «+ اعرض للبيع» وانشر أول غرض.",
+      noListings: "<strong>ما فيه إعلانات للحين.</strong> اضغط زر + وانشر أول غرض.",
       sold: "مُباع", markSold: "علّمه مُباع", markAvail: "رجّعه للبيع", delAd: "حذف الإعلان",
       aed: "درهم", whatsapp: "واتساب", copyNum: "نسخ", copiedNum: "انتسخ ✓", noPhoto: "بدون صورة",
       errSellReq: "عبّ اسم الغرض والسعر ورقم التواصل.", errPhone: "حط رقم صحيح مع مفتاح الدولة.",
@@ -417,7 +438,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       fNotes: "Notes", fNotesPh: "Helmet required, front and rear lights, at least 2 L of water",
       publishRide: "Publish ride", cancel: "Cancel", loading: "Loading…",
       exampleNote: "<strong>These are examples.</strong> Shared rides and listings appear when you open the page signed in to Claude.",
-      noRides: "<strong>No rides yet.</strong> Tap “+ New ride” to publish the crew's first one.",
+      noRides: "<strong>No rides yet.</strong> Tap the + button to publish the crew's first one.",
       readOnly: "You can view only; you can't add or sign up.",
       example: "Example", ended: "Ended", km: "km", kmh: "avg km/h", minkm: "min/km", dur: "approx. time",
       climb: "{n} m climb", meetAt: "Meet: {p}",
@@ -440,7 +461,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       sPrice: "Price (AED)", sCond: "Condition", cond_new: "New", cond_likenew: "Like new", cond_used: "Used",
       sPhone: "Contact number (WhatsApp)", sPhoto: "Photo", sDesc: "Description",
       sDescPh: "Size, how much it's been used, why you're selling, pickup or delivery", publishAd: "Publish listing",
-      noListings: "<strong>Nothing for sale yet.</strong> Tap “+ Sell an item” to list the first one.",
+      noListings: "<strong>Nothing for sale yet.</strong> Tap the + button to list the first one.",
       sold: "Sold", markSold: "Mark as sold", markAvail: "Back on sale", delAd: "Delete listing",
       aed: "AED", whatsapp: "WhatsApp", copyNum: "Copy", copiedNum: "Copied ✓", noPhoto: "No photo",
       errSellReq: "Fill in the item name, price and contact number.", errPhone: "Enter a valid phone number with the country code.",
@@ -475,7 +496,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       fNotes: "Mga paalala", fNotesPh: "Kailangan ng helmet, ilaw sa harap at likod, hindi bababa sa 2 L na tubig",
       publishRide: "I-publish ang ride", cancel: "Kanselahin", loading: "Naglo-load…",
       exampleNote: "<strong>Mga halimbawa lang ito.</strong> Lalabas ang mga shared na ride at listing kapag binuksan mo ang page habang naka-sign in sa Claude.",
-      noRides: "<strong>Wala pang ride.</strong> Pindutin ang “+ Bagong ride” para i-publish ang unang ride ng crew.",
+      noRides: "<strong>Wala pang ride.</strong> Pindutin ang + para i-publish ang unang ride ng crew.",
       readOnly: "Pwede ka lang tumingin; hindi ka makakapagdagdag o makakapag-sign up.",
       example: "Halimbawa", ended: "Tapos na", km: "km", kmh: "avg km/h", minkm: "min/km", dur: "tinatayang oras",
       climb: "{n} m akyat", meetAt: "Tagpuan: {p}",
@@ -498,7 +519,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       sPrice: "Presyo (AED)", sCond: "Kondisyon", cond_new: "Bago", cond_likenew: "Parang bago", cond_used: "Gamit na",
       sPhone: "Numero (WhatsApp)", sPhoto: "Larawan", sDesc: "Paglalarawan",
       sDescPh: "Size, gaano kadalas nagamit, bakit ibinebenta, pickup o delivery", publishAd: "I-publish ang listing",
-      noListings: "<strong>Wala pang binebenta.</strong> Pindutin ang “+ Magbenta” para sa unang listing.",
+      noListings: "<strong>Wala pang binebenta.</strong> Pindutin ang + para sa unang listing.",
       sold: "Nabenta na", markSold: "Markahan na nabenta", markAvail: "Ibalik sa benta", delAd: "Burahin ang listing",
       aed: "AED", whatsapp: "WhatsApp", copyNum: "Kopyahin", copiedNum: "Nakopya ✓", noPhoto: "Walang larawan",
       errSellReq: "Punan ang pangalan ng gamit, presyo at numero.", errPhone: "Maglagay ng tamang numero na may country code.",
@@ -533,7 +554,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       fNotes: "नोट्स", fNotesPh: "हेलमेट ज़रूरी, आगे-पीछे लाइट, कम से कम 2 लीटर पानी",
       publishRide: "राइड पब्लिश करें", cancel: "रद्द करें", loading: "लोड हो रहा है…",
       exampleNote: "<strong>ये उदाहरण हैं।</strong> साझा राइड और लिस्टिंग तब दिखेंगी जब आप Claude में साइन इन करके पेज खोलेंगे।",
-      noRides: "<strong>अभी कोई राइड नहीं।</strong> क्रू की पहली राइड पब्लिश करने के लिए “+ नई राइड” दबाएँ।",
+      noRides: "<strong>अभी कोई राइड नहीं।</strong> क्रू की पहली राइड पब्लिश करने के लिए + बटन दबाएँ।",
       readOnly: "आप सिर्फ़ देख सकते हैं; जोड़ या साइन-अप नहीं कर सकते।",
       example: "उदाहरण", ended: "समाप्त", km: "किमी", kmh: "औसत किमी/घं", minkm: "मिनट/किमी", dur: "अनुमानित समय",
       climb: "{n} मी चढ़ाई", meetAt: "मिलना: {p}",
@@ -556,7 +577,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       sPrice: "कीमत (AED)", sCond: "हालत", cond_new: "नया", cond_likenew: "लगभग नया", cond_used: "इस्तेमाल किया हुआ",
       sPhone: "संपर्क नंबर (WhatsApp)", sPhoto: "फ़ोटो", sDesc: "विवरण",
       sDescPh: "साइज़, कितना इस्तेमाल हुआ, बेचने की वजह, पिकअप या डिलीवरी", publishAd: "लिस्टिंग पब्लिश करें",
-      noListings: "<strong>अभी कुछ बिक्री के लिए नहीं।</strong> पहली लिस्टिंग के लिए “+ सामान बेचें” दबाएँ।",
+      noListings: "<strong>अभी कुछ बिक्री के लिए नहीं।</strong> पहली लिस्टिंग के लिए + बटन दबाएँ।",
       sold: "बिक गया", markSold: "बिका हुआ मार्क करें", markAvail: "फिर से बिक्री पर", delAd: "लिस्टिंग हटाएँ",
       aed: "AED", whatsapp: "WhatsApp", copyNum: "कॉपी", copiedNum: "कॉपी हुआ ✓", noPhoto: "फ़ोटो नहीं",
       errSellReq: "सामान का नाम, कीमत और संपर्क नंबर भरें।", errPhone: "देश कोड के साथ सही फ़ोन नंबर डालें।",
@@ -572,6 +593,13 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       exi2: "रनिंग जूते, साइज़ 43", exi2d: "लगभग 80 किमी पहने गए।"
     }
   };
+  const EXTRA = {
+    ar: { tabBoard: "الترتيب", details: "التفاصيل", hide: "إخفاء", boardEmpty: "الترتيب يطلع بعد أول طلعة تخلص.", marketFoot: "البيع والشراء بين الأعضاء مباشرة، تأكد من الغرض قبل لا تدفع.", newRideA: "طلعة جديدة", sellA: "اعرض للبيع" },
+    en: { tabBoard: "Ranking", details: "Details", hide: "Hide", boardEmpty: "The ranking appears after the first ride is finished.", marketFoot: "Buying and selling is directly between members; check the item before you pay.", newRideA: "New ride", sellA: "Sell an item" },
+    fil: { tabBoard: "Ranggo", details: "Detalye", hide: "Itago", boardEmpty: "Lalabas ang ranggo pagkatapos ng unang natapos na ride.", marketFoot: "Direkta ang bentahan sa pagitan ng mga miyembro; suriin muna ang gamit bago magbayad.", newRideA: "Bagong ride", sellA: "Magbenta" },
+    hi: { tabBoard: "रैंकिंग", details: "विवरण", hide: "छिपाएँ", boardEmpty: "पहली राइड पूरी होने के बाद रैंकिंग दिखेगी।", marketFoot: "खरीद-बिक्री सीधे सदस्यों के बीच होती है; पैसे देने से पहले सामान जाँच लें।", newRideA: "नई राइड", sellA: "सामान बेचें" }
+  };
+  for (const k in EXTRA) Object.assign(I18N[k], EXTRA[k]);
   const LANGS = Object.keys(I18N);
   const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
   const LEVELS = ["beg", "int", "adv"];
@@ -580,8 +608,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
   const ARTIFACT = "https://claude.ai/artifact/JpB2p9Jcy2iFszBixE8Jq9";
 
   let lang = "ar";
-  try { const s = localStorage.getItem("yc-lang"); if (LANGS.includes(s)) lang = s; else throw 0; }
-  catch { const n = (navigator.language || "").toLowerCase(); lang = n.startsWith("ar") ? "ar" : n.startsWith("hi") ? "hi" : (n.startsWith("fil") || n.startsWith("tl")) ? "fil" : n.startsWith("en") ? "en" : "ar"; }
+  try { const s = localStorage.getItem("yc-lang"); if (LANGS.includes(s)) lang = s; } catch {}
   const t = (k, v) => {
     let s = I18N[lang][k] ?? I18N.en[k] ?? k;
     if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b);
@@ -591,7 +618,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
 
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const PH = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 3"><rect width="4" height="3" fill="#8a9a97" opacity=".25"/></svg>');
+  const PH = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect width="1" height="1" fill="#9aa1ad" opacity=".25"/></svg>');
 
   function nextFriday() {
     const d = new Date(); d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7)); d.setHours(5, 30, 0, 0);
@@ -620,8 +647,9 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
 
   const state = {
     mode: "pending", rides: [], joins: [], listings: [], me: null, canWrite: true,
-    sport: "all", emirate: "all", mine: false, ai: {}, gpx: null,
-    tab: location.hash === "#market" ? "market" : "rides", m: { sport: "all", cat: "all", q: "" }
+    sport: "all", emirate: "all", mine: false, ai: {}, open: {}, gpx: null,
+    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : "rides",
+    m: { sport: "all", cat: "all", q: "" }
   };
   let db = null, user = null, sample = null, assets = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
@@ -660,9 +688,9 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     return 100;
   }
   function routeSvg(route) {
-    const W = 360, H = 220, P = 18;
+    const W = 360, H = 200, P = 16;
     if (!route || route.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("noRoute"))}"><text class="empty" x="${W / 2}" y="${H / 2}" text-anchor="middle">${esc(t("noRoute"))}</text></svg>`;
+      return `<svg viewBox="0 0 ${W} 60" role="img" aria-label="${esc(t("noRoute"))}"><text class="empty" x="${W / 2}" y="34" text-anchor="middle">${esc(t("noRoute"))}</text></svg>`;
     }
     const lats = route.map((p) => p[0]), lons = route.map((p) => p[1]);
     const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLon = Math.min(...lons), maxLon = Math.max(...lons);
@@ -677,11 +705,11 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const scaleKm = niceScale(kmPerPx * (W - 2 * P));
     const scalePx = scaleKm / kmPerPx;
     let grid = "";
-    for (let gx = P; gx <= W - P; gx += 40) grid += `<line class="grid" x1="${gx}" y1="${P}" x2="${gx}" y2="${H - 30}"/>`;
-    for (let gy = P; gy <= H - 30; gy += 40) grid += `<line class="grid" x1="${P}" y1="${gy}" x2="${W - P}" y2="${gy}"/>`;
+    for (let gx = P; gx <= W - P; gx += 40) grid += `<line class="grid" x1="${gx}" y1="${P}" x2="${gx}" y2="${H - 28}"/>`;
+    for (let gy = P; gy <= H - 28; gy += 40) grid += `<line class="grid" x1="${P}" y1="${gy}" x2="${W - P}" y2="${gy}"/>`;
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("routeMap"))}">${grid}
       <path class="route" d="${d}"/>
-      <rect class="end" x="${(ex - 5).toFixed(1)}" y="${(ey - 5).toFixed(1)}" width="10" height="10"/>
+      <rect class="end" x="${(ex - 5).toFixed(1)}" y="${(ey - 5).toFixed(1)}" width="10" height="10" rx="2"/>
       <circle class="start" cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5"/>
       <line class="scale" x1="${P}" y1="${H - 10}" x2="${(P + scalePx).toFixed(1)}" y2="${H - 10}"/>
       <text class="lbl" x="${(P + scalePx + 6).toFixed(1)}" y="${H - 6}" direction="ltr">${scaleKm} km</text>
@@ -691,14 +719,14 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
   // Elevation along the route, distance on the x axis.
   function elevSvg(route) {
     if (!route || route.length < 2 || !route.every((p) => isFinite(p[2]))) return "";
-    const W = 360, H = 70, P = 18;
+    const W = 360, H = 64, P = 16;
     const dist = [0];
     for (let i = 1; i < route.length; i++) dist.push(dist[i - 1] + haversine(route[i - 1], route[i]));
     const total = dist[dist.length - 1] || 1;
     const eles = route.map((p) => p[2]);
     const lo = Math.min(...eles), hi = Math.max(...eles), span = Math.max(hi - lo, 10);
     const x = (d) => P + (d / total) * (W - 2 * P);
-    const y = (e) => 8 + (1 - (e - lo) / span) * (H - 26);
+    const y = (e) => 6 + (1 - (e - lo) / span) * (H - 24);
     const line = route.map((p, i) => (i ? "L" : "M") + x(dist[i]).toFixed(1) + " " + y(p[2]).toFixed(1)).join("");
     const area = line + `L${x(total).toFixed(1)} ${H - 18}L${P} ${H - 18}Z`;
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("elevLbl", { lo, hi }))}">
@@ -734,11 +762,11 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     else if (state.mode === "example") html = t("exampleNote");
     else if (state.tab === "rides" && !state.rides.length) html = t("noRides");
     else if (state.tab === "market" && !state.listings.length) html = t("noListings");
-    else if (!state.canWrite) html = esc(t("readOnly"));
+    else if (!state.canWrite && state.tab !== "board") html = esc(t("readOnly"));
     el.innerHTML = html; el.hidden = !html;
-    const canAct = state.mode === "live" && state.canWrite;
-    $("#openForm").hidden = !canAct;
-    $("#openSell").hidden = !canAct;
+    const fab = $("#fab");
+    fab.hidden = !(state.mode === "live" && state.canWrite && state.tab !== "board");
+    fab.setAttribute("aria-label", t(state.tab === "market" ? "sellA" : "newRideA"));
   }
 
   function fmtPace(m) { return `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, "0")}`; }
@@ -757,40 +785,49 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const maps = r.route?.length ? `https://www.google.com/maps/search/?api=1&query=${r.route[0][0]},${r.route[0][1]}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meet + " " + t("em_" + r.emirate))}`;
     const count = r.maxRiders > 0 ? t("cntMax", { c: ids.length, n: r.maxRiders }) : ids.length === 1 ? t("cnt1") : t("cnt", { c: ids.length });
     const notes = txt(r, "notes");
-    return `<article class="ride ${run ? "run" : "bike"}${past ? " past" : ""}" data-id="${esc(r.id)}">
-      <div class="info">
-        <div class="meta">
-          <span class="pill sport">${esc(t(sportOf(r)))}</span><span class="pill">${esc(t("em_" + r.emirate))}</span><span class="pill">${esc(t("lvl_" + r.level))}</span>
-          ${r.example ? `<span class="pill example">${esc(t("example"))}</span>` : ""}${past ? `<span class="pill done">${esc(t("ended"))}</span>` : ""}
-        </div>
-        <h3>${esc(txt(r, "title"))}</h3>
-        <div class="meta"><span>${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}</span><span>${esc(t("meetAt", { p: meet }))}</span></div>
-        <div class="nums">
-          <div><b>${esc(r.distanceKm)}</b><span>${esc(t("km"))}</span></div>
-          <div><b>${esc(paceTxt)}</b><span>${esc(t(run ? "minkm" : "kmh"))}</span></div>
-          <div><b>${esc(dur)}</b><span>${esc(t("dur"))}${r.gainM ? " · " + esc(t("climb", { n: r.gainM })) : ""}</span></div>
-        </div>
+    const open = !!state.open[r.id];
+    const canJoin = live && state.canWrite && state.me && !past && !full;
+    return `<article class="card ride ${run ? "run" : "bike"}${past ? " past" : ""}" data-id="${esc(r.id)}">
+      <div class="top">
+        <span class="tag">${esc(t(sportOf(r)))}</span><span>${esc(t("em_" + r.emirate))} · ${esc(t("lvl_" + r.level))}</span>
+        ${r.example ? `<span class="badge">${esc(t("example"))}</span>` : ""}${past ? `<span class="badge muted">${esc(t("ended"))}</span>` : ""}
+      </div>
+      <h3>${esc(txt(r, "title"))}</h3>
+      <p class="when">${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}<br>${esc(meet)}</p>
+      <div class="nums">
+        <div><b>${esc(r.distanceKm)}</b><span>${esc(t("km"))}</span></div>
+        <div><b>${esc(paceTxt)}</b><span>${esc(t(run ? "minkm" : "kmh"))}</span></div>
+        <div><b>${esc(dur)}</b><span>${esc(t("dur"))}</span></div>
+      </div>
+      <div class="row">
+        <div class="faces" data-faces="${esc(ids.slice(0, 6).join(","))}"></div>
+        <span class="count">${esc(count)}${full && !past ? ` · <span class="full-tag">${esc(t("full"))}</span>` : ""}</span>
+        ${canJoin ? `<button type="button" class="btn${joined ? " soft" : ""}" data-act="join">${esc(t(joined ? "leave" : "join"))}</button>` : ""}
+      </div>
+      <div class="links">
+        <button type="button" class="linkbtn" data-act="toggle" aria-expanded="${open}">${esc(t(open ? "hide" : "details"))}</button>
+        ${live ? `<button type="button" class="linkbtn" data-act="link">${esc(t("copyLink"))}</button>` : ""}
+      </div>
+      ${open ? `<div class="details">
+        <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}</div>
+        ${r.gainM ? `<p class="sub">${esc(t("climb", { n: r.gainM }))}</p>` : ""}
         ${notes ? `<p class="notes">${esc(notes)}</p>` : ""}
-        <div class="crew">
-          <div class="faces" data-faces="${esc(ids.slice(0, 8).join(","))}"></div>
-          <span class="count">${esc(count)}</span>
-          ${full && !past ? `<span class="full-tag">${esc(t("full"))}</span>` : ""}
-        </div>
-        <div class="actions">
-          ${live && state.canWrite && state.me && !past && !full ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${esc(t(joined ? "leave" : "join"))}</button>` : ""}
-          ${live ? `<button type="button" class="ghost" data-act="link">${esc(t("copyLink"))}</button>` : ""}
-          ${sample ? `<button type="button" class="ghost" data-act="ai">${esc(t("assistant"))}</button>` : ""}
-          ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="link" data-act="del">${esc(t("delRide"))}</button>` : ""}
+        <div class="links">
+          <a class="linkbtn" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t("openMaps"))}</a>
+          ${sample ? `<button type="button" class="linkbtn" data-act="ai">${esc(t("assistant"))}</button>` : ""}
+          ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="linkbtn danger" data-act="del">${esc(t("delRide"))}</button>` : ""}
         </div>
         ${state.ai[r.id] ? `<div class="ai" data-ai>${esc(state.ai[r.id])}</div>` : ""}
-      </div>
-      <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">${esc(t("openMaps"))}</a></div>
+      </div>` : ""}
     </article>`;
   }
 
+  function sportChips(current, attr) { return chips(["all", "bike", "run"], current, attr); }
   function renderRides() {
-    $("#filters").innerHTML = chips(["all", "bike", "run"], state.sport, "data-f") +
-      (state.me ? `<button type="button" class="chip" data-mine aria-pressed="${state.mine}">${esc(t("mine"))}</button>` : "");
+    $("#filters").innerHTML = sportChips(state.sport, "data-f") +
+      (state.me ? `<button type="button" class="chip" data-mine aria-pressed="${state.mine}">${esc(t("mine"))}</button>` : "") +
+      `<select class="chip" id="emirateFilter" aria-label="${esc(t("fEmirate"))}">` +
+      `<option value="all">${esc(t("allEmirates"))}</option>` + EMIRATES.map((e) => `<option value="${e}"${e === state.emirate ? " selected" : ""}>${esc(t("em_" + e))}</option>`).join("") + `</select>`;
     renderStats();
     const now = Date.now();
     const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
@@ -798,11 +835,11 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     $("#rides").innerHTML = ordered.map(rideCard).join("") ||
       (state.mode === "live" && state.rides.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
     fillFaces();
-    renderBoard();
     focusTarget();
   }
 
   function renderBoard() {
+    $("#bFilters").innerHTML = sportChips(state.sport, "data-f");
     const totals = {};
     if (state.mode === "live") {
       const now = Date.now();
@@ -815,9 +852,9 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
         }
       }
     }
-    const rows = Object.entries(totals).sort((a, b) => b[1].km - a[1].km).slice(0, 10);
-    $("#board").hidden = !rows.length;
-    if (!rows.length) return;
+    const rows = Object.entries(totals).sort((a, b) => b[1].km - a[1].km).slice(0, 20);
+    $("#boardList").parentElement.hidden = !rows.length;
+    $("#boardEmpty").hidden = !!rows.length;
     const list = $("#boardList");
     list.replaceChildren(...rows.map(([id, v], i) => {
       const li = document.createElement("li");
@@ -825,7 +862,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       li.innerHTML = `<span class="rk">${i + 1}</span><img alt=""><span class="nm"></span><span class="km">${esc(t("boardRow", { km: Math.round(v.km), n: v.rides }))}</span>`;
       return li;
     }));
-    if (user) user.profiles(rows.map((r) => r[0])).then((ps) => {
+    if (user && rows.length) user.profiles(rows.map((r) => r[0])).then((ps) => {
       for (const li of list.children) {
         const p = ps[li.dataset.uid];
         li.querySelector("img").src = p?.avatarUrl || "";
@@ -840,11 +877,13 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     if (targetDone || state.mode !== "live") return;
     targetDone = true;
     const id = location.hash.slice(1);
-    if (!id || id === "market") return;
+    if (!id || id === "market" || id === "ranking") return;
     const el = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
     if (!el) return;
-    el.classList.add("target");
-    el.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    state.open[id] = true; renderRides();
+    const again = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
+    again.classList.add("target");
+    again.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   async function copyText(text, btn, done) {
@@ -932,105 +971,135 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     const mine = state.mode === "live" && x.sellerId && x.sellerId === state.me;
     const photo = x.photo ? `<img src="/_blob/${esc(x.photo)}" alt="${esc(txt(x, "title"))}" loading="lazy" data-ph>` : esc(t("noPhoto"));
     const wa = waDigits(x.phone);
-    const sportCls = x.sport === "both" ? "both" : x.sport === "run" ? "run" : "bike";
+    const sp = x.sport === "both" ? "both" : x.sport === "run" ? "run" : "bike";
     const desc = txt(x, "desc");
-    return `<article class="item${x.sold ? " sold" : ""}" data-id="${esc(x.id)}">
-      <div class="ph">${photo}${x.sold ? `<span class="badge sold">${esc(t("sold"))}</span>` : x.example ? `<span class="badge example">${esc(t("example"))}</span>` : ""}</div>
+    return `<article class="card item ${sp}${x.sold ? " sold" : ""}" data-id="${esc(x.id)}">
+      <div class="ph">${photo}${x.sold ? `<span class="badge sold">${esc(t("sold"))}</span>` : x.example ? `<span class="badge">${esc(t("example"))}</span>` : ""}</div>
       <div class="body">
-        <div class="meta"><span class="pill ${sportCls}">${esc(t(sportCls))}</span><span class="pill">${esc(t("cat_" + x.category))}</span></div>
-        <h3>${esc(txt(x, "title"))}</h3>
         <div class="price">${esc(Number(x.price).toLocaleString(I18N[lang].locale))} <small>${esc(t("aed"))}</small></div>
-        <div class="meta"><span>${esc(t("cond_" + x.condition))}</span><span>${esc(t("em_" + x.emirate))}</span></div>
+        <h3>${esc(txt(x, "title"))}</h3>
+        <span class="tag">${esc(t(sp))}</span>
+        <div class="meta">${esc(t("cat_" + x.category))} · ${esc(t("cond_" + x.condition))} · ${esc(t("em_" + x.emirate))}</div>
         ${desc ? `<p class="desc">${esc(desc)}</p>` : ""}
-        ${x.sold ? "" : `<div class="contact"><span class="num">${esc(x.phone)}</span>
-          <button type="button" data-act="copynum">${esc(t("copyNum"))}</button>
-          ${wa.length >= 8 && !x.example ? `<a href="https://wa.me/${wa}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a>` : ""}</div>`}
-        ${mine ? `<div class="actions">
-          <button type="button" class="ghost" data-act="sold">${esc(t(x.sold ? "markAvail" : "markSold"))}</button>
-          <button type="button" class="link" data-act="delItem">${esc(t("delAd"))}</button></div>` : ""}
+        ${x.sold ? "" : `<div class="contact"><span class="num">${esc(x.phone)}</span><div class="acts">
+          ${wa.length >= 8 && !x.example ? `<a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a>` : ""}
+          <button type="button" class="cp" data-act="copynum">${esc(t("copyNum"))}</button></div></div>`}
+        ${mine ? `<div class="links" style="margin-top:6px">
+          <button type="button" class="linkbtn" data-act="sold">${esc(t(x.sold ? "markAvail" : "markSold"))}</button>
+          <button type="button" class="linkbtn danger" data-act="delItem">${esc(t("delAd"))}</button></div>` : ""}
       </div>
     </article>`;
   }
   function renderMarket() {
-    $("#mFilters").innerHTML = chips(["all", "bike", "run"], state.m.sport, "data-f");
+    $("#mFilters").innerHTML = sportChips(state.m.sport, "data-f") +
+      `<select class="chip" id="mCat" aria-label="${esc(t("sCat"))}"><option value="all">${esc(t("allCats"))}</option>` +
+      CATS.map((c) => `<option value="${c}"${c === state.m.cat ? " selected" : ""}>${esc(t("cat_" + c))}</option>`).join("") + `</select>`;
     const list = visibleListings();
     $("#market").innerHTML = list.map(itemCard).join("") ||
-      (state.mode === "live" && state.listings.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
+      (state.mode === "live" && state.listings.length ? `<p class="notice" style="grid-column:1/-1">${esc(t("noMatch"))}</p>` : "");
     for (const img of document.querySelectorAll("#market img[data-ph]")) img.addEventListener("error", () => { img.src = PH; }, { once: true });
   }
 
   function render() {
     renderStatus();
-    $("#tab-rides").hidden = state.tab !== "rides";
-    $("#tab-market").hidden = state.tab !== "market";
-    for (const b of document.querySelectorAll("[data-tab]")) b.setAttribute("aria-selected", b.dataset.tab === state.tab);
-    if (state.tab === "rides") renderRides(); else renderMarket();
+    for (const id of ["rides", "market", "board"]) $("#tab-" + id).hidden = state.tab !== id;
+    for (const b of document.querySelectorAll("[data-tab]")) {
+      if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    }
+    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else renderBoard();
   }
 
   function flash(msg) { const el = $("#status"); el.textContent = msg; el.hidden = false; }
 
+  // ---------- Sheets ----------
+  let lastFocus = null;
+  function openSheet(id, focusSel) {
+    lastFocus = document.activeElement;
+    $(id).hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $(focusSel)?.focus(), 50);
+  }
+  function closeSheets() {
+    for (const s of document.querySelectorAll(".sheet-bg")) s.hidden = true;
+    document.body.style.overflow = "";
+    $("#formErr").textContent = ""; $("#sellErr").textContent = "";
+    lastFocus?.focus?.();
+  }
+  for (const s of document.querySelectorAll(".sheet-bg")) s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) closeSheets(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
+
   // ---------- Language ----------
-  function options(sel, keys, prefix, keep) {
-    const el = $(sel), cur = keep ? el.value : null;
+  function options(sel, keys, prefix) {
+    const el = $(sel), cur = el.value;
     el.innerHTML = keys.map((k) => `<option value="${k}">${esc(t(prefix + k))}</option>`).join("");
     if (cur && keys.includes(cur)) el.value = cur;
   }
   function applyLang() {
     const app = $("#app"), L = I18N[lang];
     app.lang = lang; app.dir = L.dir;
-    fmtDate = new Intl.DateTimeFormat(L.locale, { weekday: "long", day: "numeric", month: "long" });
+    $("#langSel").value = lang;
+    fmtDate = new Intl.DateTimeFormat(L.locale, { weekday: "short", day: "numeric", month: "short" });
     fmtTime = new Intl.DateTimeFormat(L.locale, { hour: "numeric", minute: "2-digit" });
     for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
     for (const el of document.querySelectorAll("[data-i18n-ph]")) el.placeholder = t(el.dataset.i18nPh);
     for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", t(el.dataset.i18nAria));
-    for (const b of document.querySelectorAll("[data-lang]")) b.setAttribute("aria-pressed", b.dataset.lang === lang);
-    const efv = $("#emirateFilter").value || "all";
-    $("#emirateFilter").innerHTML = `<option value="all">${esc(t("allEmirates"))}</option>` + EMIRATES.map((e) => `<option value="${e}">${esc(t("em_" + e))}</option>`).join("");
-    $("#emirateFilter").value = efv;
-    const mcv = $("#mCat").value || "all";
-    $("#mCat").innerHTML = `<option value="all">${esc(t("allCats"))}</option>` + CATS.map((c) => `<option value="${c}">${esc(t("cat_" + c))}</option>`).join("");
-    $("#mCat").value = mcv;
-    options("#f-sport", ["bike", "run"], "", true);
-    options("#s-sport", ["bike", "run", "both"], "", true);
-    options("#f-emirate", EMIRATES, "em_", true);
-    options("#s-emirate", EMIRATES, "em_", true);
-    options("#f-level", LEVELS, "lvl_", true);
-    options("#s-cat", CATS, "cat_", true);
-    options("#s-cond", CONDS, "cond_", true);
+    options("#f-sport", ["bike", "run"], "");
+    options("#s-sport", ["bike", "run", "both"], "");
+    options("#f-emirate", EMIRATES, "em_");
+    options("#s-emirate", EMIRATES, "em_");
+    options("#f-level", LEVELS, "lvl_");
+    options("#s-cat", CATS, "cat_");
+    options("#s-cond", CONDS, "cond_");
+    if (!$("#f-emirate").dataset.init) { $("#f-emirate").value = "DXB"; $("#s-emirate").value = "DXB"; $("#f-level").value = "int"; $("#s-cond").value = "likenew"; $("#f-emirate").dataset.init = 1; }
     syncPace(false);
     render();
   }
-  $("#langs").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-lang]"); if (!b) return;
-    lang = b.dataset.lang;
+  $("#langSel").addEventListener("change", (e) => {
+    lang = e.target.value;
     try { localStorage.setItem("yc-lang", lang); } catch {}
     applyLang();
   });
 
   // ---------- Events ----------
-  for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => { state.tab = b.dataset.tab; render(); });
+  for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => { state.tab = b.dataset.tab; render(); scrollTo({ top: 0 }); });
+
+  $("#fab").addEventListener("click", () => {
+    if (state.tab === "market") {
+      $("#s-photo-wrap").hidden = !assets; $("#s-photo-off").hidden = !!assets;
+      openSheet("#sellSheet", "#s-title");
+    } else {
+      if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
+      openSheet("#rideSheet", "#f-title");
+    }
+  });
 
   $("#filters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-f], [data-mine]"); if (!b) return;
     if (b.hasAttribute("data-mine")) state.mine = !state.mine; else state.sport = b.dataset.f;
     renderRides();
   });
-  $("#emirateFilter").addEventListener("change", (e) => { state.emirate = e.target.value; renderRides(); });
+  $("#filters").addEventListener("change", (e) => { if (e.target.id === "emirateFilter") { state.emirate = e.target.value; renderRides(); } });
+  $("#bFilters").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]"); if (!b) return;
+    state.sport = b.dataset.f; renderBoard();
+  });
   $("#rides").addEventListener("click", (e) => {
     const b = e.target.closest("[data-act]"); if (!b) return;
     const id = b.closest(".ride").dataset.id;
     const r = (state.mode === "live" ? state.rides : EXAMPLES).find((x) => x.id === id);
-    if (b.dataset.act === "join") toggleJoin(id);
-    else if (b.dataset.act === "del") confirmThen(b, () => db.doc("rides/" + id).delete());
-    else if (b.dataset.act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
-    else if (b.dataset.act === "ai" && r) askAi(r, b);
+    const act = b.dataset.act;
+    if (act === "toggle") { state.open[id] = !state.open[id]; renderRides(); }
+    else if (act === "join") toggleJoin(id);
+    else if (act === "del") confirmThen(b, () => db.doc("rides/" + id).delete());
+    else if (act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
+    else if (act === "ai" && r) askAi(r, b);
   });
 
   $("#mFilters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-f]"); if (!b) return;
     state.m.sport = b.dataset.f; renderMarket();
   });
-  $("#mCat").addEventListener("change", (e) => { state.m.cat = e.target.value; renderMarket(); });
+  $("#mFilters").addEventListener("change", (e) => { if (e.target.id === "mCat") { state.m.cat = e.target.value; renderMarket(); } });
   $("#mSearch").addEventListener("input", (e) => { state.m.q = e.target.value.trim(); renderMarket(); });
   $("#market").addEventListener("click", async (e) => {
     const b = e.target.closest("[data-act]"); if (!b) return;
@@ -1058,12 +1127,6 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     else { pace.min = 10; pace.max = 50; pace.step = 1; pace.value = 28; }
   }
   $("#f-sport").addEventListener("change", () => syncPace(true));
-  $("#openForm").addEventListener("click", () => {
-    form.hidden = false;
-    if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
-    $("#f-title").focus();
-  });
-  $("#cancelForm").addEventListener("click", () => { form.hidden = true; $("#formErr").textContent = ""; });
 
   async function takeGpx(file) {
     const info = $("#gpxInfo");
@@ -1109,19 +1172,13 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
         notes: $("#f-notes").value.trim(), route: state.gpx?.route ?? [],
         createdBy: state.me, createdAt: new Date().toISOString()
       });
-      form.reset(); syncPace(true); state.gpx = null; $("#gpxInfo").textContent = ""; form.hidden = true;
+      form.reset(); syncPace(true); state.gpx = null; $("#gpxInfo").textContent = ""; closeSheets();
     } catch (ex) { err.textContent = writeErr(ex); }
     finally { btn.disabled = false; }
   });
 
   // Sell form
   const sellForm = $("#sellForm");
-  $("#openSell").addEventListener("click", () => {
-    sellForm.hidden = false;
-    $("#s-photo-wrap").hidden = !assets; $("#s-photo-off").hidden = !!assets;
-    $("#s-title").focus();
-  });
-  $("#cancelSell").addEventListener("click", () => { sellForm.hidden = true; $("#sellErr").textContent = ""; });
   sellForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const err = $("#sellErr");
@@ -1144,7 +1201,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
         description: $("#s-desc").value.trim(), photo, sold: false,
         sellerId: state.me, createdAt: new Date().toISOString()
       });
-      sellForm.reset(); sellForm.hidden = true;
+      sellForm.reset(); closeSheets();
     } catch (ex) { err.textContent = writeErr(ex); }
     finally { btn.disabled = false; }
   });
@@ -1165,11 +1222,11 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     }, fail);
     db.collection("joins").onSnapshot((s) => {
       state.joins = s.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (state.tab === "rides") renderRides();
+      if (state.tab !== "market") render();
     }, fail);
     db.collection("listings").onSnapshot((s) => {
       state.listings = s.docs.map((d) => ({ id: d.id, ...d.data(), desc: d.data().description }));
-      if (state.mode === "live") render();
+      if (state.mode === "live" && state.tab === "market") render();
     }, fail);
   })();
 })();
