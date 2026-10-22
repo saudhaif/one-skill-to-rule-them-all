@@ -94,6 +94,19 @@ button:disabled { opacity: .55; cursor: default; }
 .map .scale { stroke: var(--ink); stroke-width: 2; }
 .map .empty { fill: var(--muted); font: 13px var(--font-body); }
 .map a { font-size: 12px; color: var(--accent); justify-self: start; margin-top: 4px; }
+.map .elev { fill: var(--accent); opacity: .18; }
+.map .elev-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.ride.target { border-color: var(--sun); box-shadow: 0 0 0 2px var(--sun); }
+.full-tag { color: var(--danger); font-size: 13px; }
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; }
+.board h2 { margin: 0; font: 700 20px var(--font-display); }
+.board p { margin: 0; color: var(--muted); font-size: 13px; }
+.board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.board li { display: grid; grid-template-columns: 2ch 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.board li .rk { font: 500 14px var(--font-data); color: var(--muted); }
+.board li img { width: 28px; height: 28px; border-radius: 50%; background: var(--line); }
+.board li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board li .km { font: 500 14px var(--font-data); font-variant-numeric: tabular-nums; }
 form.add { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; }
 form.add h2 { margin: 0; font: 700 20px var(--font-display); }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -190,6 +203,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
           <label class="full">نقطة التجمّع<input id="f-meet" maxlength="120" placeholder="مواقف حلبة القدرة للدراجات" required></label>
           <label>المسافة (كم)<input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
           <label>متوسط السرعة (كم/س)<input id="f-pace" type="number" min="10" max="50" step="1" value="28"></label>
+          <label>الحد الأقصى للمشاركين (اختياري)<input id="f-max" type="number" min="2" max="500" step="1" inputmode="numeric" placeholder="بدون حد"></label>
           <div class="garmin full" id="drop">
             <strong>مسار من Garmin (اختياري)</strong>
             <p>من Garmin Connect افتح النشاط أو المسار، ثم ⚙ ← تصدير GPX، وارفع الملف هنا أو اسحبه. المسافة تنحسب تلقائياً.</p>
@@ -206,6 +220,12 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       </form>
 
       <section class="rides" id="rides" aria-live="polite"></section>
+
+      <section class="board" id="board" hidden>
+        <h2>ترتيب الكرو</h2>
+        <p>الكيلومترات من الطلعات اللي خلصت وكنت مسجّل فيها.</p>
+        <ol id="boardList"></ol>
+      </section>
     </div>
   </main>
   <footer><div class="wrap">مسارات الخريطة مرسومة من ملفات GPX. اقتراحات المساعد تجي من Claude على حسابك.</div></footer>
@@ -238,7 +258,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const pts = [];
     for (let i = 0; i <= n; i++) {
       const t = (i / n) * Math.PI * 2;
-      pts.push([+(lat + dLat * Math.sin(t) * (1 + 0.15 * Math.cos(3 * t))).toFixed(5), +(lon + dLon * Math.cos(t)).toFixed(5)]);
+      pts.push([+(lat + dLat * Math.sin(t) * (1 + 0.15 * Math.cos(3 * t))).toFixed(5), +(lon + dLon * Math.cos(t)).toFixed(5), Math.round(55 + 18 * Math.sin(2 * t) + 6 * Math.cos(5 * t))]);
     }
     return pts;
   }
@@ -264,7 +284,8 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       if (de > 0) gain += de;
     }
     const step = Math.ceil(raw.length / 400);
-    const route = raw.filter((_, i) => i % step === 0 || i === raw.length - 1).map((p) => [+p[0].toFixed(5), +p[1].toFixed(5)]);
+    const route = raw.filter((_, i) => i % step === 0 || i === raw.length - 1)
+      .map((p) => isFinite(p[2]) ? [+p[0].toFixed(5), +p[1].toFixed(5), Math.round(p[2])] : [+p[0].toFixed(5), +p[1].toFixed(5)]);
     const name = doc.querySelector("trk > name, rte > name, metadata > name")?.textContent?.trim() || "";
     return { route, km: Math.round(km * 10) / 10, gain: Math.round(gain), name };
   }
@@ -301,6 +322,26 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       <line class="scale" x1="${P}" y1="${H - 10}" x2="${(P + scalePx).toFixed(1)}" y2="${H - 10}"/>
       <text class="lbl" x="${(P + scalePx + 6).toFixed(1)}" y="${H - 6}" direction="ltr">${scaleKm} km</text>
       <text class="lbl" x="${W - P}" y="${H - 6}" text-anchor="end">● البداية  ■ النهاية</text></svg>`;
+  }
+
+  // Elevation along the route, distance on the x axis.
+  function elevSvg(route) {
+    if (!route || route.length < 2 || !route.every((p) => isFinite(p[2]))) return "";
+    const W = 360, H = 70, P = 18;
+    const dist = [0];
+    for (let i = 1; i < route.length; i++) dist.push(dist[i - 1] + haversine(route[i - 1], route[i]));
+    const total = dist[dist.length - 1] || 1;
+    const eles = route.map((p) => p[2]);
+    const lo = Math.min(...eles), hi = Math.max(...eles), span = Math.max(hi - lo, 10);
+    const x = (d) => P + (d / total) * (W - 2 * P);
+    const y = (e) => 8 + (1 - (e - lo) / span) * (H - 26);
+    const line = route.map((p, i) => (i ? "L" : "M") + x(dist[i]).toFixed(1) + " " + y(p[2]).toFixed(1)).join("");
+    const area = line + `L${x(total).toFixed(1)} ${H - 18}L${P} ${H - 18}Z`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ارتفاع المسار من ${lo} إلى ${hi} متر">
+      <line class="grid" x1="${P}" y1="${H - 18}" x2="${W - P}" y2="${H - 18}"/>
+      <path class="elev" d="${area}"/><path class="elev-line" d="${line}"/>
+      <text class="lbl" x="${P}" y="${H - 4}" direction="ltr">${lo}–${hi} m</text>
+      <text class="lbl" x="${W - P}" y="${H - 4}" text-anchor="end" direction="ltr">${Math.round(total * 10) / 10} km</text></svg>`;
   }
 
   function riders(rideId) { return state.joins.filter((j) => j.rides && j.rides[rideId] === true).map((j) => j.id); }
@@ -341,6 +382,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const past = start.getTime() < Date.now();
     const ids = riders(r.id);
     const joined = state.me && ids.includes(state.me);
+    const full = r.maxRiders > 0 && ids.length >= r.maxRiders && !joined;
     const hours = r.paceKmh ? (r.distanceKm / r.paceKmh) : null;
     const dur = hours ? `${Math.floor(hours)}:${String(Math.round((hours % 1) * 60)).padStart(2, "0")}` : "—";
     const live = state.mode === "live";
@@ -361,16 +403,18 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
         ${r.notes ? `<p class="notes">${esc(r.notes)}</p>` : ""}
         <div class="crew">
           <div class="faces" data-faces="${esc(ids.slice(0, 8).join(","))}"></div>
-          <span class="count"><b>${ids.length}</b> ${ids.length === 1 ? "مشارك" : "مشاركين"}</span>
+          <span class="count"><b>${ids.length}</b>${r.maxRiders > 0 ? ` من ${esc(r.maxRiders)}` : ""} ${ids.length === 1 ? "مشارك" : "مشاركين"}</span>
+          ${full && !past ? '<span class="full-tag">الطلعة مكتملة</span>' : ""}
         </div>
         <div class="actions">
-          ${live && state.canWrite && state.me && !past ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${joined ? "انسحب" : "أنا معكم"}</button>` : ""}
+          ${live && state.canWrite && state.me && !past && !full ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${joined ? "انسحب" : "أنا معكم"}</button>` : ""}
+          ${live ? `<button type="button" class="ghost" data-act="link">نسخ رابط الطلعة</button>` : ""}
           ${sample ? `<button type="button" class="ghost" data-act="ai">اقتراحات المساعد</button>` : ""}
           ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="link" data-act="del">حذف الطلعة</button>` : ""}
         </div>
         ${state.ai[r.id] ? `<div class="ai" data-ai>${esc(state.ai[r.id])}</div>` : ""}
       </div>
-      <div class="map">${routeSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">افتح نقطة التجمّع في الخرائط</a></div>
+      <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">افتح نقطة التجمّع في الخرائط</a></div>
     </article>`;
   }
 
@@ -382,6 +426,58 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     $("#rides").innerHTML = ordered.map(rideCard).join("") ||
       (state.mode === "live" && state.rides.length ? '<p class="notice">ما فيه طلعات بهالتصفية.</p>' : "");
     fillFaces();
+    renderBoard();
+    focusTarget();
+  }
+
+  function renderBoard() {
+    const totals = {};
+    if (state.mode === "live") {
+      const now = Date.now();
+      for (const r of state.rides) {
+        if (Date.parse(r.startAt) >= now) continue;
+        for (const id of riders(r.id)) {
+          totals[id] ??= { km: 0, rides: 0 };
+          totals[id].km += +r.distanceKm || 0; totals[id].rides += 1;
+        }
+      }
+    }
+    const rows = Object.entries(totals).sort((a, b) => b[1].km - a[1].km).slice(0, 10);
+    $("#board").hidden = !rows.length;
+    if (!rows.length) return;
+    const list = $("#boardList");
+    list.replaceChildren(...rows.map(([id, t], i) => {
+      const li = document.createElement("li");
+      li.dataset.uid = id;
+      li.innerHTML = `<span class="rk">${i + 1}</span><img alt=""><span class="nm"></span><span class="km">${Math.round(t.km)} كم · ${t.rides} طلعة</span>`;
+      return li;
+    }));
+    if (user) user.profiles(rows.map((r) => r[0])).then((ps) => {
+      for (const li of list.children) {
+        const p = ps[li.dataset.uid];
+        li.querySelector("img").src = p?.avatarUrl || "";
+        li.querySelector(".nm").textContent = (p?.isMe ? "أنت" : p?.name) || "عضو في الكرو";
+      }
+    });
+  }
+
+  // Opens the ride named in the link (#<ride id>) once the rides arrive.
+  let targetDone = false;
+  function focusTarget() {
+    if (targetDone || state.mode !== "live") return;
+    const id = location.hash.slice(1);
+    targetDone = true;
+    if (!id) return;
+    const el = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
+    if (!el) return;
+    el.classList.add("target");
+    el.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+
+  async function copyLink(rideId, btn) {
+    const link = "https://claude.ai/artifact/JpB2p9Jcy2iFszBixE8Jq9#" + rideId;
+    try { await navigator.clipboard.writeText(link); btn.textContent = "انتسخ الرابط ✓"; }
+    catch { btn.textContent = link; btn.style.userSelect = "all"; }
   }
 
   async function fillFaces() {
@@ -456,6 +552,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const r = state.mode === "live" ? state.rides.find((x) => x.id === id) : EXAMPLE;
     if (b.dataset.act === "join") toggleJoin(id);
     else if (b.dataset.act === "del") deleteRide(id, b);
+    else if (b.dataset.act === "link") copyLink(id, b);
     else if (b.dataset.act === "ai" && r) askAi(r, b);
   });
 
@@ -491,7 +588,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     e.preventDefault();
     const err = $("#formErr");
     const title = $("#f-title").value.trim(), meet = $("#f-meet").value.trim();
-    const km = parseFloat($("#f-km").value), pace = parseFloat($("#f-pace").value);
+    const km = parseFloat($("#f-km").value), pace = parseFloat($("#f-pace").value), max = parseInt($("#f-max").value, 10);
     const date = $("#f-date").value, time = $("#f-time").value;
     if (!title || !meet || !date || !time) { err.textContent = "عبّ الاسم ونقطة التجمّع والتاريخ والوقت."; return; }
     if (!(km > 0)) { err.textContent = "حط المسافة بالكيلومتر، أو ارفع ملف GPX."; return; }
@@ -504,6 +601,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
         title, meetPoint: meet, emirate: $("#f-emirate").value, level: $("#f-level").value,
         startAt: startAt.toISOString(), distanceKm: Math.round(km * 10) / 10,
         paceKmh: pace > 0 ? Math.round(pace) : null, gainM: state.gpx?.gain ?? null,
+        maxRiders: max >= 2 ? max : null,
         notes: $("#f-notes").value.trim(), route: state.gpx?.route ?? [],
         createdBy: state.me, createdAt: new Date().toISOString()
       });
