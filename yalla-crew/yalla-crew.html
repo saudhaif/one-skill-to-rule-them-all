@@ -2,79 +2,112 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Lalezar&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Teko:wght@500;600&family=Hind:wght@400;500;600&display=swap">
 <style>
-/* Layout: skyline masthead of UAE landmarks, then a single column of ride cards, each pairing details with its route map. */
+/* Layout: sunset sky with UAE landmark silhouettes, language switch and tabs; below, ride cards (details + route map) or a market grid. */
 :root {
-  --bg: #eef2f1;
+  --bg: #f2f4f9;
   --surface: #ffffff;
-  --ink: #12211f;
-  --muted: #5b6b68;
-  --line: #d3dcda;
-  --accent: #0b7a72;        /* Gulf water */
+  --ink: #0d1322;
+  --muted: #566078;
+  --line: #d9dfec;
+  --accent: #ff4d1a;        /* race orange: buttons, running */
   --accent-ink: #ffffff;
-  --sun: #d9821e;           /* dawn ride light */
-  --skyline: #1c3330;
-  --sky-a: #f6dcb5;
-  --sky-b: #eef2f1;
-  --danger: #b4372f;
-  --font-display: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
-  --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --r: 10px;
+  --bike: #1b5cff;          /* electric blue: cycling */
+  --run: #ff4d1a;
+  --volt: #c4f22e;          /* finish-line highlight */
+  --volt-ink: #0d1322;
+  --sky-top: #ffd7b0;
+  --sky-mid: #ff9f68;
+  --sun: #ff6a2b;
+  --shadow: #10172a;        /* landmark silhouettes */
+  --shadow-far: #10172a;
+  --danger: #c22a1f;
+  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-body: "Barlow", "Segoe UI", Arial, sans-serif;
+  --font-data: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --r: 12px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d1716; --surface: #142321; --ink: #e6efed; --muted: #93a6a2; --line: #26403c;
-    --accent: #3fb8ad; --accent-ink: #062320; --sun: #f0a14a; --skyline: #050c0b;
-    --sky-a: #3b2a1b; --sky-b: #0d1716; --danger: #ef7d74; color-scheme: dark;
+    --bg: #090d18; --surface: #111a2d; --ink: #eef1f8; --muted: #98a2bb; --line: #222c45;
+    --accent: #ff6a3d; --accent-ink: #160803; --bike: #5a8bff; --run: #ff6a3d; --volt: #c9f53c; --volt-ink: #0d1322;
+    --sky-top: #1b1430; --sky-mid: #6b2a24; --sun: #ff7a3d; --shadow: #03050b; --shadow-far: #03050b; --danger: #ff7b70;
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0d1716; --surface: #142321; --ink: #e6efed; --muted: #93a6a2; --line: #26403c;
-  --accent: #3fb8ad; --accent-ink: #062320; --sun: #f0a14a; --skyline: #050c0b;
-  --sky-a: #3b2a1b; --sky-b: #0d1716; --danger: #ef7d74; color-scheme: dark;
+  --bg: #090d18; --surface: #111a2d; --ink: #eef1f8; --muted: #98a2bb; --line: #222c45;
+  --accent: #ff6a3d; --accent-ink: #160803; --bike: #5a8bff; --run: #ff6a3d; --volt: #c9f53c; --volt-ink: #0d1322;
+  --sky-top: #1b1430; --sky-mid: #6b2a24; --sun: #ff7a3d; --shadow: #03050b; --shadow-far: #03050b; --danger: #ff7b70;
+  color-scheme: dark;
 }
+[lang="ar"] { --font-display: "Lalezar", "IBM Plex Sans Arabic", Tahoma, sans-serif; --font-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; }
+[lang="hi"] { --font-display: "Teko", "Hind", "Nirmala UI", sans-serif; --font-body: "Hind", "Nirmala UI", "Segoe UI", sans-serif; }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font-body); }
-.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.mast { background: linear-gradient(to bottom, var(--sky-a), var(--sky-b)); border-bottom: 1px solid var(--line); }
-.mast .wrap { padding-block: 28px 0; display: grid; gap: 6px; }
-.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-.brand h1 { margin: 0; font: 700 clamp(30px, 6vw, 46px)/1.1 var(--font-display); letter-spacing: .01em; text-wrap: balance; }
-.brand .latin { font: 500 13px var(--font-data); letter-spacing: .2em; color: var(--muted); direction: ltr; }
-.tag { margin: 0; color: var(--muted); max-width: 60ch; }
-.skyline { display: block; width: 100%; height: auto; margin-top: 10px; }
-.skyline .b { fill: var(--skyline); }
-.skyline .sun { fill: var(--sun); opacity: .85; }
-main .wrap { padding-block: 24px 48px; display: grid; gap: 22px; }
+#app { font-family: var(--font-body); }
+.wrap { max-width: 1020px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mast { background: linear-gradient(to bottom, var(--sky-top), var(--sky-mid) 78%, var(--sky-mid)); position: relative; }
+.mast .wrap { padding-block: 22px 0; display: grid; gap: 6px; }
+.toprow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font: 700 italic clamp(34px, 7vw, 54px)/1 "Barlow Condensed", "Arial Narrow", sans-serif; letter-spacing: .02em; text-transform: uppercase; color: var(--shadow); }
+.brand .ar { font: 400 clamp(24px, 5vw, 34px)/1 "Lalezar", "IBM Plex Sans Arabic", sans-serif; color: var(--shadow); }
+:root[data-theme="dark"] .brand h1, :root[data-theme="dark"] .brand .ar { color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .brand h1, :root:not([data-theme="light"]) .brand .ar { color: var(--ink); } }
+.langs { display: flex; gap: 4px; background: color-mix(in srgb, var(--surface) 70%, transparent); border-radius: 999px; padding: 3px; }
+.langs button { border: 0; background: transparent; color: var(--ink); font: 600 13px var(--font-body); padding: 4px 11px; border-radius: 999px; cursor: pointer; }
+.langs button[aria-pressed="true"] { background: var(--shadow); color: var(--surface); }
+.tag { margin: 0; color: var(--ink); max-width: 62ch; font-weight: 500; }
+.skyline { display: block; width: 100%; height: auto; margin-top: 4px; }
+.skyline .sun { fill: var(--sun); }
+.skyline .far { fill: var(--shadow-far); opacity: .28; }
+.skyline .near { fill: var(--shadow); }
+.skyline .stroke { fill: none; stroke: var(--shadow); }
+.tabs { display: flex; gap: 0; background: var(--shadow); }
+.tabs .wrap { display: flex; gap: 4px; padding-block: 0; }
+.tabs button { border: 0; background: transparent; color: color-mix(in srgb, var(--surface) 70%, transparent); font: 700 19px/1 var(--font-display); letter-spacing: .03em; text-transform: uppercase; padding: 13px 18px 11px; border-bottom: 4px solid transparent; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--surface); border-bottom-color: var(--volt); }
+main .wrap { padding-block: 22px 44px; display: grid; gap: 20px; }
+.tabpanel { display: grid; gap: 20px; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
-.stat b { display: block; font: 500 24px var(--font-data); font-variant-numeric: tabular-nums; }
+.stat { background: var(--surface); border-radius: var(--r); padding: 12px 14px; border-top: 4px solid var(--accent); }
+.stat:nth-child(2) { border-top-color: var(--bike); }
+.stat:nth-child(3) { border-top-color: var(--volt); }
+.stat b { display: block; font: 700 30px/1.1 var(--font-data); font-variant-numeric: tabular-nums; }
 .stat span { color: var(--muted); font-size: 13px; }
 .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 13px; font: 600 13px var(--font-body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.chip[data-f="bike"][aria-pressed="true"] { background: var(--bike); border-color: var(--bike); color: #fff; }
+.chip[data-f="run"][aria-pressed="true"] { background: var(--run); border-color: var(--run); color: #fff; }
 .spacer { flex: 1; }
-button.primary, .btn { border: 0; border-radius: 8px; padding: 9px 16px; font: 600 14px var(--font-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
-button.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 8px; padding: 8px 14px; font: 500 14px var(--font-body); cursor: pointer; }
+button.primary { border: 0; border-radius: 8px; padding: 9px 16px; font: 700 14px var(--font-body); cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+button.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 8px; padding: 8px 14px; font: 600 14px var(--font-body); cursor: pointer; }
 button.link { border: 0; background: none; color: var(--danger); font: inherit; font-size: 13px; cursor: pointer; padding: 0; }
-button:focus-visible, .chip:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+button:focus-visible, .chip:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--volt); outline-offset: 2px; }
 button:disabled { opacity: .55; cursor: default; }
+select.mini { width: auto; padding: 5px 10px; font-size: 13px; border-radius: 999px; background: var(--surface); }
+input.search { width: auto; flex: 1 1 180px; padding: 6px 12px; border-radius: 999px; background: var(--surface); font-size: 14px; }
 .notice { border: 1px dashed var(--line); border-radius: var(--r); padding: 14px 16px; color: var(--muted); background: var(--surface); }
 .notice strong { color: var(--ink); }
 .rides { display: grid; gap: 16px; }
-.ride { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); overflow: hidden; }
-.ride.past { opacity: .72; }
+.ride { background: var(--surface); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); overflow: hidden; border-inline-start: 6px solid var(--bike); --sport: var(--bike); }
+.ride.run { border-inline-start-color: var(--run); --sport: var(--run); }
+.ride.past { opacity: .7; }
+.ride.target { box-shadow: 0 0 0 3px var(--volt); }
 .ride .info { padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
-.ride h3 { margin: 0; font: 700 20px/1.3 var(--font-display); text-wrap: balance; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 13px; }
-.pill { display: inline-block; font-size: 12px; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
-.pill.example { border-color: var(--sun); color: var(--sun); }
+.ride h3 { margin: 0; font: 700 24px/1.15 var(--font-display); text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 13px; align-items: center; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
+.pill.sport { background: var(--sport); border-color: var(--sport); color: #fff; }
+.pill.example { background: var(--volt); border-color: var(--volt); color: var(--volt-ink); }
 .pill.done { color: var(--muted); }
 .nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-block: 1px solid var(--line); padding-block: 10px; }
 .nums div { display: grid; }
-.nums b { font: 500 20px var(--font-data); font-variant-numeric: tabular-nums; }
+.nums b { font: 700 26px/1.1 var(--font-data); font-variant-numeric: tabular-nums; color: var(--sport); }
 .nums span { font-size: 12px; color: var(--muted); }
 .notes { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .crew { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -82,186 +115,516 @@ button:disabled { opacity: .55; cursor: default; }
 .faces img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--surface); margin-inline-start: -8px; background: var(--line); }
 .faces img:first-child { margin-inline-start: 0; }
 .crew .count { font-size: 13px; color: var(--muted); }
+.full-tag { color: var(--danger); font-size: 13px; font-weight: 600; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.ai { border-inline-start: 3px solid var(--accent); padding: 8px 12px; background: var(--bg); border-radius: 6px; white-space: pre-wrap; font-size: 14px; overflow-wrap: anywhere; }
-.map { background: var(--bg); border-inline-start: 1px solid var(--line); display: grid; align-content: center; padding: 10px; min-width: 0; }
+.ai { border-inline-start: 3px solid var(--sport); padding: 8px 12px; background: var(--bg); border-radius: 6px; white-space: pre-wrap; font-size: 14px; overflow-wrap: anywhere; }
+.map { background: var(--bg); display: grid; align-content: center; padding: 10px; min-width: 0; }
 .map svg { width: 100%; height: auto; display: block; }
 .map .grid { stroke: var(--line); stroke-width: 1; }
-.map .route { fill: none; stroke: var(--accent); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
-.map .start { fill: var(--sun); }
+.map .route { fill: none; stroke: var(--sport); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+.map .start { fill: var(--volt); stroke: var(--ink); stroke-width: 1.5; }
 .map .end { fill: var(--ink); }
-.map .lbl { fill: var(--muted); font: 11px var(--font-data); }
+.map .lbl { fill: var(--muted); font: 600 11px var(--font-data); }
 .map .scale { stroke: var(--ink); stroke-width: 2; }
 .map .empty { fill: var(--muted); font: 13px var(--font-body); }
-.map a { font-size: 12px; color: var(--accent); justify-self: start; margin-top: 4px; }
-.map .elev { fill: var(--accent); opacity: .18; }
-.map .elev-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
-.ride.target { border-color: var(--sun); box-shadow: 0 0 0 2px var(--sun); }
-.full-tag { color: var(--danger); font-size: 13px; }
-.board { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; }
-.board h2 { margin: 0; font: 700 20px var(--font-display); }
-.board p { margin: 0; color: var(--muted); font-size: 13px; }
-.board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
-.board li { display: grid; grid-template-columns: 2ch 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
-.board li .rk { font: 500 14px var(--font-data); color: var(--muted); }
-.board li img { width: 28px; height: 28px; border-radius: 50%; background: var(--line); }
-.board li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.board li .km { font: 500 14px var(--font-data); font-variant-numeric: tabular-nums; }
-form.add { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; }
-form.add h2 { margin: 0; font: 700 20px var(--font-display); }
+.map .elev { fill: var(--sport); opacity: .2; }
+.map .elev-line { fill: none; stroke: var(--sport); stroke-width: 1.5; }
+.map a { font-size: 12px; color: var(--sport); justify-self: start; margin-top: 4px; font-weight: 600; }
+form.add { background: var(--surface); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; border-top: 4px solid var(--accent); }
+form.add h2 { margin: 0; font: 700 24px var(--font-display); }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .fields .full { grid-column: 1 / -1; }
 label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
 input, select, textarea { font: 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
 textarea { min-height: 70px; resize: vertical; }
-.garmin { border: 1px dashed var(--accent); border-radius: 8px; padding: 12px; display: grid; gap: 6px; }
+.garmin { border: 1px dashed var(--bike); border-radius: 8px; padding: 12px; display: grid; gap: 6px; }
 .garmin.drag { background: var(--bg); }
 .garmin p { margin: 0; font-size: 13px; color: var(--muted); }
-.garmin .ok { color: var(--accent); font-weight: 600; }
+.garmin .ok { color: var(--bike); font-weight: 600; }
 .err { color: var(--danger); font-size: 13px; min-height: 1em; margin: 0; }
+.board { background: var(--surface); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; border-top: 4px solid var(--volt); }
+.board h2 { margin: 0; font: 700 24px var(--font-display); }
+.board p { margin: 0; color: var(--muted); font-size: 13px; }
+.board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.board li { display: grid; grid-template-columns: 2.5ch 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.board li .rk { font: 700 18px var(--font-data); color: var(--muted); }
+.board li:first-child .rk { color: var(--accent); }
+.board li img { width: 28px; height: 28px; border-radius: 50%; background: var(--line); }
+.board li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board li .km { font: 700 16px var(--font-data); font-variant-numeric: tabular-nums; }
+.market { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.item { background: var(--surface); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.item.sold { opacity: .6; }
+.item .ph { aspect-ratio: 4 / 3; max-width: 100%; background: var(--bg); display: grid; place-items: center; color: var(--muted); font-size: 13px; position: relative; }
+.item .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.item .ph .badge { position: absolute; inset-inline-start: 8px; top: 8px; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.item .ph .badge.sold { background: var(--danger); color: #fff; }
+.item .ph .badge.example { background: var(--volt); color: var(--volt-ink); }
+.item .body { padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.item h3 { margin: 0; font: 600 16px/1.35 var(--font-body); overflow-wrap: anywhere; }
+.item .price { font: 700 24px/1.1 var(--font-data); font-variant-numeric: tabular-nums; color: var(--accent); }
+.item .price small { font: 600 13px var(--font-body); color: var(--muted); }
+.item .desc { margin: 0; font-size: 13px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.item .pill.bike { background: var(--bike); border-color: var(--bike); color: #fff; }
+.item .pill.run { background: var(--run); border-color: var(--run); color: #fff; }
+.item .pill.both { background: linear-gradient(90deg, var(--bike), var(--run)); border-color: transparent; color: #fff; }
+.contact { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.contact .num { font: 600 15px var(--font-data); direction: ltr; unicode-bidi: isolate; user-select: all; }
+.contact a { color: var(--bike); font-weight: 600; }
+.contact button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 8px; font: 600 12px var(--font-body); cursor: pointer; }
 footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
 @media (max-width: 720px) {
   .ride { grid-template-columns: minmax(0, 1fr); }
-  .map { border-inline-start: 0; border-top: 1px solid var(--line); }
   .fields { grid-template-columns: minmax(0, 1fr); }
-  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .stat b { font-size: 19px; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .ride { transition: border-color .2s; }
-  .ride:hover { border-color: var(--accent); }
+  .stat b { font-size: 24px; }
+  .tabs button { font-size: 17px; padding-inline: 12px; }
 }
 </style>
 
-<div dir="rtl" lang="ar">
+<div id="app" dir="rtl" lang="ar">
   <header class="mast">
     <div class="wrap">
-      <div class="brand">
-        <h1>يلا كرو</h1>
-        <span class="latin">YALLA CREW</span>
+      <div class="toprow">
+        <div class="brand"><h1>Yalla Crew</h1><span class="ar">يلا كرو</span></div>
+        <div class="langs" role="group" id="langs" data-i18n-aria="langLabel">
+          <button type="button" data-lang="ar" lang="ar">عربي</button>
+          <button type="button" data-lang="en" lang="en">English</button>
+          <button type="button" data-lang="fil" lang="fil">Filipino</button>
+          <button type="button" data-lang="hi" lang="hi">हिन्दी</button>
+        </div>
       </div>
-      <p class="tag">طلعات السياكل في الإمارات: حدّد الطلعة، ارفع مسارك من Garmin، وشوف كم واحد ماشي معك.</p>
-      <svg class="skyline" viewBox="0 0 1200 190" preserveAspectRatio="xMidYMax meet" role="img" aria-label="خط أفق لمعالم الإمارات: إطار دبي، متحف المستقبل، برج خليفة، برج العرب، وجامع الشيخ زايد">
-        <circle class="sun" cx="640" cy="150" r="46"/>
-        <!-- Dubai Frame -->
-        <path class="b" d="M70 190V70h90v120h-14V84H84v106z"/>
-        <rect class="b" x="70" y="62" width="90" height="12"/>
-        <!-- filler towers -->
-        <rect class="b" x="180" y="120" width="26" height="70"/>
-        <rect class="b" x="210" y="100" width="20" height="90"/>
-        <!-- Museum of the Future: torus -->
-        <path class="b" fill-rule="evenodd" d="M300 190c-34-6-52-36-46-70 6-36 40-58 74-52 34 6 54 40 46 74-4 20-16 36-32 48zm16-26c18-2 30-20 28-40-3-20-20-34-38-32-20 3-32 22-28 42 3 18 20 32 38 30z"/>
-        <rect class="b" x="296" y="180" width="40" height="10"/>
-        <rect class="b" x="400" y="110" width="24" height="80"/>
-        <rect class="b" x="428" y="132" width="22" height="58"/>
-        <!-- Burj Khalifa: stepped setbacks to spire -->
-        <path class="b" d="M500 190V150h10v-26h8V96h7V66h6V40h4V14h2V2h2v12h2v26h4v26h6v30h7v28h8v26h10v40z"/>
-        <rect class="b" x="580" y="128" width="22" height="62"/>
-        <rect class="b" x="606" y="112" width="18" height="78"/>
-        <!-- Burj Al Arab: mast and sail -->
-        <path class="b" d="M760 190V40h6v12c40 20 62 66 58 138z"/>
-        <path class="b" d="M752 190V58h6v132z"/>
-        <rect class="b" x="740" y="184" width="96" height="6"/>
-        <rect class="b" x="860" y="140" width="22" height="50"/>
-        <!-- Sheikh Zayed Grand Mosque: domes and minarets -->
-        <rect class="b" x="930" y="70" width="8" height="120"/><path class="b" d="M928 70l6-14 6 14z"/>
-        <rect class="b" x="1132" y="70" width="8" height="120"/><path class="b" d="M1130 70l6-14 6 14z"/>
-        <rect class="b" x="944" y="150" width="182" height="40"/>
-        <path class="b" d="M990 150a45 45 0 0 1 90 0z"/>
-        <path class="b" d="M1033 106h4v-10h-4z"/>
-        <path class="b" d="M950 150a20 20 0 0 1 40 0z"/>
-        <path class="b" d="M1080 150a20 20 0 0 1 40 0z"/>
-        <rect class="b" x="0" y="188" width="1200" height="2"/>
-      </svg>
     </div>
+    <svg class="skyline" viewBox="0 0 1200 230" preserveAspectRatio="xMidYMax slice" role="img" data-i18n-aria="skyline">
+      <circle class="sun" cx="610" cy="176" r="62"/>
+      <!-- far layer: generic towers for depth -->
+      <path class="far" d="M0 230V190h24v-22h18v40h20v-58h16v58h22v-30h18v52h40V170h14v-24h10v84h26v-40h20v40h50v-62h18v-18h8v80h40V180h22v50h40v-70h12v-30h8v100h50v-56h26v56h60V172h18v-40h12v98h40v-62h24v62h40V160h10v-22h8v92h44v-48h30v48h40v-70h18v70h50V176h20v54h40v-80h16v80h40V184h26v46h40v-38h20v38h30z"/>
+      <!-- Dubai Frame: two towers joined by a sky bridge -->
+      <path class="near" fill-rule="evenodd" d="M70 230V72h96v158zm15-142v142h66V88z"/>
+      <rect class="near" x="66" y="66" width="104" height="9"/>
+      <!-- Museum of the Future: elliptical torus with void, on a mound -->
+      <path class="near" fill-rule="evenodd" d="M262 197c-6-36 14-74 52-84 40-10 78 12 86 48 6 30-8 56-34 66zm46-18c20 6 46-4 52-26 5-17-8-30-28-31-24-1-46 16-46 36 0 9 8 18 22 21z"/>
+      <path class="near" d="M226 230c30-30 80-38 116-38s86 8 116 38z"/>
+      <!-- Emirates Towers style twin wedges -->
+      <path class="near" d="M470 230V118l12-26 12 26v112z"/>
+      <path class="near" d="M500 230V138l9-20 9 20v92z"/>
+      <!-- Burj Khalifa: Y-plan setbacks rising to the spire -->
+      <path class="near" d="M562 230v-30h6v-22h5v-22h5v-22h4v-22h4v-20h3v-20h3v-18h2v-16h2v-14h1.5V8h1V0h1v8h1v16h1.5v14h2v16h2v18h3v20h3v20h4v22h4v22h5v22h5v22h6v30z"/>
+      <path class="near" d="M650 230V150h18v-14h10v94z"/>
+      <path class="near" d="M690 230V162l14-10 14 10v68z"/>
+      <!-- Burj Al Arab: sail on its own island, mast and helipad -->
+      <path class="near" d="M800 230V48h7v8c44 20 72 76 74 174z"/>
+      <rect class="near" x="796" y="34" width="4" height="196"/>
+      <rect class="near" x="776" y="80" width="22" height="4"/>
+      <ellipse class="near" cx="770" cy="82" rx="13" ry="3.5"/>
+      <path class="near" d="M760 230c10-12 40-16 70-16s70 4 82 16z"/>
+      <!-- Ain Dubai: observation wheel on A-frame legs -->
+      <circle class="stroke" cx="985" cy="138" r="58" stroke-width="4"/>
+      <circle class="stroke" cx="985" cy="138" r="50" stroke-width="1.5"/>
+      <g class="stroke" stroke-width="1.6">
+        <path d="M985 80v116M927 138h116M944 97l82 82M1026 97l-82 82M963 84l44 108M1007 84l-44 108M931 116l108 44M1039 116l-108 44"/>
+      </g>
+      <path class="near" d="M985 138l-30 92h8l22-76 22 76h8z"/>
+      <!-- Sheikh Zayed Grand Mosque: main dome, side domes, four minarets -->
+      <path class="near" d="M1052 230V104l3-6h5l3 6v126z"/>
+      <path class="near" d="M1050 128h15v4h-15zM1050 158h15v4h-15zM1054 98l3.5-14 3.5 14z"/>
+      <path class="near" d="M1186 230V104l3-6h5l3 6v126z"/>
+      <path class="near" d="M1184 128h15v4h-15zM1184 158h15v4h-15zM1188 98l3.5-14 3.5 14z"/>
+      <rect class="near" x="1066" y="196" width="118" height="34"/>
+      <path class="near" d="M1094 196c0-28 14-44 31-50 17 6 31 22 31 50z"/>
+      <rect class="near" x="1124" y="130" width="2" height="16"/>
+      <circle class="near" cx="1125" cy="128" r="3"/>
+      <path class="near" d="M1070 196c0-14 6-22 13-24 7 2 13 10 13 24zM1154 196c0-14 6-22 13-24 7 2 13 10 13 24z"/>
+      <rect class="near" x="0" y="226" width="1200" height="4"/>
+    </svg>
+    <nav class="tabs" role="tablist">
+      <div class="wrap">
+        <button type="button" role="tab" id="tabBtn-rides" aria-controls="tab-rides" aria-selected="true" data-tab="rides" data-i18n="tabRides"></button>
+        <button type="button" role="tab" id="tabBtn-market" aria-controls="tab-market" aria-selected="false" data-tab="market" data-i18n="tabMarket"></button>
+      </div>
+    </nav>
   </header>
 
   <main>
     <div class="wrap">
-      <section class="stats" aria-label="ملخص">
-        <div class="stat"><b id="st-rides">0</b><span>طلعة قادمة</span></div>
-        <div class="stat"><b id="st-km">0</b><span>كم مخطّط لها</span></div>
-        <div class="stat"><b id="st-riders">0</b><span>تسجيل مشارك</span></div>
-      </section>
-
       <div id="status" class="notice" hidden></div>
 
-      <div class="bar" role="toolbar" aria-label="تصفية حسب الإمارة">
-        <div id="filters" class="bar"></div>
-        <span class="spacer"></span>
-        <button class="primary" id="openForm" type="button">+ طلعة جديدة</button>
-      </div>
+      <section class="tabpanel" id="tab-rides" role="tabpanel" aria-labelledby="tabBtn-rides">
+        <section class="stats">
+          <div class="stat"><b id="st-rides">0</b><span data-i18n="stUpcoming"></span></div>
+          <div class="stat"><b id="st-km">0</b><span data-i18n="stKm"></span></div>
+          <div class="stat"><b id="st-riders">0</b><span data-i18n="stSignups"></span></div>
+        </section>
 
-      <form class="add" id="addForm" hidden novalidate>
-        <h2>طلعة جديدة</h2>
-        <div class="fields">
-          <label class="full">اسم الطلعة<input id="f-title" maxlength="80" placeholder="طلعة الفجر – القدرة" required></label>
-          <label>الإمارة<select id="f-emirate"></select></label>
-          <label>المستوى<select id="f-level"><option>مبتدئ</option><option selected>متوسط</option><option>متقدم</option></select></label>
-          <label>التاريخ<input id="f-date" type="date" required></label>
-          <label>وقت الانطلاق<input id="f-time" type="time" value="05:30" required></label>
-          <label class="full">نقطة التجمّع<input id="f-meet" maxlength="120" placeholder="مواقف حلبة القدرة للدراجات" required></label>
-          <label>المسافة (كم)<input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
-          <label>متوسط السرعة (كم/س)<input id="f-pace" type="number" min="10" max="50" step="1" value="28"></label>
-          <label>الحد الأقصى للمشاركين (اختياري)<input id="f-max" type="number" min="2" max="500" step="1" inputmode="numeric" placeholder="بدون حد"></label>
-          <div class="garmin full" id="drop">
-            <strong>مسار من Garmin (اختياري)</strong>
-            <p>من Garmin Connect افتح النشاط أو المسار، ثم ⚙ ← تصدير GPX، وارفع الملف هنا أو اسحبه. المسافة تنحسب تلقائياً.</p>
-            <input id="f-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
-            <p id="gpxInfo"></p>
+        <div class="bar" role="toolbar">
+          <div id="filters" class="bar"></div>
+          <select id="emirateFilter" class="mini" data-i18n-aria="fEmirate"></select>
+          <span class="spacer"></span>
+          <button class="primary" id="openForm" type="button" data-i18n="newRide"></button>
+        </div>
+
+        <form class="add" id="addForm" hidden novalidate>
+          <h2 data-i18n="formTitle"></h2>
+          <div class="fields">
+            <label class="full"><span data-i18n="fTitle"></span><input id="f-title" maxlength="80" data-i18n-ph="fTitlePh" required></label>
+            <label><span data-i18n="fSport"></span><select id="f-sport"></select></label>
+            <label><span data-i18n="fEmirate"></span><select id="f-emirate"></select></label>
+            <label><span data-i18n="fLevel"></span><select id="f-level"></select></label>
+            <label><span data-i18n="fDate"></span><input id="f-date" type="date" required></label>
+            <label><span data-i18n="fTime"></span><input id="f-time" type="time" value="05:30" required></label>
+            <label class="full"><span data-i18n="fMeet"></span><input id="f-meet" maxlength="120" required></label>
+            <label><span data-i18n="fKm"></span><input id="f-km" type="number" min="1" max="400" step="0.1" inputmode="decimal" required></label>
+            <label><span id="paceLbl"></span><input id="f-pace" type="number" min="10" max="50" step="1" value="28"></label>
+            <label><span data-i18n="fMax"></span><input id="f-max" type="number" min="2" max="500" step="1" inputmode="numeric" data-i18n-ph="fMaxPh"></label>
+            <div class="garmin full" id="drop">
+              <strong data-i18n="garminTitle"></strong>
+              <p data-i18n="garminHelp"></p>
+              <input id="f-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+              <p id="gpxInfo"></p>
+            </div>
+            <label class="full"><span data-i18n="fNotes"></span><textarea id="f-notes" maxlength="600" data-i18n-ph="fNotesPh"></textarea></label>
           </div>
-          <label class="full">ملاحظات<textarea id="f-notes" maxlength="600" placeholder="خوذة إجبارية، أضواء أمامية وخلفية، ماء 2 لتر على الأقل"></textarea></label>
-        </div>
-        <p class="err" id="formErr"></p>
-        <div class="actions">
-          <button class="primary" type="submit" id="saveBtn">انشر الطلعة</button>
-          <button class="ghost" type="button" id="cancelForm">إلغاء</button>
-        </div>
-      </form>
+          <p class="err" id="formErr"></p>
+          <div class="actions">
+            <button class="primary" type="submit" id="saveBtn" data-i18n="publishRide"></button>
+            <button class="ghost" type="button" id="cancelForm" data-i18n="cancel"></button>
+          </div>
+        </form>
 
-      <section class="rides" id="rides" aria-live="polite"></section>
+        <section class="rides" id="rides" aria-live="polite"></section>
 
-      <section class="board" id="board" hidden>
-        <h2>ترتيب الكرو</h2>
-        <p>الكيلومترات من الطلعات اللي خلصت وكنت مسجّل فيها.</p>
-        <ol id="boardList"></ol>
+        <section class="board" id="board" hidden>
+          <h2 data-i18n="boardTitle"></h2>
+          <p data-i18n="boardSub"></p>
+          <ol id="boardList"></ol>
+        </section>
+      </section>
+
+      <section class="tabpanel" id="tab-market" role="tabpanel" aria-labelledby="tabBtn-market" hidden>
+        <div class="bar" role="toolbar">
+          <div id="mFilters" class="bar"></div>
+          <select id="mCat" class="mini" data-i18n-aria="sCat"></select>
+          <input id="mSearch" class="search" type="search" data-i18n-ph="mSearchPh" data-i18n-aria="mSearchPh">
+          <button class="primary" id="openSell" type="button" data-i18n="sell"></button>
+        </div>
+
+        <form class="add" id="sellForm" hidden novalidate>
+          <h2 data-i18n="sellTitle"></h2>
+          <div class="fields">
+            <label class="full"><span data-i18n="sTitle"></span><input id="s-title" maxlength="80" data-i18n-ph="sTitlePh" required></label>
+            <label><span data-i18n="fSport"></span><select id="s-sport"></select></label>
+            <label><span data-i18n="sCat"></span><select id="s-cat"></select></label>
+            <label><span data-i18n="sPrice"></span><input id="s-price" type="number" min="0" max="200000" step="1" inputmode="numeric" required></label>
+            <label><span data-i18n="sCond"></span><select id="s-cond"></select></label>
+            <label><span data-i18n="fEmirate"></span><select id="s-emirate"></select></label>
+            <label><span data-i18n="sPhone"></span><input id="s-phone" type="tel" maxlength="20" placeholder="+971 50 123 4567" dir="ltr" required></label>
+            <label class="full" id="s-photo-wrap"><span data-i18n="sPhoto"></span><input id="s-photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
+            <p class="full notice" id="s-photo-off" hidden data-i18n="photoOff"></p>
+            <label class="full"><span data-i18n="sDesc"></span><textarea id="s-desc" maxlength="600" data-i18n-ph="sDescPh"></textarea></label>
+          </div>
+          <p class="err" id="sellErr"></p>
+          <div class="actions">
+            <button class="primary" type="submit" id="sellBtn" data-i18n="publishAd"></button>
+            <button class="ghost" type="button" id="cancelSell" data-i18n="cancel"></button>
+          </div>
+        </form>
+
+        <section class="market" id="market" aria-live="polite"></section>
       </section>
     </div>
   </main>
-  <footer><div class="wrap">مسارات الخريطة مرسومة من ملفات GPX. اقتراحات المساعد تجي من Claude على حسابك.</div></footer>
+  <footer><div class="wrap" data-i18n="footer"></div></footer>
 </div>
 
 <script>
 (() => {
-  const EMIRATES = ["أبوظبي", "دبي", "الشارقة", "عجمان", "أم القيوين", "رأس الخيمة", "الفجيرة"];
+  const I18N = {
+    ar: {
+      dir: "rtl", locale: "ar-AE-u-nu-latn", aiLang: "Gulf Arabic, simple and friendly",
+      skyline: "ظلال معالم الإمارات: إطار دبي، متحف المستقبل، أبراج الإمارات، برج خليفة، برج العرب، عين دبي، وجامع الشيخ زايد",
+      langLabel: "اللغة",
+      tagline: "للسياكل والجري في الإمارات: حدّد الطلعة، ارفع مسارك من Garmin، شوف كم واحد ماشي معك، وبيع واشترِ عدّة الرياضة في السوق.",
+      tabRides: "الطلعات", tabMarket: "السوق",
+      stUpcoming: "طلعة قادمة", stKm: "كم مخطّط لها", stSignups: "تسجيل مشارك",
+      all: "الكل", bike: "سيكل", run: "جري", both: "الاثنين", mine: "طلعاتي", allEmirates: "كل الإمارات",
+      newRide: "+ طلعة جديدة", formTitle: "طلعة جديدة", fTitle: "اسم الطلعة", fTitlePh: "طلعة الفجر – القدرة",
+      fSport: "الرياضة", fEmirate: "الإمارة", fLevel: "المستوى",
+      lvl_beg: "مبتدئ", lvl_int: "متوسط", lvl_adv: "متقدم",
+      fDate: "التاريخ", fTime: "وقت الانطلاق", fMeet: "نقطة التجمّع",
+      fMeetPh_bike: "مواقف حلبة القدرة للدراجات", fMeetPh_run: "كورنيش أبوظبي – بوابة 3",
+      fKm: "المسافة (كم)", fSpeed: "متوسط السرعة (كم/س)", fPace: "الوتيرة (دقيقة/كم)",
+      fMax: "الحد الأقصى للمشاركين (اختياري)", fMaxPh: "بدون حد",
+      garminTitle: "مسار من Garmin (اختياري)",
+      garminHelp: "من Garmin Connect افتح النشاط أو المسار، ثم ⚙ ← تصدير GPX، وارفع الملف هنا أو اسحبه. المسافة تنحسب تلقائياً.",
+      fNotes: "ملاحظات", fNotesPh: "خوذة إجبارية، أضواء أمامية وخلفية، ماء 2 لتر على الأقل",
+      publishRide: "انشر الطلعة", cancel: "إلغاء", loading: "جاري التحميل…",
+      exampleNote: "<strong>هذي أمثلة توضيحية.</strong> الطلعات والإعلانات المشتركة تظهر لما تفتح الصفحة وأنت مسجّل دخول في Claude.",
+      noRides: "<strong>ما فيه طلعات للحين.</strong> اضغط «+ طلعة جديدة» وانشر أول طلعة للكرو.",
+      readOnly: "تقدر تشوف بس، ما عندك صلاحية تضيف أو تسجّل.",
+      example: "مثال", ended: "انتهت", km: "كم", kmh: "كم/س متوسط", minkm: "دقيقة/كم", dur: "مدة تقريبية",
+      climb: "{n} م صعود", meetAt: "التجمّع: {p}",
+      cnt1: "مشارك واحد", cnt: "{c} مشاركين", cntMax: "{c} من {n} مشارك", full: "الطلعة مكتملة",
+      join: "أنا معكم", leave: "انسحب", copyLink: "نسخ رابط الطلعة", copied: "انتسخ الرابط ✓",
+      assistant: "اقتراحات التجهيز", thinking: "يفكّر…", delRide: "حذف الطلعة", confirmDel: "متأكد؟ اضغط مرة ثانية للحذف",
+      openMaps: "افتح نقطة التجمّع في الخرائط", noRoute: "ما فيه مسار مرفوع لهالطلعة", legend: "● البداية  ■ النهاية",
+      routeMap: "خريطة المسار", elevLbl: "ارتفاع المسار من {lo} إلى {hi} متر",
+      boardTitle: "ترتيب الكرو", boardSub: "الكيلومترات من الطلعات اللي خلصت وكنت مسجّل فيها.", boardRow: "{km} كم · {n} طلعة",
+      you: "أنت", member: "عضو في الكرو", noMatch: "ما فيه نتائج بهالتصفية.",
+      errRequired: "عبّ الاسم ونقطة التجمّع والتاريخ والوقت.", errKm: "حط المسافة بالكيلومتر، أو ارفع ملف GPX.",
+      errDate: "التاريخ أو الوقت مو صحيح.", errPerm: "ما عندك صلاحية تنشر.",
+      errQuota: "قاعدة البيانات وصلت حدها، احذف طلعات أو إعلانات قديمة.", errSave: "ما انحفظ، جرّب مرة ثانية.",
+      errJoinPerm: "ما عندك صلاحية تسجّل في الطلعات.", errDel: "ما انحذف، جرّب مرة ثانية.",
+      rateLimit: "وصلت الحد المسموح، جرّب بعد شوي.", aiFail: "ما وصل رد المساعد، جرّب مرة ثانية.",
+      disconnected: "انقطع الاتصال، حدّث الصفحة.",
+      gpxOk: "تم: {km} كم · {gain} م صعود · {n} نقطة على الخريطة", gpxBad: "الملف مو GPX صالح.", gpxNoPts: "ما لقيت نقاط مسار في الملف.",
+      mSearchPh: "دوّر: خوذة، حذاء، Garmin…", sell: "+ اعرض للبيع", sellTitle: "اعرض غرض للبيع",
+      sTitle: "اسم الغرض", sTitlePh: "خوذة Specialized مقاس M", sCat: "الفئة", allCats: "كل الفئات",
+      sPrice: "السعر (درهم)", sCond: "الحالة", cond_new: "جديد", cond_likenew: "مستعمل كالجديد", cond_used: "مستعمل",
+      sPhone: "رقم التواصل (واتساب)", sPhoto: "صورة الغرض", sDesc: "الوصف",
+      sDescPh: "المقاس، كم مرة استعملته، سبب البيع، التسليم أو الشحن", publishAd: "انشر الإعلان",
+      noListings: "<strong>ما فيه إعلانات للحين.</strong> اضغط «+ اعرض للبيع» وانشر أول غرض.",
+      sold: "مُباع", markSold: "علّمه مُباع", markAvail: "رجّعه للبيع", delAd: "حذف الإعلان",
+      aed: "درهم", whatsapp: "واتساب", copyNum: "نسخ", copiedNum: "انتسخ ✓", noPhoto: "بدون صورة",
+      errSellReq: "عبّ اسم الغرض والسعر ورقم التواصل.", errPhone: "حط رقم صحيح مع مفتاح الدولة.",
+      uploading: "جاري رفع الصورة…", errPhoto: "ما انرفعت الصورة (JPG أو PNG أو WebP، لين 20 ميجا).",
+      photoOff: "إضافة الصور متاحة لأعضاء الكرو اللي عندهم صلاحية Contributor.",
+      footer: "الخرائط مرسومة من ملفات GPX. اقتراحات التجهيز تجي من Claude على حسابك. البيع والشراء بين الأعضاء مباشرة، تأكد من الغرض قبل لا تدفع.",
+      cat_bikes: "دراجات", cat_parts: "قطع وإكسسوارات", cat_apparel: "ملابس", cat_shoes: "أحذية",
+      cat_watches: "ساعات وأجهزة", cat_helmets: "خوذ وحماية", cat_nutrition: "تغذية ومكملات", cat_other: "أخرى",
+      em_AUH: "أبوظبي", em_DXB: "دبي", em_SHJ: "الشارقة", em_AJM: "عجمان", em_UAQ: "أم القيوين", em_RAK: "رأس الخيمة", em_FUJ: "الفجيرة",
+      ex1: "طلعة الفجر – حلبة القدرة", ex1n: "خوذة إجبارية وأضواء. نرجع قبل ما تشتد الحرارة.",
+      ex2: "جري الكورنيش", ex2n: "وتيرة مريحة، نوقف عند كل 2 كم للماء.",
+      exi1: "عدّاد Garmin Edge 530 للسيكل", exi1d: "مع الحامل الأمامي والشاحن.",
+      exi2: "حذاء جري مقاس 43", exi2d: "ملبوس تقريباً 80 كم."
+    },
+    en: {
+      dir: "ltr", locale: "en-AE", aiLang: "English",
+      skyline: "Silhouettes of UAE landmarks: Dubai Frame, Museum of the Future, Emirates Towers, Burj Khalifa, Burj Al Arab, Ain Dubai and Sheikh Zayed Grand Mosque",
+      langLabel: "Language",
+      tagline: "Cycling and running in the UAE: set up a ride, upload your Garmin route, see who's coming, and buy or sell gear in the market.",
+      tabRides: "Rides", tabMarket: "Market",
+      stUpcoming: "upcoming rides", stKm: "km planned", stSignups: "rider sign-ups",
+      all: "All", bike: "Cycling", run: "Running", both: "Both", mine: "My rides", allEmirates: "All emirates",
+      newRide: "+ New ride", formTitle: "New ride", fTitle: "Ride name", fTitlePh: "Dawn ride – Al Qudra",
+      fSport: "Sport", fEmirate: "Emirate", fLevel: "Level",
+      lvl_beg: "Beginner", lvl_int: "Intermediate", lvl_adv: "Advanced",
+      fDate: "Date", fTime: "Start time", fMeet: "Meeting point",
+      fMeetPh_bike: "Al Qudra Cycle Track parking", fMeetPh_run: "Abu Dhabi Corniche – Gate 3",
+      fKm: "Distance (km)", fSpeed: "Average speed (km/h)", fPace: "Pace (min/km)",
+      fMax: "Rider limit (optional)", fMaxPh: "No limit",
+      garminTitle: "Route from Garmin (optional)",
+      garminHelp: "In Garmin Connect, open the activity or course, then ⚙ → Export to GPX, and upload or drop the file here. The distance fills in automatically.",
+      fNotes: "Notes", fNotesPh: "Helmet required, front and rear lights, at least 2 L of water",
+      publishRide: "Publish ride", cancel: "Cancel", loading: "Loading…",
+      exampleNote: "<strong>These are examples.</strong> Shared rides and listings appear when you open the page signed in to Claude.",
+      noRides: "<strong>No rides yet.</strong> Tap “+ New ride” to publish the crew's first one.",
+      readOnly: "You can view only; you can't add or sign up.",
+      example: "Example", ended: "Ended", km: "km", kmh: "avg km/h", minkm: "min/km", dur: "approx. time",
+      climb: "{n} m climb", meetAt: "Meet: {p}",
+      cnt1: "1 rider", cnt: "{c} riders", cntMax: "{c} of {n} riders", full: "Ride is full",
+      join: "I'm in", leave: "Drop out", copyLink: "Copy ride link", copied: "Link copied ✓",
+      assistant: "Prep tips", thinking: "Thinking…", delRide: "Delete ride", confirmDel: "Sure? Tap again to delete",
+      openMaps: "Open meeting point in Maps", noRoute: "No route uploaded for this ride", legend: "● start  ■ finish",
+      routeMap: "Route map", elevLbl: "Elevation from {lo} to {hi} m",
+      boardTitle: "Crew leaderboard", boardSub: "Kilometres from finished rides you signed up for.", boardRow: "{km} km · {n} rides",
+      you: "You", member: "Crew member", noMatch: "No results for this filter.",
+      errRequired: "Fill in the name, meeting point, date and time.", errKm: "Enter the distance in km, or upload a GPX file.",
+      errDate: "The date or time isn't valid.", errPerm: "You don't have permission to publish.",
+      errQuota: "The database is full. Delete old rides or listings.", errSave: "Didn't save. Try again.",
+      errJoinPerm: "You don't have permission to sign up for rides.", errDel: "Didn't delete. Try again.",
+      rateLimit: "You've hit the limit. Try again shortly.", aiFail: "No reply came back. Try again.",
+      disconnected: "Lost connection. Refresh the page.",
+      gpxOk: "Done: {km} km · {gain} m climb · {n} map points", gpxBad: "This isn't a valid GPX file.", gpxNoPts: "No route points found in the file.",
+      mSearchPh: "Search: helmet, shoes, Garmin…", sell: "+ Sell an item", sellTitle: "List an item for sale",
+      sTitle: "Item name", sTitlePh: "Specialized helmet, size M", sCat: "Category", allCats: "All categories",
+      sPrice: "Price (AED)", sCond: "Condition", cond_new: "New", cond_likenew: "Like new", cond_used: "Used",
+      sPhone: "Contact number (WhatsApp)", sPhoto: "Photo", sDesc: "Description",
+      sDescPh: "Size, how much it's been used, why you're selling, pickup or delivery", publishAd: "Publish listing",
+      noListings: "<strong>Nothing for sale yet.</strong> Tap “+ Sell an item” to list the first one.",
+      sold: "Sold", markSold: "Mark as sold", markAvail: "Back on sale", delAd: "Delete listing",
+      aed: "AED", whatsapp: "WhatsApp", copyNum: "Copy", copiedNum: "Copied ✓", noPhoto: "No photo",
+      errSellReq: "Fill in the item name, price and contact number.", errPhone: "Enter a valid phone number with the country code.",
+      uploading: "Uploading photo…", errPhoto: "The photo didn't upload (JPG, PNG or WebP, up to 20 MB).",
+      photoOff: "Crew members with Contributor access can add photos.",
+      footer: "Maps are drawn from GPX files. Prep tips come from Claude on your account. Buying and selling is directly between members; check the item before you pay.",
+      cat_bikes: "Bikes", cat_parts: "Parts & accessories", cat_apparel: "Apparel", cat_shoes: "Shoes",
+      cat_watches: "Watches & devices", cat_helmets: "Helmets & protection", cat_nutrition: "Nutrition", cat_other: "Other",
+      em_AUH: "Abu Dhabi", em_DXB: "Dubai", em_SHJ: "Sharjah", em_AJM: "Ajman", em_UAQ: "Umm Al Quwain", em_RAK: "Ras Al Khaimah", em_FUJ: "Fujairah",
+      ex1: "Dawn ride – Al Qudra", ex1n: "Helmet required, lights on. Back before the heat.",
+      ex2: "Corniche run", ex2n: "Easy pace, water stop every 2 km.",
+      exi1: "Garmin Edge 530 bike computer", exi1d: "With out-front mount and charger.",
+      exi2: "Running shoes, size 43", exi2d: "Worn for about 80 km."
+    },
+    fil: {
+      dir: "ltr", locale: "fil-PH", aiLang: "Filipino (Tagalog)",
+      skyline: "Mga silweta ng landmark ng UAE: Dubai Frame, Museum of the Future, Emirates Towers, Burj Khalifa, Burj Al Arab, Ain Dubai at Sheikh Zayed Grand Mosque",
+      langLabel: "Wika",
+      tagline: "Pagbibisikleta at pagtakbo sa UAE: mag-set ng ride, i-upload ang ruta mo mula sa Garmin, tingnan kung sino ang sasama, at bumili o magbenta ng gamit sa market.",
+      tabRides: "Mga Ride", tabMarket: "Market",
+      stUpcoming: "paparating na ride", stKm: "km na nakaplano", stSignups: "nag-sign up",
+      all: "Lahat", bike: "Bisikleta", run: "Takbo", both: "Pareho", mine: "Mga ride ko", allEmirates: "Lahat ng emirate",
+      newRide: "+ Bagong ride", formTitle: "Bagong ride", fTitle: "Pangalan ng ride", fTitlePh: "Dawn ride – Al Qudra",
+      fSport: "Sport", fEmirate: "Emirate", fLevel: "Antas",
+      lvl_beg: "Baguhan", lvl_int: "Katamtaman", lvl_adv: "Advanced",
+      fDate: "Petsa", fTime: "Oras ng simula", fMeet: "Tagpuan",
+      fMeetPh_bike: "Parking ng Al Qudra Cycle Track", fMeetPh_run: "Abu Dhabi Corniche – Gate 3",
+      fKm: "Layo (km)", fSpeed: "Average na bilis (km/h)", fPace: "Pace (min/km)",
+      fMax: "Limitasyon ng sasali (opsyonal)", fMaxPh: "Walang limitasyon",
+      garminTitle: "Ruta mula sa Garmin (opsyonal)",
+      garminHelp: "Sa Garmin Connect, buksan ang activity o course, tapos ⚙ → Export to GPX, at i-upload o i-drop ang file dito. Kusang malalagay ang layo.",
+      fNotes: "Mga paalala", fNotesPh: "Kailangan ng helmet, ilaw sa harap at likod, hindi bababa sa 2 L na tubig",
+      publishRide: "I-publish ang ride", cancel: "Kanselahin", loading: "Naglo-load…",
+      exampleNote: "<strong>Mga halimbawa lang ito.</strong> Lalabas ang mga shared na ride at listing kapag binuksan mo ang page habang naka-sign in sa Claude.",
+      noRides: "<strong>Wala pang ride.</strong> Pindutin ang “+ Bagong ride” para i-publish ang unang ride ng crew.",
+      readOnly: "Pwede ka lang tumingin; hindi ka makakapagdagdag o makakapag-sign up.",
+      example: "Halimbawa", ended: "Tapos na", km: "km", kmh: "avg km/h", minkm: "min/km", dur: "tinatayang oras",
+      climb: "{n} m akyat", meetAt: "Tagpuan: {p}",
+      cnt1: "1 kasali", cnt: "{c} kasali", cntMax: "{c} sa {n} kasali", full: "Puno na ang ride",
+      join: "Sasama ako", leave: "Aatras ako", copyLink: "Kopyahin ang link", copied: "Nakopya ✓",
+      assistant: "Mga tip sa paghahanda", thinking: "Nag-iisip…", delRide: "Burahin ang ride", confirmDel: "Sigurado? Pindutin ulit para burahin",
+      openMaps: "Buksan ang tagpuan sa Maps", noRoute: "Walang naka-upload na ruta", legend: "● simula  ■ tapos",
+      routeMap: "Mapa ng ruta", elevLbl: "Taas mula {lo} hanggang {hi} m",
+      boardTitle: "Leaderboard ng crew", boardSub: "Mga kilometro mula sa mga natapos na ride na sinalihan mo.", boardRow: "{km} km · {n} ride",
+      you: "Ikaw", member: "Miyembro ng crew", noMatch: "Walang resulta sa filter na ito.",
+      errRequired: "Punan ang pangalan, tagpuan, petsa at oras.", errKm: "Ilagay ang layo sa km, o mag-upload ng GPX file.",
+      errDate: "Mali ang petsa o oras.", errPerm: "Wala kang pahintulot mag-publish.",
+      errQuota: "Puno na ang database. Burahin ang mga lumang ride o listing.", errSave: "Hindi na-save. Subukan ulit.",
+      errJoinPerm: "Wala kang pahintulot mag-sign up sa mga ride.", errDel: "Hindi nabura. Subukan ulit.",
+      rateLimit: "Naabot mo na ang limit. Subukan ulit mamaya.", aiFail: "Walang sagot na dumating. Subukan ulit.",
+      disconnected: "Nawala ang koneksyon. I-refresh ang page.",
+      gpxOk: "Ayos: {km} km · {gain} m akyat · {n} punto sa mapa", gpxBad: "Hindi valid na GPX file ito.", gpxNoPts: "Walang nakitang punto ng ruta sa file.",
+      mSearchPh: "Maghanap: helmet, sapatos, Garmin…", sell: "+ Magbenta", sellTitle: "Magbenta ng gamit",
+      sTitle: "Pangalan ng gamit", sTitlePh: "Specialized helmet, size M", sCat: "Kategorya", allCats: "Lahat ng kategorya",
+      sPrice: "Presyo (AED)", sCond: "Kondisyon", cond_new: "Bago", cond_likenew: "Parang bago", cond_used: "Gamit na",
+      sPhone: "Numero (WhatsApp)", sPhoto: "Larawan", sDesc: "Paglalarawan",
+      sDescPh: "Size, gaano kadalas nagamit, bakit ibinebenta, pickup o delivery", publishAd: "I-publish ang listing",
+      noListings: "<strong>Wala pang binebenta.</strong> Pindutin ang “+ Magbenta” para sa unang listing.",
+      sold: "Nabenta na", markSold: "Markahan na nabenta", markAvail: "Ibalik sa benta", delAd: "Burahin ang listing",
+      aed: "AED", whatsapp: "WhatsApp", copyNum: "Kopyahin", copiedNum: "Nakopya ✓", noPhoto: "Walang larawan",
+      errSellReq: "Punan ang pangalan ng gamit, presyo at numero.", errPhone: "Maglagay ng tamang numero na may country code.",
+      uploading: "Ina-upload ang larawan…", errPhoto: "Hindi na-upload ang larawan (JPG, PNG o WebP, hanggang 20 MB).",
+      photoOff: "Ang mga miyembrong may Contributor access ang pwedeng magdagdag ng larawan.",
+      footer: "Ang mga mapa ay mula sa GPX files. Ang mga tip sa paghahanda ay galing sa Claude sa account mo. Direkta ang bentahan sa pagitan ng mga miyembro; suriin muna ang gamit bago magbayad.",
+      cat_bikes: "Bisikleta", cat_parts: "Piyesa at accessories", cat_apparel: "Damit", cat_shoes: "Sapatos",
+      cat_watches: "Relo at device", cat_helmets: "Helmet at proteksyon", cat_nutrition: "Nutrisyon", cat_other: "Iba pa",
+      em_AUH: "Abu Dhabi", em_DXB: "Dubai", em_SHJ: "Sharjah", em_AJM: "Ajman", em_UAQ: "Umm Al Quwain", em_RAK: "Ras Al Khaimah", em_FUJ: "Fujairah",
+      ex1: "Dawn ride – Al Qudra", ex1n: "Kailangan ng helmet at ilaw. Babalik bago uminit.",
+      ex2: "Takbo sa Corniche", ex2n: "Relax na pace, hinto para uminom bawat 2 km.",
+      exi1: "Garmin Edge 530 bike computer", exi1d: "May kasamang mount at charger.",
+      exi2: "Running shoes, size 43", exi2d: "Nagamit nang mga 80 km."
+    },
+    hi: {
+      dir: "ltr", locale: "hi-IN", aiLang: "Hindi (Devanagari script)",
+      skyline: "UAE के प्रसिद्ध स्थलों की परछाइयाँ: दुबई फ़्रेम, म्यूज़ियम ऑफ़ द फ़्यूचर, एमिरेट्स टावर्स, बुर्ज ख़लीफ़ा, बुर्ज अल अरब, ऐन दुबई और शेख़ ज़ायद ग्रैंड मस्जिद",
+      langLabel: "भाषा",
+      tagline: "UAE में साइकिलिंग और रनिंग: राइड तय करें, Garmin से अपना रूट अपलोड करें, देखें कौन आ रहा है, और मार्केट में सामान खरीदें या बेचें।",
+      tabRides: "राइड्स", tabMarket: "मार्केट",
+      stUpcoming: "आने वाली राइड", stKm: "किमी तय", stSignups: "साइन-अप",
+      all: "सभी", bike: "साइकिलिंग", run: "रनिंग", both: "दोनों", mine: "मेरी राइड्स", allEmirates: "सभी अमीरात",
+      newRide: "+ नई राइड", formTitle: "नई राइड", fTitle: "राइड का नाम", fTitlePh: "सुबह की राइड – अल कुदरा",
+      fSport: "खेल", fEmirate: "अमीरात", fLevel: "स्तर",
+      lvl_beg: "शुरुआती", lvl_int: "मध्यम", lvl_adv: "एडवांस",
+      fDate: "तारीख", fTime: "शुरू होने का समय", fMeet: "मिलने की जगह",
+      fMeetPh_bike: "अल कुदरा साइकिल ट्रैक पार्किंग", fMeetPh_run: "अबू धाबी कॉर्निश – गेट 3",
+      fKm: "दूरी (किमी)", fSpeed: "औसत गति (किमी/घं)", fPace: "पेस (मिनट/किमी)",
+      fMax: "अधिकतम प्रतिभागी (वैकल्पिक)", fMaxPh: "कोई सीमा नहीं",
+      garminTitle: "Garmin से रूट (वैकल्पिक)",
+      garminHelp: "Garmin Connect में एक्टिविटी या कोर्स खोलें, फिर ⚙ → Export to GPX, और फ़ाइल यहाँ अपलोड करें या खींचकर छोड़ें। दूरी अपने आप भर जाएगी।",
+      fNotes: "नोट्स", fNotesPh: "हेलमेट ज़रूरी, आगे-पीछे लाइट, कम से कम 2 लीटर पानी",
+      publishRide: "राइड पब्लिश करें", cancel: "रद्द करें", loading: "लोड हो रहा है…",
+      exampleNote: "<strong>ये उदाहरण हैं।</strong> साझा राइड और लिस्टिंग तब दिखेंगी जब आप Claude में साइन इन करके पेज खोलेंगे।",
+      noRides: "<strong>अभी कोई राइड नहीं।</strong> क्रू की पहली राइड पब्लिश करने के लिए “+ नई राइड” दबाएँ।",
+      readOnly: "आप सिर्फ़ देख सकते हैं; जोड़ या साइन-अप नहीं कर सकते।",
+      example: "उदाहरण", ended: "समाप्त", km: "किमी", kmh: "औसत किमी/घं", minkm: "मिनट/किमी", dur: "अनुमानित समय",
+      climb: "{n} मी चढ़ाई", meetAt: "मिलना: {p}",
+      cnt1: "1 प्रतिभागी", cnt: "{c} प्रतिभागी", cntMax: "{n} में से {c} प्रतिभागी", full: "राइड फुल है",
+      join: "मैं आ रहा हूँ", leave: "नाम वापस लें", copyLink: "राइड लिंक कॉपी करें", copied: "लिंक कॉपी हुआ ✓",
+      assistant: "तैयारी के सुझाव", thinking: "सोच रहा है…", delRide: "राइड हटाएँ", confirmDel: "पक्का? हटाने के लिए फिर दबाएँ",
+      openMaps: "मिलने की जगह मैप्स में खोलें", noRoute: "इस राइड का कोई रूट अपलोड नहीं हुआ", legend: "● शुरू  ■ अंत",
+      routeMap: "रूट मैप", elevLbl: "ऊँचाई {lo} से {hi} मी",
+      boardTitle: "क्रू लीडरबोर्ड", boardSub: "उन पूरी हुई राइड्स के किलोमीटर जिनमें आपने साइन-अप किया।", boardRow: "{km} किमी · {n} राइड",
+      you: "आप", member: "क्रू सदस्य", noMatch: "इस फ़िल्टर में कुछ नहीं मिला।",
+      errRequired: "नाम, मिलने की जगह, तारीख और समय भरें।", errKm: "दूरी किमी में डालें, या GPX फ़ाइल अपलोड करें।",
+      errDate: "तारीख या समय सही नहीं है।", errPerm: "आपको पब्लिश करने की अनुमति नहीं है।",
+      errQuota: "डेटाबेस भर गया है। पुरानी राइड या लिस्टिंग हटाएँ।", errSave: "सेव नहीं हुआ। फिर कोशिश करें।",
+      errJoinPerm: "आपको राइड में साइन-अप की अनुमति नहीं है।", errDel: "नहीं हटा। फिर कोशिश करें।",
+      rateLimit: "सीमा पूरी हो गई। थोड़ी देर बाद कोशिश करें।", aiFail: "जवाब नहीं आया। फिर कोशिश करें।",
+      disconnected: "कनेक्शन टूट गया। पेज रीफ़्रेश करें।",
+      gpxOk: "हो गया: {km} किमी · {gain} मी चढ़ाई · मैप पर {n} पॉइंट", gpxBad: "यह सही GPX फ़ाइल नहीं है।", gpxNoPts: "फ़ाइल में रूट पॉइंट नहीं मिले।",
+      mSearchPh: "खोजें: हेलमेट, जूते, Garmin…", sell: "+ सामान बेचें", sellTitle: "बिक्री के लिए सामान डालें",
+      sTitle: "सामान का नाम", sTitlePh: "Specialized हेलमेट, साइज़ M", sCat: "श्रेणी", allCats: "सभी श्रेणियाँ",
+      sPrice: "कीमत (AED)", sCond: "हालत", cond_new: "नया", cond_likenew: "लगभग नया", cond_used: "इस्तेमाल किया हुआ",
+      sPhone: "संपर्क नंबर (WhatsApp)", sPhoto: "फ़ोटो", sDesc: "विवरण",
+      sDescPh: "साइज़, कितना इस्तेमाल हुआ, बेचने की वजह, पिकअप या डिलीवरी", publishAd: "लिस्टिंग पब्लिश करें",
+      noListings: "<strong>अभी कुछ बिक्री के लिए नहीं।</strong> पहली लिस्टिंग के लिए “+ सामान बेचें” दबाएँ।",
+      sold: "बिक गया", markSold: "बिका हुआ मार्क करें", markAvail: "फिर से बिक्री पर", delAd: "लिस्टिंग हटाएँ",
+      aed: "AED", whatsapp: "WhatsApp", copyNum: "कॉपी", copiedNum: "कॉपी हुआ ✓", noPhoto: "फ़ोटो नहीं",
+      errSellReq: "सामान का नाम, कीमत और संपर्क नंबर भरें।", errPhone: "देश कोड के साथ सही फ़ोन नंबर डालें।",
+      uploading: "फ़ोटो अपलोड हो रही है…", errPhoto: "फ़ोटो अपलोड नहीं हुई (JPG, PNG या WebP, 20 MB तक)।",
+      photoOff: "Contributor एक्सेस वाले क्रू सदस्य फ़ोटो जोड़ सकते हैं।",
+      footer: "मैप GPX फ़ाइलों से बनते हैं। तैयारी के सुझाव आपके अकाउंट पर Claude से आते हैं। खरीद-बिक्री सीधे सदस्यों के बीच होती है; पैसे देने से पहले सामान जाँच लें।",
+      cat_bikes: "साइकिलें", cat_parts: "पार्ट्स और एक्सेसरीज़", cat_apparel: "कपड़े", cat_shoes: "जूते",
+      cat_watches: "घड़ियाँ और डिवाइस", cat_helmets: "हेलमेट और सुरक्षा", cat_nutrition: "न्यूट्रिशन", cat_other: "अन्य",
+      em_AUH: "अबू धाबी", em_DXB: "दुबई", em_SHJ: "शारजाह", em_AJM: "अजमान", em_UAQ: "उम्म अल क़ुवैन", em_RAK: "रास अल ख़ैमाह", em_FUJ: "फ़ुजैराह",
+      ex1: "सुबह की राइड – अल कुदरा", ex1n: "हेलमेट ज़रूरी, लाइट ऑन। गर्मी से पहले वापसी।",
+      ex2: "कॉर्निश रन", ex2n: "आसान पेस, हर 2 किमी पर पानी।",
+      exi1: "Garmin Edge 530 बाइक कंप्यूटर", exi1d: "माउंट और चार्जर के साथ।",
+      exi2: "रनिंग जूते, साइज़ 43", exi2d: "लगभग 80 किमी पहने गए।"
+    }
+  };
+  const LANGS = Object.keys(I18N);
+  const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
+  const LEVELS = ["beg", "int", "adv"];
+  const CATS = ["bikes", "parts", "apparel", "shoes", "watches", "helmets", "nutrition", "other"];
+  const CONDS = ["new", "likenew", "used"];
+  const ARTIFACT = "https://claude.ai/artifact/JpB2p9Jcy2iFszBixE8Jq9";
+
+  let lang = "ar";
+  try { const s = localStorage.getItem("yc-lang"); if (LANGS.includes(s)) lang = s; else throw 0; }
+  catch { const n = (navigator.language || "").toLowerCase(); lang = n.startsWith("ar") ? "ar" : n.startsWith("hi") ? "hi" : (n.startsWith("fil") || n.startsWith("tl")) ? "fil" : n.startsWith("en") ? "en" : "ar"; }
+  const t = (k, v) => {
+    let s = I18N[lang][k] ?? I18N.en[k] ?? k;
+    if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b);
+    return s;
+  };
+  let fmtDate, fmtTime;
+
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const fmtDate = new Intl.DateTimeFormat("ar-AE-u-nu-latn", { weekday: "long", day: "numeric", month: "long" });
-  const fmtTime = new Intl.DateTimeFormat("ar-AE-u-nu-latn", { hour: "numeric", minute: "2-digit" });
-
-  // Shown only when the shared store is not reachable (preview, signed out).
-  const EXAMPLE = {
-    id: "example", example: true, title: "طلعة الفجر – حلبة القدرة", emirate: "دبي", level: "متوسط",
-    meetPoint: "مواقف حلبة القدرة للدراجات", distanceKm: 50, paceKmh: 28, gainM: 120,
-    startAt: nextFriday(), notes: "خوذة إجبارية وأضواء. نرجع قبل ما تشتد الحرارة.",
-    route: loop(24.835, 55.375, 0.055, 0.08, 60)
-  };
-
-  const state = { mode: "pending", rides: [], joins: [], me: null, canWrite: true, filter: "الكل", ai: {}, gpx: null };
-  let db = null, user = null, sample = null, writeChain = Promise.resolve();
+  const PH = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 3"><rect width="4" height="3" fill="#8a9a97" opacity=".25"/></svg>');
 
   function nextFriday() {
     const d = new Date(); d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7)); d.setHours(5, 30, 0, 0);
     return d.toISOString();
   }
-  function loop(lat, lon, dLat, dLon, n) {
+  function loop(lat, lon, dLat, dLon, n, e0) {
     const pts = [];
     for (let i = 0; i <= n; i++) {
-      const t = (i / n) * Math.PI * 2;
-      pts.push([+(lat + dLat * Math.sin(t) * (1 + 0.15 * Math.cos(3 * t))).toFixed(5), +(lon + dLon * Math.cos(t)).toFixed(5), Math.round(55 + 18 * Math.sin(2 * t) + 6 * Math.cos(5 * t))]);
+      const a = (i / n) * Math.PI * 2;
+      pts.push([+(lat + dLat * Math.sin(a) * (1 + 0.15 * Math.cos(3 * a))).toFixed(5), +(lon + dLon * Math.cos(a)).toFixed(5), Math.round(e0 + 18 * Math.sin(2 * a) + 6 * Math.cos(5 * a))]);
     }
     return pts;
   }
+  // Shown only when the shared store is not reachable (preview, signed out).
+  const EXAMPLES = [
+    { id: "example", example: true, sport: "bike", titleKey: "ex1", notesKey: "ex1n", meetKey: "fMeetPh_bike", emirate: "DXB", level: "int",
+      distanceKm: 50, paceKmh: 28, gainM: 120, startAt: nextFriday(), route: loop(24.835, 55.375, 0.055, 0.08, 60, 55) },
+    { id: "example-run", example: true, sport: "run", titleKey: "ex2", notesKey: "ex2n", meetKey: "fMeetPh_run", emirate: "AUH", level: "beg",
+      distanceKm: 8, paceMinKm: 6, gainM: 10, startAt: nextFriday(), route: loop(24.475, 54.335, 0.008, 0.014, 40, 4) }
+  ];
+  const EXAMPLE_ITEMS = [
+    { id: "exi1", example: true, titleKey: "exi1", descKey: "exi1d", sport: "bike", category: "watches", condition: "likenew", price: 650, emirate: "DXB", phone: "+971 50 000 0000" },
+    { id: "exi2", example: true, titleKey: "exi2", descKey: "exi2d", sport: "run", category: "shoes", condition: "used", price: 180, emirate: "SHJ", phone: "+971 55 000 0000" }
+  ];
+  const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
+
+  const state = {
+    mode: "pending", rides: [], joins: [], listings: [], me: null, canWrite: true,
+    sport: "all", emirate: "all", mine: false, ai: {}, gpx: null,
+    tab: location.hash === "#market" ? "market" : "rides", m: { sport: "all", cat: "all", q: "" }
+  };
+  let db = null, user = null, sample = null, assets = null, writeChain = Promise.resolve();
+  const sportOf = (r) => r.sport === "run" ? "run" : "bike";
+
   function haversine(a, b) {
     const R = 6371, r = Math.PI / 180;
     const dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r;
@@ -271,12 +634,12 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
 
   function parseGpx(text) {
     const doc = new DOMParser().parseFromString(text, "application/xml");
-    if (doc.querySelector("parsererror")) throw new Error("الملف مو GPX صالح.");
+    if (doc.querySelector("parsererror")) throw new Error(t("gpxBad"));
     const raw = [...doc.querySelectorAll("trkpt, rtept")].map((p) => {
       const e = p.querySelector("ele");
       return [parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon")), e ? parseFloat(e.textContent) : NaN];
     }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
-    if (raw.length < 2) throw new Error("ما لقيت نقاط مسار في الملف.");
+    if (raw.length < 2) throw new Error(t("gpxNoPts"));
     let km = 0, gain = 0;
     for (let i = 1; i < raw.length; i++) {
       km += haversine(raw[i - 1], raw[i]);
@@ -298,7 +661,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
   function routeSvg(route) {
     const W = 360, H = 220, P = 18;
     if (!route || route.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="لا يوجد مسار"><text class="empty" x="${W / 2}" y="${H / 2}" text-anchor="middle">ما فيه مسار مرفوع لهالطلعة</text></svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("noRoute"))}"><text class="empty" x="${W / 2}" y="${H / 2}" text-anchor="middle">${esc(t("noRoute"))}</text></svg>`;
     }
     const lats = route.map((p) => p[0]), lons = route.map((p) => p[1]);
     const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLon = Math.min(...lons), maxLon = Math.max(...lons);
@@ -315,13 +678,13 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     let grid = "";
     for (let gx = P; gx <= W - P; gx += 40) grid += `<line class="grid" x1="${gx}" y1="${P}" x2="${gx}" y2="${H - 30}"/>`;
     for (let gy = P; gy <= H - 30; gy += 40) grid += `<line class="grid" x1="${P}" y1="${gy}" x2="${W - P}" y2="${gy}"/>`;
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة المسار">${grid}
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("routeMap"))}">${grid}
       <path class="route" d="${d}"/>
       <rect class="end" x="${(ex - 5).toFixed(1)}" y="${(ey - 5).toFixed(1)}" width="10" height="10"/>
       <circle class="start" cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="6.5"/>
       <line class="scale" x1="${P}" y1="${H - 10}" x2="${(P + scalePx).toFixed(1)}" y2="${H - 10}"/>
       <text class="lbl" x="${(P + scalePx + 6).toFixed(1)}" y="${H - 6}" direction="ltr">${scaleKm} km</text>
-      <text class="lbl" x="${W - P}" y="${H - 6}" text-anchor="end">● البداية  ■ النهاية</text></svg>`;
+      <text class="lbl" x="${W - P}" y="${H - 6}" text-anchor="end">${esc(t("legend"))}</text></svg>`;
   }
 
   // Elevation along the route, distance on the x axis.
@@ -337,94 +700,102 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const y = (e) => 8 + (1 - (e - lo) / span) * (H - 26);
     const line = route.map((p, i) => (i ? "L" : "M") + x(dist[i]).toFixed(1) + " " + y(p[2]).toFixed(1)).join("");
     const area = line + `L${x(total).toFixed(1)} ${H - 18}L${P} ${H - 18}Z`;
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ارتفاع المسار من ${lo} إلى ${hi} متر">
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("elevLbl", { lo, hi }))}">
       <line class="grid" x1="${P}" y1="${H - 18}" x2="${W - P}" y2="${H - 18}"/>
       <path class="elev" d="${area}"/><path class="elev-line" d="${line}"/>
       <text class="lbl" x="${P}" y="${H - 4}" direction="ltr">${lo}–${hi} m</text>
       <text class="lbl" x="${W - P}" y="${H - 4}" text-anchor="end" direction="ltr">${Math.round(total * 10) / 10} km</text></svg>`;
   }
 
+  // ---------- Rides ----------
   function riders(rideId) { return state.joins.filter((j) => j.rides && j.rides[rideId] === true).map((j) => j.id); }
   function visibleRides() {
-    const list = state.mode === "live" ? state.rides : [EXAMPLE];
-    return state.filter === "الكل" ? list : state.filter === "طلعاتي"
-      ? list.filter((r) => riders(r.id).includes(state.me) || r.createdBy === state.me)
-      : list.filter((r) => r.emirate === state.filter);
+    let list = state.mode === "live" ? state.rides : EXAMPLES;
+    if (state.sport !== "all") list = list.filter((r) => sportOf(r) === state.sport);
+    if (state.emirate !== "all") list = list.filter((r) => r.emirate === state.emirate);
+    if (state.mine) list = list.filter((r) => riders(r.id).includes(state.me) || r.createdBy === state.me);
+    return list;
   }
-
-  function renderFilters() {
-    const opts = ["الكل", ...(state.me ? ["طلعاتي"] : []), ...EMIRATES];
-    $("#filters").innerHTML = opts.map((o) => `<button type="button" class="chip" data-f="${esc(o)}" aria-pressed="${o === state.filter}">${esc(o)}</button>`).join("");
+  function chips(opts, current, attr) {
+    return opts.map((o) => `<button type="button" class="chip" ${attr}="${o}" aria-pressed="${o === current}">${esc(t(o))}</button>`).join("");
   }
-
   function renderStats() {
     const now = Date.now();
-    const list = state.mode === "live" ? state.rides : [];
-    const up = list.filter((r) => Date.parse(r.startAt) >= now);
+    const up = (state.mode === "live" ? state.rides : []).filter((r) => Date.parse(r.startAt) >= now);
     $("#st-rides").textContent = up.length;
     $("#st-km").textContent = Math.round(up.reduce((a, r) => a + (+r.distanceKm || 0), 0));
     $("#st-riders").textContent = up.reduce((a, r) => a + riders(r.id).length, 0);
   }
-
   function renderStatus() {
     const el = $("#status");
     let html = "";
-    if (state.mode === "pending") html = "جاري تحميل الطلعات…";
-    else if (state.mode === "example") html = "<strong>هذا مثال توضيحي.</strong> الطلعات المشتركة تظهر لما تفتح الصفحة وأنت مسجّل دخول في Claude.";
-    else if (state.mode === "live" && !state.rides.length) html = "<strong>ما فيه طلعات للحين.</strong> اضغط «+ طلعة جديدة» وانشر أول طلعة للكرو.";
-    else if (state.mode === "live" && !state.canWrite) html = "تقدر تشوف الطلعات بس، ما عندك صلاحية تضيف أو تسجّل.";
+    if (state.mode === "pending") html = esc(t("loading"));
+    else if (state.mode === "example") html = t("exampleNote");
+    else if (state.tab === "rides" && !state.rides.length) html = t("noRides");
+    else if (state.tab === "market" && !state.listings.length) html = t("noListings");
+    else if (!state.canWrite) html = esc(t("readOnly"));
     el.innerHTML = html; el.hidden = !html;
-    $("#openForm").hidden = state.mode !== "live" || !state.canWrite;
+    const canAct = state.mode === "live" && state.canWrite;
+    $("#openForm").hidden = !canAct;
+    $("#openSell").hidden = !canAct;
   }
 
+  function fmtPace(m) { return `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, "0")}`; }
   function rideCard(r) {
     const start = new Date(r.startAt);
     const past = start.getTime() < Date.now();
     const ids = riders(r.id);
     const joined = state.me && ids.includes(state.me);
     const full = r.maxRiders > 0 && ids.length >= r.maxRiders && !joined;
-    const hours = r.paceKmh ? (r.distanceKm / r.paceKmh) : null;
+    const run = sportOf(r) === "run";
+    const hours = run ? (r.paceMinKm ? r.distanceKm * r.paceMinKm / 60 : null) : (r.paceKmh ? r.distanceKm / r.paceKmh : null);
     const dur = hours ? `${Math.floor(hours)}:${String(Math.round((hours % 1) * 60)).padStart(2, "0")}` : "—";
+    const paceTxt = run ? (r.paceMinKm ? fmtPace(r.paceMinKm) : "—") : (r.paceKmh || "—");
     const live = state.mode === "live";
-    const maps = r.route?.length ? `https://www.google.com/maps/search/?api=1&query=${r.route[0][0]},${r.route[0][1]}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.meetPoint + " " + r.emirate)}`;
-    return `<article class="ride${past ? " past" : ""}" data-id="${esc(r.id)}">
+    const meet = txt(r, "meet") ?? r.meetPoint;
+    const maps = r.route?.length ? `https://www.google.com/maps/search/?api=1&query=${r.route[0][0]},${r.route[0][1]}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meet + " " + t("em_" + r.emirate))}`;
+    const count = r.maxRiders > 0 ? t("cntMax", { c: ids.length, n: r.maxRiders }) : ids.length === 1 ? t("cnt1") : t("cnt", { c: ids.length });
+    const notes = txt(r, "notes");
+    return `<article class="ride ${run ? "run" : "bike"}${past ? " past" : ""}" data-id="${esc(r.id)}">
       <div class="info">
         <div class="meta">
-          <span class="pill">${esc(r.emirate)}</span><span class="pill">${esc(r.level)}</span>
-          ${r.example ? '<span class="pill example">مثال</span>' : ""}${past ? '<span class="pill done">انتهت</span>' : ""}
+          <span class="pill sport">${esc(t(sportOf(r)))}</span><span class="pill">${esc(t("em_" + r.emirate))}</span><span class="pill">${esc(t("lvl_" + r.level))}</span>
+          ${r.example ? `<span class="pill example">${esc(t("example"))}</span>` : ""}${past ? `<span class="pill done">${esc(t("ended"))}</span>` : ""}
         </div>
-        <h3>${esc(r.title)}</h3>
-        <div class="meta"><span>${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}</span><span>التجمّع: ${esc(r.meetPoint)}</span></div>
+        <h3>${esc(txt(r, "title"))}</h3>
+        <div class="meta"><span>${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}</span><span>${esc(t("meetAt", { p: meet }))}</span></div>
         <div class="nums">
-          <div><b>${esc(r.distanceKm)}</b><span>كم</span></div>
-          <div><b>${esc(r.paceKmh || "—")}</b><span>كم/س متوسط</span></div>
-          <div><b>${esc(dur)}</b><span>${r.gainM ? `مدة تقريبية · ${esc(r.gainM)} م صعود` : "مدة تقريبية"}</span></div>
+          <div><b>${esc(r.distanceKm)}</b><span>${esc(t("km"))}</span></div>
+          <div><b>${esc(paceTxt)}</b><span>${esc(t(run ? "minkm" : "kmh"))}</span></div>
+          <div><b>${esc(dur)}</b><span>${esc(t("dur"))}${r.gainM ? " · " + esc(t("climb", { n: r.gainM })) : ""}</span></div>
         </div>
-        ${r.notes ? `<p class="notes">${esc(r.notes)}</p>` : ""}
+        ${notes ? `<p class="notes">${esc(notes)}</p>` : ""}
         <div class="crew">
           <div class="faces" data-faces="${esc(ids.slice(0, 8).join(","))}"></div>
-          <span class="count"><b>${ids.length}</b>${r.maxRiders > 0 ? ` من ${esc(r.maxRiders)}` : ""} ${ids.length === 1 ? "مشارك" : "مشاركين"}</span>
-          ${full && !past ? '<span class="full-tag">الطلعة مكتملة</span>' : ""}
+          <span class="count">${esc(count)}</span>
+          ${full && !past ? `<span class="full-tag">${esc(t("full"))}</span>` : ""}
         </div>
         <div class="actions">
-          ${live && state.canWrite && state.me && !past && !full ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${joined ? "انسحب" : "أنا معكم"}</button>` : ""}
-          ${live ? `<button type="button" class="ghost" data-act="link">نسخ رابط الطلعة</button>` : ""}
-          ${sample ? `<button type="button" class="ghost" data-act="ai">اقتراحات المساعد</button>` : ""}
-          ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="link" data-act="del">حذف الطلعة</button>` : ""}
+          ${live && state.canWrite && state.me && !past && !full ? `<button type="button" class="${joined ? "ghost" : "primary"}" data-act="join">${esc(t(joined ? "leave" : "join"))}</button>` : ""}
+          ${live ? `<button type="button" class="ghost" data-act="link">${esc(t("copyLink"))}</button>` : ""}
+          ${sample ? `<button type="button" class="ghost" data-act="ai">${esc(t("assistant"))}</button>` : ""}
+          ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="link" data-act="del">${esc(t("delRide"))}</button>` : ""}
         </div>
         ${state.ai[r.id] ? `<div class="ai" data-ai>${esc(state.ai[r.id])}</div>` : ""}
       </div>
-      <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">افتح نقطة التجمّع في الخرائط</a></div>
+      <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}<a href="${esc(maps)}" target="_blank" rel="noopener">${esc(t("openMaps"))}</a></div>
     </article>`;
   }
 
-  function render() {
-    renderFilters(); renderStats(); renderStatus();
-    const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+  function renderRides() {
+    $("#filters").innerHTML = chips(["all", "bike", "run"], state.sport, "data-f") +
+      (state.me ? `<button type="button" class="chip" data-mine aria-pressed="${state.mine}">${esc(t("mine"))}</button>` : "");
+    renderStats();
     const now = Date.now();
+    const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const ordered = [...list.filter((r) => Date.parse(r.startAt) >= now), ...list.filter((r) => Date.parse(r.startAt) < now).reverse()];
     $("#rides").innerHTML = ordered.map(rideCard).join("") ||
-      (state.mode === "live" && state.rides.length ? '<p class="notice">ما فيه طلعات بهالتصفية.</p>' : "");
+      (state.mode === "live" && state.rides.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
     fillFaces();
     renderBoard();
     focusTarget();
@@ -436,6 +807,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       const now = Date.now();
       for (const r of state.rides) {
         if (Date.parse(r.startAt) >= now) continue;
+        if (state.sport !== "all" && sportOf(r) !== state.sport) continue;
         for (const id of riders(r.id)) {
           totals[id] ??= { km: 0, rides: 0 };
           totals[id].km += +r.distanceKm || 0; totals[id].rides += 1;
@@ -446,17 +818,17 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     $("#board").hidden = !rows.length;
     if (!rows.length) return;
     const list = $("#boardList");
-    list.replaceChildren(...rows.map(([id, t], i) => {
+    list.replaceChildren(...rows.map(([id, v], i) => {
       const li = document.createElement("li");
       li.dataset.uid = id;
-      li.innerHTML = `<span class="rk">${i + 1}</span><img alt=""><span class="nm"></span><span class="km">${Math.round(t.km)} كم · ${t.rides} طلعة</span>`;
+      li.innerHTML = `<span class="rk">${i + 1}</span><img alt=""><span class="nm"></span><span class="km">${esc(t("boardRow", { km: Math.round(v.km), n: v.rides }))}</span>`;
       return li;
     }));
     if (user) user.profiles(rows.map((r) => r[0])).then((ps) => {
       for (const li of list.children) {
         const p = ps[li.dataset.uid];
         li.querySelector("img").src = p?.avatarUrl || "";
-        li.querySelector(".nm").textContent = (p?.isMe ? "أنت" : p?.name) || "عضو في الكرو";
+        li.querySelector(".nm").textContent = (p?.isMe ? t("you") : p?.name) || t("member");
       }
     });
   }
@@ -465,19 +837,18 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
   let targetDone = false;
   function focusTarget() {
     if (targetDone || state.mode !== "live") return;
-    const id = location.hash.slice(1);
     targetDone = true;
-    if (!id) return;
+    const id = location.hash.slice(1);
+    if (!id || id === "market") return;
     const el = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
     if (!el) return;
     el.classList.add("target");
     el.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
-  async function copyLink(rideId, btn) {
-    const link = "https://claude.ai/artifact/JpB2p9Jcy2iFszBixE8Jq9#" + rideId;
-    try { await navigator.clipboard.writeText(link); btn.textContent = "انتسخ الرابط ✓"; }
-    catch { btn.textContent = link; btn.style.userSelect = "all"; }
+  async function copyText(text, btn, done) {
+    try { await navigator.clipboard.writeText(text); btn.textContent = done; }
+    catch { btn.textContent = text; btn.style.userSelect = "all"; }
   }
 
   async function fillFaces() {
@@ -489,7 +860,7 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     for (const b of boxes) {
       b.replaceChildren(...b.dataset.faces.split(",").map((id) => {
         const img = document.createElement("img");
-        img.src = ps[id]?.avatarUrl || ""; img.alt = ps[id]?.name || "مشارك"; img.title = ps[id]?.name || "مشارك";
+        img.src = ps[id]?.avatarUrl || ""; img.alt = ps[id]?.name || t("member"); img.title = ps[id]?.name || t("member");
         return img;
       }));
     }
@@ -504,27 +875,29 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
     const ref = db.doc("joins/" + state.me);
     try {
       await queueWrite(() => mine ? ref.update({ rides: { [rideId]: on } }) : ref.set({ rides: { [rideId]: on } }));
-    } catch (e) { flash(e.code === "invalid_argument" ? "ما عندك صلاحية تسجّل في الطلعات." : "ما انحفظ التسجيل، جرّب مرة ثانية."); }
+    } catch (e) { flash(t(e.code === "invalid_argument" ? "errJoinPerm" : "errSave")); }
   }
 
-  async function deleteRide(rideId, btn) {
-    if (btn.dataset.confirm !== "1") { btn.dataset.confirm = "1"; btn.textContent = "متأكد؟ اضغط مرة ثانية للحذف"; return; }
-    try { await db.doc("rides/" + rideId).delete(); } catch { flash("ما انحذفت الطلعة، جرّب مرة ثانية."); }
+  async function confirmThen(btn, fn) {
+    if (btn.dataset.confirm !== "1") { btn.dataset.confirm = "1"; btn.textContent = t("confirmDel"); return; }
+    try { await fn(); } catch { flash(t("errDel")); }
   }
 
   async function askAi(r, btn) {
     btn.disabled = true;
-    state.ai[r.id] = "يفكّر…"; render();
+    state.ai[r.id] = t("thinking"); renderRides();
     const start = new Date(r.startAt);
-    const prompt = `أنت مساعد لمجموعة دراجات هوائية في الإمارات اسمها يلا كرو. اكتب بالعربي الخليجي البسيط 6 نقاط قصيرة لتجهيز هذه الطلعة: الماء والتغذية حسب حرارة الإمارات ووقت الانطلاق، التجهيزات، تقسيم مجموعات السرعة، والسلامة على الطريق. نص عادي بدون تنسيق Markdown، كل نقطة في سطر يبدأ بـ «•».
+    const run = sportOf(r) === "run";
+    const prompt = `You help a UAE ${run ? "running" : "cycling"} group called Yalla Crew. Write 6 short bullet points to prepare for this ${run ? "run" : "ride"}: water and fuelling for UAE heat at this start time, gear, splitting into ${run ? "pace" : "speed"} groups, and road safety. Reply in ${t("aiLang")}. Plain text, no Markdown, each point on its own line starting with "•".
 
-الطلعة: ${r.title}
-الإمارة: ${r.emirate}
-نقطة التجمع: ${r.meetPoint}
-الموعد: ${fmtDate.format(start)} الساعة ${fmtTime.format(start)}
-المسافة: ${r.distanceKm} كم، متوسط السرعة ${r.paceKmh || "غير محدد"} كم/س، الصعود ${r.gainM || "غير معروف"} م
-المستوى: ${r.level}
-ملاحظات المنظم: ${r.notes || "لا يوجد"}`;
+Sport: ${run ? "running" : "cycling"}
+Title: ${txt(r, "title")}
+Emirate: ${I18N.en["em_" + r.emirate]}
+Meeting point: ${txt(r, "meet") ?? r.meetPoint}
+When: ${start.toString()}
+Distance: ${r.distanceKm} km; ${run ? `pace ${r.paceMinKm || "not set"} min/km` : `average speed ${r.paceKmh || "not set"} km/h`}; climb ${r.gainM || "unknown"} m
+Level: ${I18N.en["lvl_" + r.level]}
+Organiser notes: ${txt(r, "notes") || "none"}`;
     try {
       const { text } = await sample(prompt, { modelTier: "quick", onText: ({ text }) => {
         state.ai[r.id] = text;
@@ -533,31 +906,157 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       } });
       state.ai[r.id] = text;
     } catch (e) {
-      if (e.code === "not_granted" || e.code === "sampling_disabled" || e.code === "capability_disabled") { sample = null; delete state.ai[r.id]; }
-      else state.ai[r.id] = e.text || (e.code === "rate_limited" ? "وصلت الحد المسموح، جرّب بعد شوي." : "ما وصل رد المساعد، جرّب مرة ثانية.");
+      if (["not_granted", "sampling_disabled", "capability_disabled", "not_declared"].includes(e.code)) { sample = null; delete state.ai[r.id]; }
+      else state.ai[r.id] = e.text || t(e.code === "rate_limited" ? "rateLimit" : "aiFail");
     }
-    render();
+    renderRides();
+  }
+
+  // ---------- Market ----------
+  function waDigits(phone) {
+    let d = String(phone || "").replace(/\D/g, "");
+    if (d.startsWith("00")) d = d.slice(2);
+    if (d.length === 10 && d.startsWith("05")) d = "971" + d.slice(1);   // UAE mobile written locally
+    return d;
+  }
+  function visibleListings() {
+    let list = state.mode === "live" ? state.listings : EXAMPLE_ITEMS;
+    const m = state.m;
+    if (m.sport !== "all") list = list.filter((x) => x.sport === m.sport || x.sport === "both");
+    if (m.cat !== "all") list = list.filter((x) => x.category === m.cat);
+    if (m.q) { const q = m.q.toLowerCase(); list = list.filter((x) => (txt(x, "title") + " " + (txt(x, "desc") || "")).toLowerCase().includes(q)); }
+    return list.slice().sort((a, b) => (a.sold ? 1 : 0) - (b.sold ? 1 : 0) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  }
+  function itemCard(x) {
+    const mine = state.mode === "live" && x.sellerId && x.sellerId === state.me;
+    const photo = x.photo ? `<img src="/_blob/${esc(x.photo)}" alt="${esc(txt(x, "title"))}" loading="lazy" data-ph>` : esc(t("noPhoto"));
+    const wa = waDigits(x.phone);
+    const sportCls = x.sport === "both" ? "both" : x.sport === "run" ? "run" : "bike";
+    const desc = txt(x, "desc");
+    return `<article class="item${x.sold ? " sold" : ""}" data-id="${esc(x.id)}">
+      <div class="ph">${photo}${x.sold ? `<span class="badge sold">${esc(t("sold"))}</span>` : x.example ? `<span class="badge example">${esc(t("example"))}</span>` : ""}</div>
+      <div class="body">
+        <div class="meta"><span class="pill ${sportCls}">${esc(t(sportCls))}</span><span class="pill">${esc(t("cat_" + x.category))}</span></div>
+        <h3>${esc(txt(x, "title"))}</h3>
+        <div class="price">${esc(Number(x.price).toLocaleString(I18N[lang].locale))} <small>${esc(t("aed"))}</small></div>
+        <div class="meta"><span>${esc(t("cond_" + x.condition))}</span><span>${esc(t("em_" + x.emirate))}</span></div>
+        ${desc ? `<p class="desc">${esc(desc)}</p>` : ""}
+        ${x.sold ? "" : `<div class="contact"><span class="num">${esc(x.phone)}</span>
+          <button type="button" data-act="copynum">${esc(t("copyNum"))}</button>
+          ${wa.length >= 8 && !x.example ? `<a href="https://wa.me/${wa}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a>` : ""}</div>`}
+        ${mine ? `<div class="actions">
+          <button type="button" class="ghost" data-act="sold">${esc(t(x.sold ? "markAvail" : "markSold"))}</button>
+          <button type="button" class="link" data-act="delItem">${esc(t("delAd"))}</button></div>` : ""}
+      </div>
+    </article>`;
+  }
+  function renderMarket() {
+    $("#mFilters").innerHTML = chips(["all", "bike", "run"], state.m.sport, "data-f");
+    const list = visibleListings();
+    $("#market").innerHTML = list.map(itemCard).join("") ||
+      (state.mode === "live" && state.listings.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
+    for (const img of document.querySelectorAll("#market img[data-ph]")) img.addEventListener("error", () => { img.src = PH; }, { once: true });
+  }
+
+  function render() {
+    renderStatus();
+    $("#tab-rides").hidden = state.tab !== "rides";
+    $("#tab-market").hidden = state.tab !== "market";
+    for (const b of document.querySelectorAll("[data-tab]")) b.setAttribute("aria-selected", b.dataset.tab === state.tab);
+    if (state.tab === "rides") renderRides(); else renderMarket();
   }
 
   function flash(msg) { const el = $("#status"); el.textContent = msg; el.hidden = false; }
 
-  // Events
-  $("#filters").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-f]"); if (!b) return;
-    state.filter = b.dataset.f; render();
+  // ---------- Language ----------
+  function options(sel, keys, prefix, keep) {
+    const el = $(sel), cur = keep ? el.value : null;
+    el.innerHTML = keys.map((k) => `<option value="${k}">${esc(t(prefix + k))}</option>`).join("");
+    if (cur && keys.includes(cur)) el.value = cur;
+  }
+  function applyLang() {
+    const app = $("#app"), L = I18N[lang];
+    app.lang = lang; app.dir = L.dir;
+    fmtDate = new Intl.DateTimeFormat(L.locale, { weekday: "long", day: "numeric", month: "long" });
+    fmtTime = new Intl.DateTimeFormat(L.locale, { hour: "numeric", minute: "2-digit" });
+    for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+    for (const el of document.querySelectorAll("[data-i18n-ph]")) el.placeholder = t(el.dataset.i18nPh);
+    for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    for (const b of document.querySelectorAll("[data-lang]")) b.setAttribute("aria-pressed", b.dataset.lang === lang);
+    const efv = $("#emirateFilter").value || "all";
+    $("#emirateFilter").innerHTML = `<option value="all">${esc(t("allEmirates"))}</option>` + EMIRATES.map((e) => `<option value="${e}">${esc(t("em_" + e))}</option>`).join("");
+    $("#emirateFilter").value = efv;
+    const mcv = $("#mCat").value || "all";
+    $("#mCat").innerHTML = `<option value="all">${esc(t("allCats"))}</option>` + CATS.map((c) => `<option value="${c}">${esc(t("cat_" + c))}</option>`).join("");
+    $("#mCat").value = mcv;
+    options("#f-sport", ["bike", "run"], "", true);
+    options("#s-sport", ["bike", "run", "both"], "", true);
+    options("#f-emirate", EMIRATES, "em_", true);
+    options("#s-emirate", EMIRATES, "em_", true);
+    options("#f-level", LEVELS, "lvl_", true);
+    options("#s-cat", CATS, "cat_", true);
+    options("#s-cond", CONDS, "cond_", true);
+    syncPace(false);
+    render();
+  }
+  $("#langs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-lang]"); if (!b) return;
+    lang = b.dataset.lang;
+    try { localStorage.setItem("yc-lang", lang); } catch {}
+    applyLang();
   });
+
+  // ---------- Events ----------
+  for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => { state.tab = b.dataset.tab; render(); });
+
+  $("#filters").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f], [data-mine]"); if (!b) return;
+    if (b.hasAttribute("data-mine")) state.mine = !state.mine; else state.sport = b.dataset.f;
+    renderRides();
+  });
+  $("#emirateFilter").addEventListener("change", (e) => { state.emirate = e.target.value; renderRides(); });
   $("#rides").addEventListener("click", (e) => {
     const b = e.target.closest("[data-act]"); if (!b) return;
     const id = b.closest(".ride").dataset.id;
-    const r = state.mode === "live" ? state.rides.find((x) => x.id === id) : EXAMPLE;
+    const r = (state.mode === "live" ? state.rides : EXAMPLES).find((x) => x.id === id);
     if (b.dataset.act === "join") toggleJoin(id);
-    else if (b.dataset.act === "del") deleteRide(id, b);
-    else if (b.dataset.act === "link") copyLink(id, b);
+    else if (b.dataset.act === "del") confirmThen(b, () => db.doc("rides/" + id).delete());
+    else if (b.dataset.act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
     else if (b.dataset.act === "ai" && r) askAi(r, b);
   });
 
+  $("#mFilters").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]"); if (!b) return;
+    state.m.sport = b.dataset.f; renderMarket();
+  });
+  $("#mCat").addEventListener("change", (e) => { state.m.cat = e.target.value; renderMarket(); });
+  $("#mSearch").addEventListener("input", (e) => { state.m.q = e.target.value.trim(); renderMarket(); });
+  $("#market").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const id = b.closest(".item").dataset.id;
+    const x = (state.mode === "live" ? state.listings : EXAMPLE_ITEMS).find((i) => i.id === id);
+    if (!x) return;
+    if (b.dataset.act === "copynum") copyText(x.phone, b, t("copiedNum"));
+    else if (b.dataset.act === "sold") {
+      b.disabled = true;
+      try { await db.doc("listings/" + id).update({ sold: !x.sold }); } catch { flash(t("errSave")); b.disabled = false; }
+    } else if (b.dataset.act === "delItem") confirmThen(b, async () => {
+      await db.doc("listings/" + id).delete();
+      if (x.photo && assets) assets.delete(x.photo).catch(() => {});
+    });
+  });
+
+  // Ride form
   const form = $("#addForm");
-  $("#f-emirate").innerHTML = EMIRATES.map((e) => `<option${e === "دبي" ? " selected" : ""}>${e}</option>`).join("");
+  function syncPace(reset = true) {
+    const pace = $("#f-pace"), run = $("#f-sport").value === "run";
+    $("#paceLbl").textContent = t(run ? "fPace" : "fSpeed");
+    $("#f-meet").placeholder = t(run ? "fMeetPh_run" : "fMeetPh_bike");
+    if (!reset) return;
+    if (run) { pace.min = 3; pace.max = 12; pace.step = 0.25; pace.value = 6; }
+    else { pace.min = 10; pace.max = 50; pace.step = 1; pace.value = 28; }
+  }
+  $("#f-sport").addEventListener("change", () => syncPace(true));
   $("#openForm").addEventListener("click", () => {
     form.hidden = false;
     if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
@@ -573,9 +1072,9 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
       $("#f-km").value = g.km;
       if (!$("#f-title").value && g.name) $("#f-title").value = g.name.slice(0, 80);
       info.className = "ok";
-      info.textContent = `تم: ${g.km} كم · ${g.gain} م صعود · ${g.route.length} نقطة على الخريطة`;
+      info.textContent = t("gpxOk", { km: g.km, gain: g.gain, n: g.route.length });
     } catch (err) {
-      state.gpx = null; info.className = "err"; info.textContent = err.message || "ما قدرت أقرأ الملف.";
+      state.gpx = null; info.className = "err"; info.textContent = err.message || t("gpxBad");
     }
   }
   $("#f-gpx").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) takeGpx(f); });
@@ -584,50 +1083,92 @@ footer { color: var(--muted); font-size: 12px; padding-block: 0 32px; }
   drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
   drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("drag"); const f = e.dataTransfer.files[0]; if (f) takeGpx(f); });
 
+  const writeErr = (ex) => t(ex.code === "invalid_argument" ? "errPerm" : ex.code === "quota_exceeded" ? "errQuota" : "errSave");
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const err = $("#formErr");
     const title = $("#f-title").value.trim(), meet = $("#f-meet").value.trim();
     const km = parseFloat($("#f-km").value), pace = parseFloat($("#f-pace").value), max = parseInt($("#f-max").value, 10);
     const date = $("#f-date").value, time = $("#f-time").value;
-    if (!title || !meet || !date || !time) { err.textContent = "عبّ الاسم ونقطة التجمّع والتاريخ والوقت."; return; }
-    if (!(km > 0)) { err.textContent = "حط المسافة بالكيلومتر، أو ارفع ملف GPX."; return; }
+    if (!title || !meet || !date || !time) { err.textContent = t("errRequired"); return; }
+    if (!(km > 0)) { err.textContent = t("errKm"); return; }
     const startAt = new Date(`${date}T${time}`);
-    if (isNaN(startAt)) { err.textContent = "التاريخ أو الوقت مو صحيح."; return; }
+    if (isNaN(startAt)) { err.textContent = t("errDate"); return; }
     err.textContent = "";
     const btn = $("#saveBtn"); btn.disabled = true;
     try {
+      const sport = $("#f-sport").value;
       await db.collection("rides").add({
-        title, meetPoint: meet, emirate: $("#f-emirate").value, level: $("#f-level").value,
+        sport, title, meetPoint: meet, emirate: $("#f-emirate").value, level: $("#f-level").value,
         startAt: startAt.toISOString(), distanceKm: Math.round(km * 10) / 10,
-        paceKmh: pace > 0 ? Math.round(pace) : null, gainM: state.gpx?.gain ?? null,
-        maxRiders: max >= 2 ? max : null,
+        paceKmh: sport === "bike" && pace > 0 ? Math.round(pace) : null,
+        paceMinKm: sport === "run" && pace > 0 ? Math.round(pace * 4) / 4 : null,
+        gainM: state.gpx?.gain ?? null, maxRiders: max >= 2 ? max : null,
         notes: $("#f-notes").value.trim(), route: state.gpx?.route ?? [],
         createdBy: state.me, createdAt: new Date().toISOString()
       });
-      form.reset(); state.gpx = null; $("#gpxInfo").textContent = ""; form.hidden = true;
-    } catch (ex) {
-      err.textContent = ex.code === "invalid_argument" ? "ما عندك صلاحية تنشر طلعات." : ex.code === "quota_exceeded" ? "وصلت قاعدة البيانات حدها، احذف طلعات قديمة." : "ما انحفظت الطلعة، جرّب مرة ثانية.";
-    } finally { btn.disabled = false; }
+      form.reset(); syncPace(true); state.gpx = null; $("#gpxInfo").textContent = ""; form.hidden = true;
+    } catch (ex) { err.textContent = writeErr(ex); }
+    finally { btn.disabled = false; }
   });
 
-  // Boot
-  render();
+  // Sell form
+  const sellForm = $("#sellForm");
+  $("#openSell").addEventListener("click", () => {
+    sellForm.hidden = false;
+    $("#s-photo-wrap").hidden = !assets; $("#s-photo-off").hidden = !!assets;
+    $("#s-title").focus();
+  });
+  $("#cancelSell").addEventListener("click", () => { sellForm.hidden = true; $("#sellErr").textContent = ""; });
+  sellForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#sellErr");
+    const title = $("#s-title").value.trim(), phone = $("#s-phone").value.trim(), price = parseFloat($("#s-price").value);
+    if (!title || !phone || !(price >= 0)) { err.textContent = t("errSellReq"); return; }
+    if (waDigits(phone).length < 8 || waDigits(phone).length > 15) { err.textContent = t("errPhone"); return; }
+    err.textContent = "";
+    const btn = $("#sellBtn"); btn.disabled = true;
+    let photo = null;
+    try {
+      const file = $("#s-photo").files[0];
+      if (file && assets) {
+        err.textContent = t("uploading");
+        try { photo = (await assets.upload(file)).id; err.textContent = ""; }
+        catch { err.textContent = t("errPhoto"); btn.disabled = false; return; }
+      }
+      await db.collection("listings").add({
+        title, sport: $("#s-sport").value, category: $("#s-cat").value, condition: $("#s-cond").value,
+        price: Math.round(price), emirate: $("#s-emirate").value, phone,
+        description: $("#s-desc").value.trim(), photo, sold: false,
+        sellerId: state.me, createdAt: new Date().toISOString()
+      });
+      sellForm.reset(); sellForm.hidden = true;
+    } catch (ex) { err.textContent = writeErr(ex); }
+    finally { btn.disabled = false; }
+  });
+
+  // ---------- Boot ----------
+  applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("sample")]);
+    [db, user, sample, assets] = await Promise.all(["db", "user", "sample", "assets"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;
     state.canWrite = cw !== false && !!state.me;
-    const fail = (e) => { if (e.code === "revoked") { db = null; state.mode = "example"; render(); } else flash("انقطع الاتصال بالطلعات، حدّث الصفحة."); };
+    const fail = (e) => { if (e.code === "revoked") { db = null; state.mode = "example"; render(); } else flash(t("disconnected")); };
     db.collection("rides").orderBy("startAt").onSnapshot((s) => {
       state.rides = s.docs.map((d) => ({ id: d.id, ...d.data() }));
       state.mode = "live"; render();
     }, fail);
     db.collection("joins").onSnapshot((s) => {
       state.joins = s.docs.map((d) => ({ id: d.id, ...d.data() }));
-      render();
+      if (state.tab === "rides") renderRides();
+    }, fail);
+    db.collection("listings").onSnapshot((s) => {
+      state.listings = s.docs.map((d) => ({ id: d.id, ...d.data(), desc: d.data().description }));
+      if (state.mode === "live") render();
     }, fail);
   })();
 })();
