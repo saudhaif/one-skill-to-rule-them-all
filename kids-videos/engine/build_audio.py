@@ -299,14 +299,14 @@ ScriptType: v4.00+
 PlayResX: 1920
 PlayResY: 1080
 WrapStyle: 0
+; Encoding -1 lets libass pick right-to-left for Arabic, so punctuation lands at the line end
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,Noto Sans Arabic,66,&H00FFFFFF,&H00FFFFFF,&H00301A08,&H64000000,1,0,0,0,100,100,0,0,1,6,2,2,80,80,46,1
-Style: Song,Noto Kufi Arabic,74,&H0000E6FF,&H00FFFFFF,&H006B2A8C,&H64000000,1,0,0,0,100,100,0,0,1,7,3,2,80,80,50,1
-Style: Title,Noto Kufi Arabic,132,&H0030E8FF,&H00FFFFFF,&H00104AC8,&H96000000,1,0,0,0,100,100,0,0,1,12,6,5,60,60,0,1
-Style: Big,Noto Kufi Arabic,300,&H0000D7FF,&H00FFFFFF,&H00B84A12,&H96000000,1,0,0,0,100,100,0,0,1,14,6,8,0,0,40,1
-Style: Speaker,Noto Kufi Arabic,40,&H00FFFFFF,&H00FFFFFF,&H00B85A1F,&H00000000,1,0,0,0,100,100,0,0,1,5,0,2,80,80,150,1
+Style: Sub,Noto Sans Arabic,66,&H00FFFFFF,&H00FFFFFF,&H00301A08,&H64000000,1,0,0,0,100,100,0,0,1,6,2,2,80,80,46,-1
+Style: Song,Noto Kufi Arabic,74,&H0000E6FF,&H00FFFFFF,&H006B2A8C,&H64000000,1,0,0,0,100,100,0,0,1,7,3,2,80,80,50,-1
+Style: Title,Noto Kufi Arabic,132,&H0030E8FF,&H00FFFFFF,&H00104AC8,&H96000000,1,0,0,0,100,100,0,0,1,12,6,5,60,60,0,-1
+Style: Big,Noto Kufi Arabic,300,&H0000D7FF,&H00FFFFFF,&H00B84A12,&H96000000,1,0,0,0,100,100,0,0,1,14,6,8,0,0,40,-1
 """
 
 
@@ -341,7 +341,6 @@ def main(ep_dir):
                 vox_clips.append((clip, t))
                 ev["env"] = envelope(clip)
                 ev["dur"] = max(d + LINE_GAP, b.get("dur", 0))
-                ass.append(f"Dialogue: 1,{ass_time(t)},{ass_time(t + d + 0.15)},Speaker,,0,0,0,,{voices[b['say']]['name']}")
                 ass.append(f"Dialogue: 0,{ass_time(t)},{ass_time(t + d + 0.15)},Sub,,0,0,0,,{plain(b['tts'])}")
             elif "song" in b:
                 sg = story["songs"][b["song"]]
@@ -359,7 +358,7 @@ def main(ep_dir):
                 ev["dur"] = b["dur"]
                 sfx_clips.append((sfx("sting"), t, 0.9))
                 ass.append(f"Dialogue: 2,{ass_time(t)},{ass_time(t + b['dur'])},Title,,0,0,0,,"
-                           "{\\fscx20\\fscy20\\t(0,350,\\fscx112\\fscy112)\\t(350,520,\\fscx100\\fscy100)\\fad(0,300)}"
+                           "{\\pos(960,190)\\fscx20\\fscy20\\t(0,350,\\fscx112\\fscy112)\\t(350,520,\\fscx100\\fscy100)\\fad(0,300)}"
                            + b["title"])
             else:
                 ev["dur"] = b.get("dur", b.get("pause", 0))
