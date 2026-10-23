@@ -22,6 +22,8 @@ import wave
 
 import numpy as np
 
+import khaleeji as kh
+
 SR = 44100
 FPS = 25
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -180,43 +182,10 @@ def t_axis(dur):
     return np.arange(int(dur * SR)) / SR
 
 
-def marimba(f, dur=0.6, vel=1.0):
-    t = t_axis(dur)
-    a = np.minimum(1, t / 0.004)
-    x = np.sin(2 * np.pi * f * t) * np.exp(-t * 7) + 0.35 * np.sin(2 * np.pi * 3.98 * f * t) * np.exp(-t * 28)
-    return x * a * vel * 0.5
-
-
 def bell(f, dur=1.2, vel=1.0):
     t = t_axis(dur)
     x = (np.sin(2 * np.pi * f * t) + 0.4 * np.sin(2 * np.pi * 2.76 * f * t) * np.exp(-t * 3)) * np.exp(-t * 3.5)
     return x * np.minimum(1, t / 0.002) * vel * 0.3
-
-
-def bass(f, dur=0.45, vel=1.0):
-    t = t_axis(dur)
-    x = np.sin(2 * np.pi * f * t) + 0.25 * np.sin(4 * np.pi * f * t)
-    return x * np.exp(-t * 4) * np.minimum(1, t / 0.01) * vel * 0.45
-
-
-def kick():
-    t = t_axis(0.25)
-    f = 50 + 70 * np.exp(-t * 30)
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 14) * 0.6
-
-
-def clap():
-    t = t_axis(0.18)
-    n = rng.standard_normal(len(t))
-    n = np.diff(n, prepend=0)  # brighten
-    env = np.exp(-t * 35) + 0.6 * np.exp(-np.maximum(0, t - 0.012) * 40) * (t > 0.012)
-    return n * env * 0.18
-
-
-def shaker():
-    t = t_axis(0.07)
-    n = np.diff(rng.standard_normal(len(t)), prepend=0)
-    return n * np.exp(-t * 60) * 0.05
 
 
 # ---------- sound effects ----------
@@ -248,63 +217,75 @@ def sfx(name):
         n = np.convolve(rng.standard_normal(len(t)), np.ones(60) / 60, "same")
         return n * np.sin(np.pi * t / 3.0) ** 2 * 0.8
     if name == "sting":
-        out = np.zeros(int(2.6 * SR))
-        for i, n in enumerate(["C5", "E5", "G5", "C6"]):
-            mix_into(out, marimba(hz(n), 1.2), i * 0.11)
-        mix_into(out, bell(hz("C7"), 2.0, 0.7), 0.44)
-        mix_into(out, bell(hz("G6"), 2.0, 0.5), 0.5)
-        return out
+        # oud flourish up the Bayati scale, landed by the جحلة and a row of claps
+        out = np.zeros(int(2.8 * SR))
+        for i, n in enumerate(["D3", "F3", "G3", "A3", "D4"]):
+            mix_into(out, kh.oud(kh.hz(n), 1.4, 1.0), i * 0.09)
+        mix_into(out, kh.jahla(1.0), 0.45)
+        mix_into(out, kh.clap_row(1.0), 0.45)
+        mix_into(out, kh.oud(kh.hz("D2"), 2.0, 1.2), 0.45)
+        return out * 1.3
+    if name in ("nahma", "nahma_long"):
+        # the نهّام's «يا مال»; a real recording in recordings/ replaces the synthesis
+        rec = RECORDED_DIR and os.path.join(RECORDED_DIR, f"{name}.wav")
+        if rec and os.path.exists(rec):
+            return read_wav(rec)
+        return kh.sea_call(short=(name == "nahma"))
     raise ValueError(name)
 
 
 # ---------- music ----------
 
-CHORDS = {"C": ["C3", "E4", "G4", "C5"], "F": ["F2", "A4", "C5", "F5"], "G": ["G2", "B4", "D5", "G5"],
-          "Am": ["A2", "C5", "E5", "A5"]}
-
-# The hook: one bar of eighth-notes per lyric line ('-' = hold). Same tune every time — repetition is the point.
+# The hook: one bar of eighth-notes per lyric line ('-' = hold), in maqam Bayati on D (Eh = E half-flat).
+# Same tune every time — repetition is the point.
 HOOK = [
-    "E5 G5 G5 - A5 G5 E5 -",
-    "D5 E5 G5 E5 D5 C5 D5 -",
-    "E5 G5 A5 G5 E5 D5 C5 -",
-    "D5 E5 G5 A5 G5 E5 C5 -",
+    "A3 A3 G3 - F3 G3 A3 -",
+    "Bb3 A3 G3 F3 Eh3 F3 D3 -",
+    "D3 F3 G3 A3 Bb3 A3 G3 -",
+    "A3 G3 F3 Eh3 F3 Eh3 D3 -",
 ]
-HOOK_CHORDS = ["C", "G", "F", "C"]
 PASSES = 2
 
 
-def drums_bar(out, start, full=True):
-    for b in range(4):
-        t = start + b * BEAT
-        if full and b in (0, 2):
-            mix_into(out, kick(), t)
-        if b in (1, 3):
-            mix_into(out, clap(), t)
-        for s in range(2):
-            mix_into(out, shaker(), t + s * BEAT / 2)
+def groove_bar(out, start, full=True):
+    """Khaleeji sea groove: جحلة on the downbeats, مرواس filling, rows of claps on the off-beats."""
+    for beat in (0, 1.5) if full else (0,):
+        mix_into(out, kh.jahla(1.0 if beat == 0 else 0.7), start + beat * BEAT)
+    for beat in (0.5, 2.5, 3.0, 3.5):
+        mix_into(out, kh.mirwas(0.8), start + beat * BEAT)
+    for beat in ((1.0, 2.5, 3.0) if full else (1.0, 3.0)):
+        mix_into(out, kh.clap_row(1.0), start + beat * BEAT)
+    # low oud pedal on the tonic
+    mix_into(out, kh.oud(kh.hz("D2"), BEAT * 2, 0.9), start)
+    mix_into(out, kh.oud(kh.hz("A2"), BEAT * 2, 0.6), start + 2 * BEAT)
 
 
-def chord_bar(out, start, chord, vel=1.0):
-    notes = CHORDS[chord]
-    mix_into(out, bass(hz(notes[0]), BEAT * 1.8, vel), start)
-    mix_into(out, bass(hz(notes[0]), BEAT * 1.8, vel * 0.8), start + 2 * BEAT)
-    for b in range(4):
-        for n in notes[1:]:
-            mix_into(out, marimba(hz(n), 0.4, 0.22 * vel), start + b * BEAT + BEAT / 2)
+_HUM = None
+
+
+def hum_loop(dur):
+    """Sailors' humming drone, synthesised once and looped with crossfades."""
+    global _HUM
+    if _HUM is None:
+        _HUM = kh.hum(8.0, gain=0.35)
+    out = np.zeros(int((dur + 8) * SR))
+    step = 6.5
+    k = 0
+    while k * step < dur:
+        mix_into(out, _HUM, k * step)
+        k += 1
+    t = t_axis(dur)
+    return out[: len(t)] * np.minimum(1, np.minimum(t / 1.0, (dur - t) / 1.0))
 
 
 def bed(dur):
-    """Soft background loop under dialogue: gentle marimba arpeggios, no drums."""
-    out = np.zeros(int((dur + 2) * SR))
-    prog = ["C", "Am", "F", "G"]
-    bar = 0
-    while bar * BAR < dur:
-        notes = CHORDS[prog[bar % 4]]
-        pattern = [notes[1], notes[2], notes[3], notes[2]]
-        for b in range(4):
-            mix_into(out, marimba(hz(pattern[b]), 0.5, 0.5), bar * BAR + b * BEAT)
-        mix_into(out, bass(hz(notes[0]), BAR * 0.9, 0.5), bar * BAR)
-        bar += 1
+    """Soft background under dialogue: the sailors' hum with a slow oud phrase in Bayati."""
+    out = hum_loop(dur) * 0.6
+    phrase = ["D3", "A3", "F3", "G3", "A3", "G3", "F3", "Eh3"]
+    k = 0
+    while k * 2 * BEAT < dur - 1:
+        mix_into(out, kh.oud(kh.hz(phrase[k % len(phrase)]), 1.6, 0.7), k * 2 * BEAT)
+        k += 1
     t = t_axis(dur)
     fade = np.minimum(1, np.minimum(t / 0.5, (dur - t) / 0.5))
     return out[: len(t)] * fade
@@ -317,18 +298,16 @@ def song(name, lines, cache_dir, voices):
     music = np.zeros(int((total + 2) * SR))
     vox = np.zeros_like(music)
     timings = []
-    drums_bar(music, 0, full=False)
-    chord_bar(music, 0, "C", 0.8)
+    groove_bar(music, 0, full=False)
     target = 0.9 * BAR
     for p in range(PASSES):
         for i, line in enumerate(lines):
             start = BAR * (1 + p * len(lines) + i)
-            drums_bar(music, start)
-            chord_bar(music, start, HOOK_CHORDS[i % len(HOOK_CHORDS)])
+            groove_bar(music, start)
             for k, n in enumerate(HOOK[i % len(HOOK)].split()):
                 if n != "-":
-                    mix_into(music, marimba(hz(n), 0.5, 0.75), start + k * BEAT / 2)
-                    mix_into(music, bell(hz(n) * 2, 0.6, 0.18), start + k * BEAT / 2)
+                    mix_into(music, kh.oud(kh.hz(n), 0.7, 1.1), start + k * BEAT / 2)
+                    mix_into(music, kh.oud(kh.hz(n[:-1] + str(int(n[-1]) + 1)), 0.5, 0.35), start + k * BEAT / 2)
             # a boy and a girl voice together, nudged to fit the bar without sounding slowed down
             for spk, delay in (("H", 0.0), ("M", 0.015)):
                 lid = f"song-{name}-{i + 1}-{spk}"
@@ -337,10 +316,12 @@ def song(name, lines, cache_dir, voices):
                 mix_into(vox, synth_voice(line, voices[spk], cache_dir, tempo=tempo, line_id=lid), start + delay, 0.75)
             timings.append({"start": start, "dur": target, "text": line})
     end = BAR * (1 + PASSES * len(lines))
-    drums_bar(music, end)
-    chord_bar(music, end, "C")
-    mix_into(music, bell(hz("C6"), 2.0, 0.8), end + BAR * 0.5)
+    groove_bar(music, end)
+    mix_into(music, kh.jahla(1.2), end + BAR)
+    mix_into(music, kh.clap_row(1.2), end + BAR)
+    mix_into(music, kh.oud(kh.hz("D3"), 2.0, 1.2), end + BAR)
     n = int(total * SR)
+    mix_into(music, hum_loop(total) * 0.35, 0.0)
     # a real sung take (recorded over build/guide-<song>.wav) replaces the chanted chorus
     sung = RECORDED_DIR and os.path.join(RECORDED_DIR, f"song-{name}.wav")
     if sung and os.path.exists(sung):

@@ -7,12 +7,12 @@ burned-in Arabic subtitles.
 
 | Episode | Title | Teaches | Length |
 | --- | --- | --- | --- |
-| 01 | زعفران يبحث عن ماما (Zafran looks for Mama) | counting to 3, big vs small, helping others | ~3:50 |
+| 01 | زعفران يبحث عن ماما (Zafran looks for Mama) | counting to 3, big vs small, helping others | ~4:00 |
 
 ## Build an episode
 
 ```bash
-pip install piper-tts pycairo numpy        # plus ffmpeg (with libass + rubberband) and Arabic fonts:
+pip install piper-tts pycairo numpy scipy        # plus ffmpeg (with libass + rubberband) and Arabic fonts:
 apt-get install ffmpeg fonts-noto-core     # Noto Sans Arabic / Noto Kufi Arabic
 ./fetch-voices.sh                          # Arabic neural voices into .models/
 python3 engine/build_audio.py episodes/01-zafran     # voices, music, timeline, subtitles, recording sheet
@@ -73,6 +73,26 @@ Sources:
 
 Narration and dialogue are in simple فصحى (what the Arabic voices pronounce best), with Emirati words where a child
 would hear them at home.
+
+## Music: النهمة
+
+The score is built on the Gulf sea songs of the pearl-diving era (`engine/khaleeji.py`). In those songs the
+**نهّام** sang a free, ornamented melody over the sailors' humming, clapping and drums. Its «يامال» expresses
+longing for the family left on shore, which mirrors Zafran calling for his mother.
+
+- **Opening and ending signature:** a synthesised نهّام singing «يا مال» in maqam Bayati (with its half-flat second)
+  over the sailors' hum.
+- **Under dialogue:** the hum, very soft, with a slow oud phrase.
+- **Songs:** oud melody in Bayati, the جحلة (clay pot drum) and مرواس, and rows of claps.
+
+This is a synthesised evocation, not real نهمة. For the real channel, record a نهّام (heritage troupes and
+Emirati maritime-arts performers keep the tradition alive) and drop the takes in as `recordings/nahma.wav`
+(opening) and `recordings/nahma_long.wav` (ending). They replace the synthesis automatically.
+
+Background: [الجزيرة: النهمة فن خليجي](https://www.aljazeera.net/news/cultureandart/2019/3/13/فن-النهمة-استعادة-تاريخية-زمن-الغوص-اللؤلؤ-الخليج),
+[Abu Dhabi Culture: Al Nahma](https://abudhabiculture.ae/en/cultural-resources/learning-resources/performing-arts/al-nahma),
+[Smithsonian: pearl diving music](https://festival.si.edu/blog/pearl-diving-music),
+[Khaleej Times: UAE sea chants](https://www.khaleejtimes.com/uae/sea-chants-sharjah-maritime-museum).
 
 ## Voices
 
