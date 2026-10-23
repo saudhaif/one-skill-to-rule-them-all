@@ -1,11 +1,15 @@
 """Build an episode's soundtrack, timeline and subtitles from its story.json.
 
-Usage: python3 engine/build_audio.py episodes/01-zafran
+Usage: python3 engine/build_audio.py episodes/01-zafran [--voices piper|google|elevenlabs]
+
+Any <episode>/recordings/<line id>.wav (ids listed in build/recording-sheet.md) replaces that synthetic line,
+so human voice actors can be dropped in line by line.
 
 Writes into <episode>/build/:
   audio.wav      final mix (voices + music + sound effects)
   timeline.json  every scene and beat with start/duration, plus mouth envelopes
   subs.ass       Arabic subtitles, song karaoke, titles and big numbers
+  recording-sheet.md, guide-<song>.wav   everything a voice actor needs
 """
 import hashlib
 import json
@@ -61,20 +65,82 @@ def mix_into(track, clip, start, gain=1.0):
 
 # ---------- voices ----------
 
-def synth_voice(text, voice, cache_dir, tempo=1.0):
-    """Arabic TTS with piper, then pitch/tempo shaping with rubberband. Cached by content."""
-    key = hashlib.sha1(json.dumps([text, voice, tempo], ensure_ascii=False).encode()).hexdigest()[:16]
+PROVIDER = "piper"     # piper | google | elevenlabs — set with --voices
+RECORDED_DIR = None    # <episode>/recordings: a <line id>.wav there replaces the synthetic line
+
+
+def _post_json(url, body, headers):
+    import ssl
+    import urllib.error
+    import urllib.request
+    ca = os.environ.get("SSL_CERT_FILE") or os.environ.get("REQUESTS_CA_BUNDLE")
+    req = urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json", **headers})
+    try:
+        with urllib.request.urlopen(req, context=ssl.create_default_context(cafile=ca), timeout=120) as r:
+            return r.read()
+    except urllib.error.HTTPError as e:
+        sys.exit(f"{url.split('?')[0]} -> HTTP {e.code}: {e.read()[:400].decode(errors='replace')}")
+
+
+def tts_piper(text, voice, raw):
+    subprocess.run([sys.executable, "-m", "piper", "-m", MODELS[voice["model"]], "-f", raw,
+                    "--length-scale", str(1.0 / voice.get("speed", 1.0))],
+                   input=text.encode(), capture_output=True, check=True)
+
+
+def tts_google(text, voice, raw):
+    """Google Cloud Text-to-Speech (Chirp 3 HD Arabic voices). Needs GOOGLE_TTS_API_KEY."""
+    import base64
+    key = os.environ.get("GOOGLE_TTS_API_KEY") or sys.exit("GOOGLE_TTS_API_KEY is not set")
+    g = voice["google"]
+    body = {"input": {"text": text},
+            "voice": {"languageCode": g.get("language", "ar-XA"), "name": g["name"]},
+            "audioConfig": {"audioEncoding": "LINEAR16", "sampleRateHertz": SR, "speakingRate": g.get("rate", 1.0)}}
+    data = json.loads(_post_json(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={key}", body, {}))
+    with open(raw, "wb") as f:
+        f.write(base64.b64decode(data["audioContent"]))
+
+
+def tts_elevenlabs(text, voice, raw):
+    """ElevenLabs multilingual voices. Needs ELEVENLABS_API_KEY and a voice_id per character."""
+    key = os.environ.get("ELEVENLABS_API_KEY") or sys.exit("ELEVENLABS_API_KEY is not set")
+    e = voice["elevenlabs"]
+    body = {"text": text, "model_id": e.get("model", "eleven_multilingual_v2"),
+            "voice_settings": {"stability": e.get("stability", 0.4), "similarity_boost": 0.8,
+                               "style": e.get("style", 0.45), "use_speaker_boost": True}}
+    audio = _post_json(f"https://api.elevenlabs.io/v1/text-to-speech/{e['voice_id']}?output_format=mp3_44100_128",
+                       body, {"xi-api-key": key, "Accept": "audio/mpeg"})
+    with open(raw + ".mp3", "wb") as f:
+        f.write(audio)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw + ".mp3", raw], check=True)
+    os.remove(raw + ".mp3")
+
+
+def synth_voice(text, voice, cache_dir, tempo=1.0, line_id=None):
+    """One spoken line: a human recording if present, else TTS from the chosen provider. Cached by content."""
+    recorded = line_id and RECORDED_DIR and os.path.join(RECORDED_DIR, line_id + ".wav")
+    if recorded and os.path.exists(recorded):
+        src_wav, pitch = recorded, 0.0
+    else:
+        # synthetic piper voices get pitch-shifted into children's voices; the realistic providers are left natural
+        settings = voice.get(PROVIDER, {}) if PROVIDER != "piper" else voice
+        pitch = settings.get("pitch", 0.0)
+        src_wav = None
+    key = hashlib.sha1(json.dumps([text, voice, tempo, PROVIDER, recorded and os.path.getmtime(recorded)
+                                   if recorded and os.path.exists(recorded) else None],
+                                  ensure_ascii=False).encode()).hexdigest()[:16]
     out = os.path.join(cache_dir, key + ".wav")
     if not os.path.exists(out):
         raw = out + ".raw.wav"
-        subprocess.run([sys.executable, "-m", "piper", "-m", MODELS[voice["model"]], "-f", raw,
-                        "--length-scale", str(1.0 / voice.get("speed", 1.0))],
-                       input=text.encode(), capture_output=True, check=True)
-        ratio = 2 ** (voice.get("pitch", 0) / 12.0)
+        if src_wav is None:
+            {"piper": tts_piper, "google": tts_google, "elevenlabs": tts_elevenlabs}[PROVIDER](text, voice, raw)
+            src_wav = raw
+        ratio = 2 ** (pitch / 12.0)
         filt = f"rubberband=pitch={ratio:.4f}:tempo={tempo:.4f}:formant=shifted,highpass=f=70"
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", filt, "-ar", str(SR), "-ac", "1", out],
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src_wav, "-af", filt, "-ar", str(SR), "-ac", "1", out],
                        check=True)
-        os.remove(raw)
+        if src_wav == raw:
+            os.remove(raw)
     x = read_wav(out)
     # trim silence, normalise loudness
     idx = np.where(np.abs(x) > 0.01)[0]
@@ -244,7 +310,7 @@ def bed(dur):
     return out[: len(t)] * fade
 
 
-def song(lines, cache_dir, voices):
+def song(name, lines, cache_dir, voices):
     """Intro bar, the verse sung twice (one bar per line), outro bar. A kids' chorus chants each line on the beat."""
     bars = 2 + PASSES * len(lines)
     total = bars * BAR
@@ -265,15 +331,21 @@ def song(lines, cache_dir, voices):
                     mix_into(music, bell(hz(n) * 2, 0.6, 0.18), start + k * BEAT / 2)
             # a boy and a girl voice together, nudged to fit the bar without sounding slowed down
             for spk, delay in (("H", 0.0), ("M", 0.015)):
-                base = synth_voice(line, voices[spk], cache_dir)
+                lid = f"song-{name}-{i + 1}-{spk}"
+                base = synth_voice(line, voices[spk], cache_dir, line_id=lid)
                 tempo = max(0.8, min(1.35, (len(base) / SR) / target))
-                mix_into(vox, synth_voice(line, voices[spk], cache_dir, tempo=tempo), start + delay, 0.75)
+                mix_into(vox, synth_voice(line, voices[spk], cache_dir, tempo=tempo, line_id=lid), start + delay, 0.75)
             timings.append({"start": start, "dur": target, "text": line})
     end = BAR * (1 + PASSES * len(lines))
     drums_bar(music, end)
     chord_bar(music, end, "C")
     mix_into(music, bell(hz("C6"), 2.0, 0.8), end + BAR * 0.5)
     n = int(total * SR)
+    # a real sung take (recorded over build/guide-<song>.wav) replaces the chanted chorus
+    sung = RECORDED_DIR and os.path.join(RECORDED_DIR, f"song-{name}.wav")
+    if sung and os.path.exists(sung):
+        vox = np.zeros_like(music)
+        mix_into(vox, read_wav(sung), 0.0)
     return music[:n], vox[:n], timings
 
 
@@ -320,6 +392,8 @@ def karaoke(text, dur):
 # ---------- main ----------
 
 def main(ep_dir):
+    global RECORDED_DIR
+    RECORDED_DIR = os.path.join(ep_dir, "recordings")
     story = json.load(open(os.path.join(ep_dir, "story.json")))
     build = os.path.join(ep_dir, "build")
     cache = os.path.join(build, "voices")
@@ -329,14 +403,17 @@ def main(ep_dir):
     t = 0.0
     events, scenes, ass = [], [], []
     vox_clips, music_clips, sfx_clips = [], [], []
+    sheet = []
     for sc in story["scenes"]:
         s_start = t
         beats = []
-        for b in sc["beats"]:
+        for bi, b in enumerate(sc["beats"]):
             ev = dict(b)
             ev["start"] = t
             if "say" in b:
-                clip = synth_voice(b["tts"], voices[b["say"]], cache)
+                lid = f"{sc['id']}-{bi + 1:02d}-{b['say']}"
+                sheet.append((lid, voices[b["say"]]["name"], b["tts"]))
+                clip = synth_voice(b["tts"], voices[b["say"]], cache, line_id=lid)
                 d = len(clip) / SR
                 vox_clips.append((clip, t))
                 ev["env"] = envelope(clip)
@@ -344,7 +421,9 @@ def main(ep_dir):
                 ass.append(f"Dialogue: 0,{ass_time(t)},{ass_time(t + d + 0.15)},Sub,,0,0,0,,{plain(b['tts'])}")
             elif "song" in b:
                 sg = story["songs"][b["song"]]
-                music, vox, timings = song(sg["lines"], cache, voices)
+                music, vox, timings = song(b["song"], sg["lines"], cache, voices)
+                write_wav(os.path.join(build, f"guide-{b['song']}.wav"), music * 0.8)
+                sheet.append((f"song-{b['song']}", "الكورال (غناء)", " / ".join(sg["lines"])))
                 music_clips.append((music, t, 0.55))
                 vox_clips.append((vox, t))
                 ev["dur"] = len(music) / SR
@@ -404,8 +483,19 @@ def main(ep_dir):
     with open(os.path.join(build, "subs.ass"), "w") as f:
         f.write(ASS_HEAD + "\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n")
         f.write("\n".join(ass) + "\n")
+    with open(os.path.join(build, "recording-sheet.md"), "w") as f:
+        f.write("# Recording sheet\n\nSave each take as `recordings/<file>.wav` in the episode folder, then rebuild.\n"
+                "Songs: sing the whole song over `build/guide-<song>.wav` (headphones) and save as `song-<song>.wav`.\n\n"
+                "| File | Character | Line |\n| --- | --- | --- |\n")
+        seen = set()
+        for lid, who, text in sheet:
+            if lid not in seen:
+                seen.add(lid)
+                f.write(f"| `{lid}.wav` | {who} | {text} |\n")
     print(f"audio {total:.1f}s, {len(scenes)} scenes, {sum(len(s['beats']) for s in scenes)} beats")
 
 
 if __name__ == "__main__":
+    if "--voices" in sys.argv:
+        PROVIDER = sys.argv[sys.argv.index("--voices") + 1]
     main(sys.argv[1])

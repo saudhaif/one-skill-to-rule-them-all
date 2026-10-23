@@ -15,7 +15,7 @@ burned-in Arabic subtitles.
 pip install piper-tts pycairo numpy        # plus ffmpeg (with libass + rubberband) and Arabic fonts:
 apt-get install ffmpeg fonts-noto-core     # Noto Sans Arabic / Noto Kufi Arabic
 ./fetch-voices.sh                          # Arabic neural voices into .models/
-python3 engine/build_audio.py episodes/01-zafran     # voices, music, timeline, subtitles
+python3 engine/build_audio.py episodes/01-zafran     # voices, music, timeline, subtitles, recording sheet
 python3 engine/render.py episodes/01-zafran          # -> episodes/01-zafran/build/01-zafran.mp4
 python3 engine/render.py episodes/01-zafran --frame 70   # one PNG preview at 70s
 ```
@@ -73,6 +73,44 @@ Sources:
 
 Narration and dialogue are in simple فصحى (what the Arabic voices pronounce best), with Emirati words where a child
 would hear them at home.
+
+## Voices
+
+`build_audio.py` takes voices from three places, best first:
+
+1. **Human recordings (the goal).** Every build writes `build/recording-sheet.md` with one row per line (file name,
+   character, fully voweled text). An actor saves each take as `episodes/<ep>/recordings/<file>.wav` and the
+   rebuild uses it in place of the synthetic line. Lip-sync and timing follow the recording automatically.
+   Songs: a singer sings the whole song over `build/guide-<song>.wav` on headphones and saves it as
+   `recordings/song-<song>.wav`. That replaces the chanted chorus with real singing.
+2. **Realistic TTS.** `--voices google` (Google Chirp 3 HD Arabic, needs `GOOGLE_TTS_API_KEY`) or
+   `--voices elevenlabs` (needs `ELEVENLABS_API_KEY` and `api.elevenlabs.io` allowed in the environment's
+   network settings). Per-character voice names go under `"google"` / `"elevenlabs"` in each `voices` entry.
+3. **piper (default).** Free and offline, but robotic. Pilot only, not for a monetised channel (see licences below).
+
+**Casting the sound people asked for.** The wanted feel is the warm, funny Emirati character voices of
+«شعبية الكرتون» (أشحفان, voiced by سلطان الشاعر) and the warm Emirati singing of حسين الجسمي. Do **not** clone
+those voices with AI: copying a real person's voice without consent breaks YouTube's policies and their rights.
+Instead:
+- **Narrator and comic characters:** cast Emirati voice actors with that energy (theatre and dubbing actors in
+  Dubai, Sharjah and Abu Dhabi, or the voice artists who work on Emirati animation). Ask for natural Emirati
+  dialect and big comic expression.
+- **Songs:** an Emirati singer with a warm, open voice in the Khaleeji style, plus 2–3 children for the chorus.
+- Approaching the original artists for an official, paid collaboration is legitimate. Imitating them is not.
+- With real Emirati actors, the dialogue can move from simple فصحى into Emirati dialect, like «شعبية الكرتون».
+
+## Emirati content already on screen
+
+| Show | What it is | Audience | Note |
+| --- | --- | --- | --- |
+| [فريج (Freej)](https://en.wikipedia.org/wiki/Freej) | CGI series about four old Emirati women, by محمد سعيد حارب, since 2006 | Family | Proves the appetite for heritage, grandmothers and Emirati dialect |
+| [شعبية الكرتون](https://en.wikipedia.org/wiki/Shaabiat_Al_Cartoon) | 2D comedy on social issues, Sama Dubai, 18 seasons since 2006; أشحفان is one of its characters | Teens and adults | A Ramadan tradition; reported cancelled from Ramadan 2025 |
+| [مغامرات منصور](https://www.wam.ae/en/article/hszra75z-mansour-cartoon-reaches-new-milestone-with-over) | Emirati action-adventure series (Mubadala and Bidaya Media) | Ages ~6–12 | The YouTube benchmark: millions of subscribers and [2B+ reported views](https://www.zawya.com/en/life/culture/emirati-action-adventure-cartoon-series-mansour-is-going-global-in-new-avatar-jurgil9l) |
+| [Officer Mansour](https://gulfnews.com/uae/watch-officer-mansour-the-new-cartoon-series-by-dubai-police-promotes-child-safety-1.103974113) | Dubai Police child-safety cartoon | Children | Shows government appetite for educational Emirati animation |
+
+**Where خراريف يدّوه fits:** the big Emirati shows target older children or families. None of them is a preschool
+(ages 3–6) sing-along channel built on counting, songs and the traditional خروفة. That gap is this channel's lane.
+Mansour's scale shows that an Emirati identity can work on YouTube.
 
 ## Writing a new episode
 
