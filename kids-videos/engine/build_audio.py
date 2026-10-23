@@ -137,8 +137,15 @@ def synth_voice(text, voice, cache_dir, tempo=1.0, line_id=None):
         if src_wav is None:
             {"piper": tts_piper, "google": tts_google, "elevenlabs": tts_elevenlabs}[PROVIDER](text, voice, raw)
             src_wav = raw
-        ratio = 2 ** (pitch / 12.0)
-        filt = f"rubberband=pitch={ratio:.4f}:tempo={tempo:.4f}:formant=shifted,highpass=f=70"
+        # Big formant-shifted pitch jumps are what made the voices ring like a robot: keep shifts small, preserve
+        # formants, skip the shifter entirely when nothing changes, then soften the vocoder's metallic top end.
+        chain = []
+        if abs(pitch) > 0.01 or abs(tempo - 1) > 0.001:
+            ratio = 2 ** (pitch / 12.0)
+            chain.append(f"rubberband=pitch={ratio:.4f}:tempo={tempo:.4f}:formant=preserved:pitchq=quality")
+        chain += ["highpass=f=80", "equalizer=f=3800:t=q:w=1.4:g=-4", "equalizer=f=250:t=q:w=1:g=1.5",
+                  "deesser=i=0.4", "lowpass=f=8500", "acompressor=threshold=0.125:ratio=2.5:attack=8:release=120"]
+        filt = ",".join(chain)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src_wav, "-af", filt, "-ar", str(SR), "-ac", "1", out],
                        check=True)
         if src_wav == raw:

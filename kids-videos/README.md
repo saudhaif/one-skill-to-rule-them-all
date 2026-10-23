@@ -7,7 +7,7 @@ burned-in Arabic subtitles.
 
 | Episode | Title | Teaches | Length |
 | --- | --- | --- | --- |
-| 01 | زعفران يبحث عن ماما (Zafran looks for Mama) | counting to 3, big vs small, helping others | ~4:00 |
+| 01 | زعفران يدوّر أمّه (Zafran looks for his mother) | counting to 3, big vs small, helping others | ~4:00 |
 
 ## Build an episode
 
@@ -71,8 +71,8 @@ Sources:
 - مفردات المكان في لهجة أهل الإمارات: البرّ، السيح ([الاتحاد](https://www.aletihad.ae/articleamp/46495/2010/«المكان»-في-لهجة-أهل-الإمارات)).
 - 50 مفردة للنخيل في اللهجة الإماراتية ([الخليج](https://www.alkhaleej.ae/2024-09-08/50-مفردة-للنخيل-في-اللهجة-الإماراتية/يوميات-ثقافية/ثقافة)).
 
-Narration and dialogue are in simple فصحى (what the Arabic voices pronounce best), with Emirati words where a child
-would hear them at home.
+Narration and dialogue are in simple everyday Emirati speech (الرمسة): «كان يا مكان، في قديم الزمان», «أمّي», «وين»،
+«شو»، «ندوّر»، «الماي»، «ريول»، «الربع». Lines carry light vowel marks so the voices pronounce them well.
 
 ## Music: النهمة
 
