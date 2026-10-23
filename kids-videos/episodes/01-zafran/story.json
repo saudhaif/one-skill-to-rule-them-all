@@ -1,0 +1,226 @@
+{
+  "title": "زعفران يبحث عن ماما",
+  "title_en": "Zafran Looks for Mama",
+  "voices": {
+    "N":   {"name": "يدّوه",  "model": "dii",    "pitch": -1.5, "speed": 1.12},
+    "H":   {"name": "حمدان",  "model": "kareem", "pitch": 6.0,  "speed": 1.0},
+    "M":   {"name": "ميثاء",  "model": "dii",    "pitch": 4.0,  "speed": 1.0},
+    "Z":   {"name": "زعفران", "model": "dii",    "pitch": 7.0,  "speed": 1.05},
+    "F":   {"name": "شاهين",  "model": "kareem", "pitch": -1.0, "speed": 1.05},
+    "O":   {"name": "وضيحي",    "model": "kareem", "pitch": 1.0, "speed": 1.08},
+    "R":   {"name": "أرنوب",  "model": "kareem", "pitch": 4.0,  "speed": 0.92},
+    "MOM": {"name": "ماما",   "model": "dii",    "pitch": -3.0, "speed": 1.1}
+  },
+  "songs": {
+    "refrain": {
+      "lines": [
+        "زَعْفَرَانْ، زَعْفَرَانْ",
+        "أَيْنَ مَامَا يَا زَعْفَرَانْ؟",
+        "نَمْشِي نَمْشِي، نَسْأَلُ نَسْأَلُ",
+        "حَتَّى نَجِدَ مَامَا زَعْفَرَانْ!"
+      ],
+      "tune": "hook"
+    },
+    "final": {
+      "lines": [
+        "زَعْفَرَانْ، زَعْفَرَانْ",
+        "وَجَدَ مَامَا زَعْفَرَانْ!",
+        "سِرْنَا مَعًا، وَسَأَلْنَا مَعًا",
+        "يَا فَرْحَةَ قَلْبِ زَعْفَرَانْ!"
+      ],
+      "tune": "hook"
+    }
+  },
+  "scenes": [
+    {
+      "id": "cold_open", "bg": "desert_dawn",
+      "cast": {"zafran": {"x": 0.5, "s": 1.0, "emote": "sad"}},
+      "beats": [
+        {"sfx": "wind"},
+        {"pause": 0.8},
+        {"say": "Z", "tts": "مَامَا! مَامَا!"},
+        {"pause": 0.3},
+        {"say": "Z", "tts": "أَيْنَ أَنْتِ يَا مَامَا؟"},
+        {"pause": 0.7}
+      ]
+    },
+    {
+      "id": "intro", "bg": "majlis",
+      "cast": {"yadda": {"x": 0.5, "s": 1.15, "emote": "happy"}},
+      "beats": [
+        {"say": "N", "tts": "حَيَّاكُمْ يَا أَحْبَابِي! أَنَا يَدَّوْه، وَعِنْدِي لَكُمْ خَرُّوفَة."},
+        {"say": "N", "tts": "كَانَ يَا مَا كَانَ... وَخَرُّوفَةُ الْيَوْمِ اسْمُهَا..."},
+        {"title": "زعفران يبحث عن ماما", "dur": 4.0},
+        {"say": "N", "tts": "هَيَّا نَبْدَأ!"},
+        {"pause": 0.4}
+      ]
+    },
+    {
+      "id": "dunes_play", "bg": "desert_day",
+      "cast": {
+        "hamdan": {"x": 0.32, "s": 1.0, "emote": "happy"},
+        "maitha": {"x": 0.6, "s": 1.0, "emote": "happy", "face": "left"}
+      },
+      "beats": [
+        {"say": "N", "tts": "فِي صَبَاحٍ مُشْمِسٍ، خَرَجَ حَمْدَانُ وَمَيْثَاءُ يَلْعَبَانِ فِي الْبَرِّ، بَيْنَ الرِّمَالِ الذَّهَبِيَّةِ.", "jump": ["hamdan", "maitha"]},
+        {"pause": 0.3},
+        {"say": "M", "tts": "حَمْدَان! اسْمَعْ! أَحَدٌ يَبْكِي!", "emote": {"maitha": "surprised", "hamdan": "surprised"}},
+        {"say": "H", "tts": "تَعَالَيْ نَرَى!", "face": {"maitha": "right"}},
+        {"pause": 0.3}
+      ]
+    },
+    {
+      "id": "meet", "bg": "desert_ghaf",
+      "cast": {
+        "hamdan": {"x": 0.12, "s": 1.0, "emote": "surprised"},
+        "maitha": {"x": 0.27, "s": 1.0, "emote": "surprised"},
+        "zafran": {"x": 0.72, "s": 1.0, "emote": "sad", "face": "left"}
+      },
+      "beats": [
+        {"pause": 0.2, "move": {"hamdan": [0.3], "maitha": [0.45]}, "dur": 1.6},
+        {"say": "H", "tts": "مَرْحَبًا يَا حُوَارُ الصَّغِيرُ! مَا اسْمُكَ؟", "emote": {"hamdan": "happy", "maitha": "happy"}},
+        {"say": "Z", "tts": "اسْمِي زَعْفَرَانُ... أَضَعْتُ مَامَا!"},
+        {"say": "M", "tts": "لَا تَبْكِ يَا زَعْفَرَانُ. نَحْنُ سَنُسَاعِدُكَ!"},
+        {"say": "H", "tts": "يَالله! هَيَّا نَبْحَثْ عَنْهَا مَعًا!", "emote": {"zafran": "happy"}, "jump": ["hamdan"]},
+        {"pause": 0.3}
+      ]
+    },
+    {
+      "id": "song1", "bg": "desert_day", "walk": true,
+      "cast": {
+        "hamdan": {"x": 0.28, "s": 0.9, "emote": "happy"},
+        "zafran": {"x": 0.5, "s": 0.9, "emote": "happy"},
+        "maitha": {"x": 0.72, "s": 0.9, "emote": "happy"}
+      },
+      "beats": [{"song": "refrain"}]
+    },
+    {
+      "id": "falcon", "bg": "desert_ghaf",
+      "cast": {
+        "hamdan": {"x": 0.18, "s": 0.95, "emote": "happy"},
+        "maitha": {"x": 0.32, "s": 0.95, "emote": "happy"},
+        "zafran": {"x": 0.47, "s": 0.95, "emote": "happy"},
+        "falcon": {"x": 1.2, "y": 0.15, "s": 1.0, "face": "left"}
+      },
+      "props": {
+        "palm1": {"type": "palm", "x": 0.62, "y": 0.8, "s": 0.8, "hidden": true},
+        "palm2": {"type": "palm", "x": 0.76, "y": 0.78, "s": 0.9, "hidden": true},
+        "palm3": {"type": "palm", "x": 0.9, "y": 0.8, "s": 0.8, "hidden": true}
+      },
+      "beats": [
+        {"say": "N", "tts": "فَجْأَةً... طَارَ فِي السَّمَاءِ صَقْرٌ جَمِيلٌ اسْمُهُ شَاهِين.", "move": {"falcon": [0.82, 0.38]}, "sfx": "flap"},
+        {"say": "M", "tts": "يَا شَاهِين! هَلْ رَأَيْتَ مَامَا زَعْفَرَان؟", "face": {"zafran": "right"}},
+        {"say": "F", "tts": "مِنْ فَوْقُ، أَرَى كُلَّ شَيْءٍ! امْشُوا نَحْوَ النَّخِيلِ."},
+        {"say": "F", "tts": "هَيَّا، عُدُّوا النَّخَلَاتِ مَعِي!"},
+        {"say": "H", "tts": "وَاحِدَة!", "reveal": ["palm1"], "big": "١"},
+        {"say": "M", "tts": "اثْنَتَان!", "reveal": ["palm2"], "big": "٢"},
+        {"say": "Z", "tts": "ثَلَاث!", "reveal": ["palm3"], "big": "٣"},
+        {"say": "H", "tts": "ثَلَاثُ نَخَلَاتٍ! شُكْرًا يَا شَاهِين!", "jump": ["hamdan", "maitha", "zafran"]},
+        {"pause": 1.0, "move": {"falcon": [1.3, -0.2]}, "sfx": "flap", "dur": 1.4}
+      ]
+    },
+    {
+      "id": "song2", "bg": "desert_palms", "walk": true,
+      "cast": {
+        "hamdan": {"x": 0.28, "s": 0.9, "emote": "happy"},
+        "zafran": {"x": 0.5, "s": 0.9, "emote": "happy"},
+        "maitha": {"x": 0.72, "s": 0.9, "emote": "happy"}
+      },
+      "beats": [{"song": "refrain"}]
+    },
+    {
+      "id": "oryx", "bg": "desert_palms",
+      "cast": {
+        "hamdan": {"x": 0.15, "s": 0.95, "emote": "happy"},
+        "maitha": {"x": 0.29, "s": 0.95, "emote": "happy"},
+        "zafran": {"x": 0.43, "s": 0.95, "emote": "happy"},
+        "oryx": {"x": 1.25, "s": 1.0, "face": "left"}
+      },
+      "props": {
+        "small_prints": {"type": "prints_small", "x": 0.63, "y": 0.9, "s": 1.0, "hidden": true},
+        "big_prints": {"type": "prints_big", "x": 0.86, "y": 0.92, "s": 1.0, "hidden": true}
+      },
+      "beats": [
+        {"say": "N", "tts": "قُرْبَ النَّخَلَاتِ، جَاءَ الْوُضَيْحِي، الْمَهَا الْأَبْيَضُ.", "move": {"oryx": [0.8]}},
+        {"say": "H", "tts": "يَا وُضَيْحِي، هَلْ رَأَيْتَ مَامَا زَعْفَرَان؟", "face": {"zafran": "right"}},
+        {"say": "O", "tts": "انْظُرُوا إِلَى الرَّمْلِ! هُنَاكَ آثَارُ أَقْدَامٍ.", "reveal": ["small_prints", "big_prints"]},
+        {"say": "O", "tts": "أَيُّهَا الْكَبِيرُ؟ وَأَيُّهَا الصَّغِيرُ؟"},
+        {"say": "N", "tts": "وَأَنْتَ يَا صَدِيقِي، هَلْ تَرَى الْأَثَرَ الْكَبِيرَ؟", "ask": "؟"},
+        {"pause": 2.6, "dots": true},
+        {"say": "M", "tts": "هَذَا الْأَثَرُ صَغِيرٌ... مِثْلُ زَعْفَرَان!", "point": "small_prints"},
+        {"say": "M", "tts": "وَهَذَا الْأَثَرُ كَبِيرٌ... مِثْلُ مَامَا!", "point": "big_prints"},
+        {"say": "O", "tts": "أَحْسَنْتِ يَا مَيْثَاءُ! اتْبَعُوا الْآثَارَ الْكَبِيرَةَ.", "jump": ["maitha"], "sfx": "sparkle"},
+        {"pause": 0.4}
+      ]
+    },
+    {
+      "id": "hare", "bg": "desert_day",
+      "cast": {
+        "hamdan": {"x": 0.18, "s": 0.95, "emote": "happy"},
+        "maitha": {"x": 0.32, "s": 0.95, "emote": "happy"},
+        "zafran": {"x": 0.46, "s": 0.95, "emote": "happy"},
+        "hare": {"x": 0.74, "y": 1.15, "s": 1.0, "face": "left"}
+      },
+      "beats": [
+        {"say": "N", "tts": "وَمِنْ خَلْفِ الْكَثِيبِ... قَفَزَ أَرْنُوب!", "move": {"hare": [0.74, 0.86]}, "sfx": "boing"},
+        {"say": "R", "tts": "مَرْحَبًا! أُذُنَايَ طَوِيلَتَانِ، وَأَسْمَعُ صَوْتَ الْمَاءِ!", "jump": ["hare"]},
+        {"say": "R", "tts": "مَامَا زَعْفَرَانَ تُحِبُّ الْمَاءَ. اذْهَبُوا إِلَى الْفَلَجِ، بَيْنَ النَّخِيلِ!"},
+        {"say": "Z", "tts": "الْفَلَج! هَيَّا بِنَا!", "jump": ["zafran", "hamdan", "maitha"]},
+        {"pause": 0.3}
+      ]
+    },
+    {
+      "id": "song3", "bg": "desert_palms", "walk": true,
+      "cast": {
+        "hamdan": {"x": 0.28, "s": 0.9, "emote": "happy"},
+        "zafran": {"x": 0.5, "s": 0.9, "emote": "happy"},
+        "maitha": {"x": 0.72, "s": 0.9, "emote": "happy"}
+      },
+      "beats": [{"song": "refrain"}]
+    },
+    {
+      "id": "oasis", "bg": "oasis",
+      "cast": {
+        "hamdan": {"x": 0.12, "s": 0.92, "emote": "happy"},
+        "maitha": {"x": 0.25, "s": 0.92, "emote": "happy"},
+        "zafran": {"x": 0.4, "s": 0.92, "emote": "sad"},
+        "mom": {"x": 1.3, "s": 1.0, "face": "left", "emote": "happy"}
+      },
+      "beats": [
+        {"say": "N", "tts": "وَصَلَ الْأَصْدِقَاءُ إِلَى الْفَلَجِ وَالنَّخِيلِ الْأَخْضَرِ... وَسَمِعُوا صَوْتًا!"},
+        {"say": "MOM", "tts": "زَعْفَرَان! زَعْفَرَان!", "move": {"mom": [0.8]}},
+        {"say": "Z", "tts": "مَامَا!", "emote": {"zafran": "love"}, "face": {"zafran": "right"}},
+        {"pause": 0.2, "move": {"zafran": [0.62]}, "dur": 1.3, "sfx": "sparkle"},
+        {"say": "MOM", "tts": "يَا حَبِيبِي يَا زَعْفَرَانُ! كُنْتُ أَبْحَثُ عَنْكَ!", "hearts": true, "emote": {"mom": "love"}},
+        {"say": "MOM", "tts": "شُكْرًا لَكُمَا يَا حَمْدَانُ وَمَيْثَاءُ!"},
+        {"say": "M", "tts": "الْأَصْدِقَاءُ يُسَاعِدُ بَعْضُهُمْ بَعْضًا!", "jump": ["maitha"]},
+        {"say": "H", "tts": "وَشُكْرًا لِشَاهِين، وَالْوُضَيْحِي، وَأَرْنُوب!", "jump": ["hamdan"]},
+        {"pause": 0.3}
+      ]
+    },
+    {
+      "id": "finale", "bg": "oasis", "party": true,
+      "cast": {
+        "hamdan": {"x": 0.1, "s": 0.82, "emote": "happy"},
+        "maitha": {"x": 0.22, "s": 0.82, "emote": "happy"},
+        "hare": {"x": 0.34, "s": 0.85, "emote": "happy"},
+        "zafran": {"x": 0.45, "s": 0.82, "emote": "love"},
+        "mom": {"x": 0.76, "s": 0.85, "emote": "love", "face": "left"},
+        "oryx": {"x": 0.93, "s": 0.7, "face": "left"},
+        "falcon": {"x": 0.55, "y": 0.2, "s": 0.85, "face": "left"}
+      },
+      "beats": [{"song": "final"}]
+    },
+    {
+      "id": "outro", "bg": "majlis",
+      "cast": {"yadda": {"x": 0.5, "s": 1.15, "emote": "happy"}},
+      "beats": [
+        {"say": "N", "tts": "تَعَلَّمْنَا الْيَوْمَ أَنْ نَعُدَّ إِلَى ثَلَاثَة،"},
+        {"say": "N", "tts": "وَأَنْ نَعْرِفَ الْكَبِيرَ وَالصَّغِيرَ،"},
+        {"say": "N", "tts": "وَأَنْ نُسَاعِدَ مَنْ يَحْتَاجُ إِلَى مُسَاعَدَة."},
+        {"say": "N", "tts": "وَخَلَصَتِ الْخَرُّوفَة! إِلَى اللِّقَاءِ يَا أَحْبَابِي!"},
+        {"title": "إلى اللقاء!", "dur": 3.5}
+      ]
+    }
+  ]
+}
