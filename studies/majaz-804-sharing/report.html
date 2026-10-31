@@ -1,0 +1,226 @@
+<title>دراسة شقة 804 المجاز</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column (RTL), a verdict band, then evidence sections; calculator sits mid-page */
+:root{
+  --bg:#f5f7fa; --surface:#ffffff; --ink:#14213d; --muted:#5b6578; --line:#d9dee8;
+  --accent:#1f3a8a; --brass:#a77b2e; --good:#1f7a4d; --warn:#b26b00; --bad:#b3261e;
+  --good-bg:#e5f3ec; --warn-bg:#fbf0de; --bad-bg:#fbe7e5;
+  --display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1522; --surface:#172033; --ink:#e7ebf3; --muted:#9aa4b8; --line:#2a3550;
+  --accent:#8fa8ff; --brass:#d6a957; --good:#5fc993; --warn:#f0b04f; --bad:#ff8a80;
+  --good-bg:#14301f; --warn-bg:#33270f; --bad-bg:#3a1714; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1522; --surface:#172033; --ink:#e7ebf3; --muted:#9aa4b8; --line:#2a3550;
+  --accent:#8fa8ff; --brass:#d6a957; --good:#5fc993; --warn:#f0b04f; --bad:#ff8a80;
+  --good-bg:#14301f; --warn-bg:#33270f; --bad-bg:#3a1714; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;direction:rtl}
+.wrap{max-width:900px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.35}
+h1{font-size:2rem} h2{font-size:1.4rem;color:var(--accent)} h3{font-size:1.05rem}
+p{margin:0;max-width:68ch}
+.eyebrow{font-size:.8rem;color:var(--brass);letter-spacing:.04em;font-weight:700}
+.muted{color:var(--muted)}
+section{display:flex;flex-direction:column;gap:14px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+header{display:flex;flex-direction:column;gap:8px;border-bottom:3px double var(--accent);padding-bottom:20px}
+.verdict{background:var(--surface);border:1px solid var(--line);border-inline-start:6px solid var(--warn);border-radius:6px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi b{font-size:1.45rem;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.85rem;color:var(--muted)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.93rem}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th{font-weight:700;background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:700}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.findings{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.findings li{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.pill{font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.p-bad{background:var(--bad-bg);color:var(--bad)} .p-warn{background:var(--warn-bg);color:var(--warn)} .p-good{background:var(--good-bg);color:var(--good)}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:680px){.calc{grid-template-columns:1fr}}
+.ctrls{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ctrl label{display:flex;justify-content:space-between;font-size:.9rem;gap:8px}
+.ctrl input{width:100%;accent-color:var(--accent)}
+.out{display:flex;flex-direction:column;gap:8px;min-width:0}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.row b{font-variant-numeric:tabular-nums}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:520px;height:auto}
+ol.steps{margin:0;padding-inline-start:1.3em;display:flex;flex-direction:column;gap:6px}
+.note{font-size:.85rem;color:var(--muted)}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">دراسة جدوى · شقة شيرنج · الوحدة 804 · المجاز، الشارقة</span>
+  <h1>هل تربح شقة 804 كسكن مشترك؟</h1>
+  <p class="muted">مبنية على ورقة «حساب تقريبي لربح شقة شيرنج» وعرض السعر رقم 804 من الهادف للعقارات. كل الأرقام بالدرهم الإماراتي. الأرقام المعلّمة «افتراض» تحتاج تأكيداً بعروض أسعار فعلية.</p>
+</header>
+
+<section class="verdict">
+  <span class="pill p-warn" style="align-self:flex-start">مربحة بشروط</span>
+  <h2>الخلاصة</h2>
+  <p>المشروع مجدٍ، لكن ربح السنة الأولى أقل بكثير من 45,000–75,000 المذكورة في الورقة. السبب أن الورقة تفترض إشغالاً كاملاً 100% من اليوم الأول، ولا تضع رقماً لتكلفة الأثاث والبارتشن، وتنسى التأمين المحتجز. في السيناريو الأساسي تحقق السنة الأولى حوالي <b class="num">15,300</b> درهم، وتقفز السنة الثانية إلى حوالي <b class="num">47,400</b> لأن العمولة والتجهيز لا يتكرران. الربح الحقيقي في هذا المشروع يبدأ من سنة التجديد.</p>
+  <div class="kpis">
+    <div class="kpi"><b class="num">58,050</b><span>نقد مطلوب مقدماً (منه 7,550 مسترد)</span></div>
+    <div class="kpi"><b class="num">15,300</b><span>صافي السنة الأولى (أساسي)</span></div>
+    <div class="kpi"><b class="num">47,400</b><span>صافي السنة الثانية (أساسي)</span></div>
+    <div class="kpi"><b class="num">80%</b><span>أقل إشغال للتعادل في السنة الأولى</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>ملاحظات على ورقة الحساب</h2>
+  <ul class="findings">
+    <li><span class="pill p-bad">خطأ جوهري</span><div><h3>إشغال 100% طوال السنة</h3><p>الشهر الأول يضيع في تركيب البارتشن والتعبئة، ودائماً هناك سرير فارغ بين ساكن وآخر. افترضنا 90% في الأساسي و80% في المتشائم.</p></div></li>
+    <li><span class="pill p-bad">خطأ جوهري</span><div><h3>التجهيز بدون رقم</h3><p>الورقة تقول «يُضاف للمصروفات» ولم تضفه. تقديرنا 24,000 درهم: 3 بارتشن × 3,000، و6 أسرّة مع خزائن × 1,500، وأجهزة مطبخ 4,000، ومتفرقات 2,000. بعد خصمه يصبح الحد الأدنى في الورقة نفسها <b class="num">17,000</b> وليس 45,000.</p></div></li>
+    <li><span class="pill p-warn">تصحيح</span><div><h3>سيوا مسترد وليس مصروفاً</h3><p>بند «البلدية وسيوا 5,500» يضم تأمين سيوا 2,550 وهو مسترد حسب عرض السعر. تصديق البلدية وحده 3,000.</p></div></li>
+    <li><span class="pill p-warn">ناقص</span><div><h3>تأمين المالك 5,000 غير موجود</h3><p>مبلغ نقدي محتجز طوال العقد، ويسترد فقط بموافقة المالك. قد يُخصم منه إن لم تُزل البارتشن وتُعاد الشقة لحالتها.</p></div></li>
+    <li><span class="pill p-warn">ناقص</span><div><h3>صيانة ونظافة وتسويق</h3><p>أضفنا 300 شهرياً للصيانة والمستهلكات و1,000 سنوياً للإعلانات. الكهرباء 1,500 شهرياً معقولة كمتوسط، لكن فواتير الصيف مع 6 سكان قد تتجاوزها، لذا رفعناها 20% في المتشائم.</p></div></li>
+    <li><span class="pill p-good">صحيح</span><div><h3>الإيجار والعمولات</h3><p>الإيجار 65,000 والعمولات والرسوم 8,500 (عمولة 5,000 + خدمة 3,000 + ضريبة 500) مطابقة تماماً لعرض السعر.</p></div></li>
+  </ul>
+</section>
+
+<section>
+  <h2>قراءة عرض السعر 804</h2>
+  <p>«Total Price 23,500» هو فقط ما يُدفع للمكتب (البنود المؤشرة ✓). البنود غير المؤشرة ما زالت مستحقة، فالنقد الفعلي يوم التوقيع <b class="num">34,050</b> درهم، إضافة إلى 5 شيكات مؤجلة قيمة كل منها <b class="num">10,000</b>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>البند</th><th>الطريقة</th><th class="n">المبلغ</th><th>طبيعته</th></tr></thead>
+    <tbody>
+      <tr><td>الدفعة الأولى</td><td>كاش ✓</td><td class="n">15,000</td><td>إيجار</td></tr>
+      <tr><td>رسوم الخدمة</td><td>✓</td><td class="n">3,000</td><td>مصروف، غير مسترد</td></tr>
+      <tr><td>ضريبة القيمة المضافة</td><td>✓</td><td class="n">500</td><td>مصروف</td></tr>
+      <tr><td>العمولة</td><td>✓</td><td class="n">5,000</td><td>مصروف، غير مستردة</td></tr>
+      <tr><td>تأمين المالك</td><td>كاش ✗</td><td class="n">5,000</td><td>مسترد بموافقة المالك</td></tr>
+      <tr><td>سيوا</td><td>أونلاين ✗</td><td class="n">2,550</td><td>مسترد</td></tr>
+      <tr><td>تصديق البلدية</td><td>كاش ✗</td><td class="n">3,000</td><td>مصروف</td></tr>
+      <tr class="total"><td>الإجمالي يوم التوقيع</td><td></td><td class="n">34,050</td><td>منه 7,550 مسترد</td></tr>
+      <tr><td>الشيكات المتبقية</td><td>5 شيكات ✗</td><td class="n">50,000</td><td>إيجار مؤجل</td></tr>
+    </tbody></table></div>
+  <p class="note">خانات فارغة في العرض يجب تعبئتها قبل التوقيع: اسم العميل، تاريخ الاستحقاق، مدة صلاحية العرض، «Free Features»، ونوع العمولة.</p>
+</section>
+
+<section>
+  <h2>السيناريوهات الثلاثة</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>البند</th><th class="n">متشائم</th><th class="n">أساسي</th><th class="n">متفائل</th></tr></thead>
+    <tbody>
+      <tr><td>الإيجار الشهري الكامل</td><td class="n">11,500</td><td class="n">13,000</td><td class="n">14,500</td></tr>
+      <tr><td>نسبة الإشغال</td><td class="n">80%</td><td class="n">90%</td><td class="n">95%</td></tr>
+      <tr><td>الدخل الفعلي السنوي</td><td class="n">110,400</td><td class="n">140,400</td><td class="n">165,300</td></tr>
+      <tr><td>المصروفات التشغيلية</td><td class="n">102,700</td><td class="n">99,100</td><td class="n">99,100</td></tr>
+      <tr><td>التجهيز + احتياطي الإزالة</td><td class="n">29,600</td><td class="n">26,000</td><td class="n">23,600</td></tr>
+      <tr class="total"><td>صافي السنة الأولى</td><td class="n neg">(21,900)</td><td class="n pos">15,300</td><td class="n pos">42,600</td></tr>
+      <tr class="total"><td>صافي السنة الثانية</td><td class="n pos">13,440</td><td class="n pos">47,400</td><td class="n pos">72,540</td></tr>
+      <tr><td>إشغال التعادل، سنة 1</td><td class="n">96%</td><td class="n">80%</td><td class="n">71%</td></tr>
+      <tr><td>العائد على النقد المدفوع، سنة 1</td><td class="n neg">(36%)</td><td class="n">26%</td><td class="n">77%</td></tr>
+    </tbody></table></div>
+  <p class="note">السنة الثانية تفترض التجديد بنفس الإيجار، بدون عمولة أو رسوم خدمة، مع 10% من التجهيز للاستبدال.</p>
+</section>
+
+<section>
+  <h2>جرّب بنفسك</h2>
+  <div class="calc">
+    <div class="ctrls">
+      <div class="ctrl"><label for="lv"><span>مستوى الإيجار الشهري</span><b class="num" id="lvo"></b></label><input id="lv" type="range" min="11500" max="14500" step="250" value="13000"></div>
+      <div class="ctrl"><label for="oc"><span>نسبة الإشغال</span><b class="num" id="oco"></b></label><input id="oc" type="range" min="60" max="100" step="1" value="90"></div>
+      <div class="ctrl"><label for="ut"><span>الكهرباء والإنترنت شهرياً</span><b class="num" id="uto"></b></label><input id="ut" type="range" min="1000" max="2500" step="50" value="1500"></div>
+      <div class="ctrl"><label for="cx"><span>تكلفة التجهيز</span><b class="num" id="cxo"></b></label><input id="cx" type="range" min="12000" max="40000" step="500" value="24000"></div>
+    </div>
+    <div class="out">
+      <div class="row"><span>الدخل الفعلي السنوي</span><b id="r1"></b></div>
+      <div class="row"><span>المصروفات التشغيلية</span><b id="r2"></b></div>
+      <div class="row"><span>صافي السنة الأولى</span><b id="r3"></b></div>
+      <div class="row"><span>صافي السنة الثانية</span><b id="r4"></b></div>
+      <div class="row"><span>إشغال التعادل، سنة 1</span><b id="r5"></b></div>
+      <div class="row"><span>النقد المطلوب مقدماً</span><b id="r6"></b></div>
+      <p class="note">نفس معادلات ملف الإكسل المرفق: إيجار 65,000، بلدية 3,000، عمولة ورسوم 8,500، صيانة 3,600، تسويق 1,000، احتياطي إزالة 2,000.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>السيولة شهراً بشهر</h2>
+  <p>السيناريو الأساسي مع تعبئة تدريجية (40% في الشهر الأول، 75% في الثاني). الرصيد يبدأ عند <b class="num">−55,650</b> ولا يعود للصفر إلا في الشهر الثاني عشر. جهّز سيولة لا تقل عن 60,000 درهم.</p>
+  <div class="chart" id="chart"></div>
+  <p class="note">افتراض: الشيكات كل شهرين (الأشهر 3، 5، 7، 9، 11). تأكد من تواريخها الفعلية مع المكتب.</p>
+</section>
+
+<section>
+  <h2>مخاطر يجب حسمها قبل التوقيع</h2>
+  <ul class="findings">
+    <li><span class="pill p-bad">قانوني</span><div><h3>موافقة المالك على التقسيم والتأجير من الباطن</h3><p>بلدية الشارقة تشن حملات على البارتشن والسكن المشترك المخالف، والغرامات وإزالة التقسيمات واردة. اطلب موافقة خطية صريحة من المالك على التأجير للسكن المشترك وتركيب البارتشن، وتحقق من شروط البلدية الحالية قبل الدفع. بدون هذه الموافقة، المشروع كله معرّض للإلغاء.</p></div></li>
+    <li><span class="pill p-warn">سوق</span><div><h3>الطلب على كل فئة</h3><p>تأكد من الأسعار بإعلانات حالية لغرف وبارتشن في المجاز. البارتشن بـ1,500 هو الأكثر حساسية للمنافسة.</p></div></li>
+    <li><span class="pill p-warn">تشغيل</span><div><h3>تحصيل الإيجار من 6 أشخاص</h3><p>تأخر ساكن واحد في شهر يقتطع جزءاً من الربح. خذ تأميناً شهراً مقدماً من كل ساكن.</p></div></li>
+  </ul>
+</section>
+
+<section>
+  <h2>نقاط للتفاوض</h2>
+  <ol class="steps">
+    <li>تخفيض العمولة أو رسوم الخدمة، فهي 8,000 لا تسترد.</li>
+    <li>فترة سماح مجانية 2–4 أسابيع لتركيب البارتشن، وتعبئة خانة «Free Features» بها.</li>
+    <li>إضافة شيك سادس بدل 15,000 كاش مقدماً، لتخفيف السيولة في الشهر الأول.</li>
+    <li>كتابة شرط استرداد التأمين وحالة إعادة الشقة بوضوح في العقد.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>الخطوات التالية</h2>
+  <ol class="steps">
+    <li>الحصول على موافقة المالك الخطية على السكن المشترك.</li>
+    <li>عرضا سعر على الأقل للبارتشن، وقائمة أثاث بأسعار حقيقية، ثم تحديث الأرقام الزرقاء في ملف الإكسل.</li>
+    <li>جمع 10 إعلانات حالية في المجاز لتأكيد أسعار الغرف.</li>
+    <li>القرار: امضِ إذا كان إشغال 85% واقعياً، وكانت لديك سيولة 60,000، وتنوي التجديد لسنة ثانية.</li>
+  </ol>
+</section>
+</div>
+
+<script>
+(function(){
+  var f=function(n){var s=Math.round(Math.abs(n)).toLocaleString('en-US');return n<0?'('+s+')':s};
+  var $=function(id){return document.getElementById(id)};
+  var RENT=65000,MUNI=3000,AGENCY=8500,MAINT=3600,MKT=1000,REST=2000,UPFIX=15000+5000+3000+500+3000+2550+5000;
+  function calc(){
+    var lv=+$('lv').value,oc=+$('oc').value/100,ut=+$('ut').value,cx=+$('cx').value;
+    var gp=lv*12,rev=gp*oc,util=ut*12;
+    var opex=RENT+MUNI+AGENCY+util+MAINT+MKT;
+    var y1=rev-opex-cx-REST;
+    var y2=rev-(RENT+MUNI+util+MAINT+MKT)-0.1*cx;
+    var be=(opex+cx+REST)/gp;
+    $('lvo').textContent=f(lv);$('oco').textContent=Math.round(oc*100)+'%';$('uto').textContent=f(ut);$('cxo').textContent=f(cx);
+    $('r1').textContent=f(rev);$('r2').textContent=f(opex);
+    [['r3',y1],['r4',y2]].forEach(function(p){var e=$(p[0]);e.textContent=f(p[1]);e.className=p[1]<0?'neg':'pos'});
+    $('r5').textContent=Math.round(be*100)+'%';$('r5').className=be>oc?'neg':'pos';
+    $('r6').textContent=f(UPFIX+cx);
+  }
+  ['lv','oc','ut','cx'].forEach(function(id){$(id).addEventListener('input',calc)});
+  calc();
+  // cumulative cash balance from CashFlow sheet (base scenario)
+  var cum=[-55650,-47700,-47800,-37900,-38000,-28100,-28200,-18300,-18400,-8500,-8600,1300];
+  var W=640,H=260,pl=64,pr=16,pt=16,pb=36,min=-60000,max=10000;
+  var y=function(v){return pt+(max-v)/(max-min)*(H-pt-pb)};
+  var bw=(W-pl-pr)/12;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="الرصيد النقدي التراكمي">';
+  [-60000,-40000,-20000,0].forEach(function(t){s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(t)+'" y2="'+y(t)+'" stroke="var(--line)" stroke-width="'+(t===0?1.5:1)+'"/><text x="'+(pl-8)+'" y="'+(y(t)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)" style="font-variant-numeric:tabular-nums">'+(t/1000)+'k</text>'});
+  // RTL chart: month 1 on the right
+  cum.forEach(function(v,i){var x=W-pr-(i+1)*bw+bw*0.18,w=bw*0.64,y0=y(0),yv=y(v);
+    s+='<rect x="'+x+'" y="'+Math.min(y0,yv)+'" width="'+w+'" height="'+Math.max(1,Math.abs(yv-y0))+'" rx="2" fill="'+(v<0?'var(--bad)':'var(--good)')+'" opacity="'+(i===11?1:0.75)+'"/>';
+    s+='<text x="'+(x+w/2)+'" y="'+(H-14)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+(i+1)+'</text>';});
+  s+='<text x="'+(W-pr-bw*0.5)+'" y="'+(y(cum[0])-6)+'" text-anchor="middle" font-size="11" fill="var(--ink)">−55.6k</text>';
+  s+='<text x="'+(pl+bw*0.5)+'" y="'+(y(cum[11])-6)+'" text-anchor="middle" font-size="11" fill="var(--ink)">+1.3k</text>';
+  s+='<text x="'+((W+pl)/2)+'" y="'+(H-1)+'" text-anchor="middle" font-size="11" fill="var(--muted)">الشهر</text></svg>';
+  $('chart').innerHTML=s;
+})();
+</script>
