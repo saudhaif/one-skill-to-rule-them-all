@@ -7,6 +7,7 @@
 | أنشئ موقع بقيمة 5,000$ بسطر كود واحد (Claude Code + Framer Motion + UI/UX + 21st.dev) | [`website-5000-one-line.md`](website-5000-one-line.md) | بناء موقع احترافي بحركات سلسة |
 | Claude × Instagram عبر Metricool (ربط، أوامر محتوى، تحليل، جدولة) | [`instagram-claude-metricool.md`](instagram-claude-metricool.md) | خطة محتوى إنستغرام، سكربت ريل، كاروسيل، تحليل أو جدولة منشور |
 | روابط إضافات Claude Code و Agent Skills (FreeLLMAPI، Strix، Claude Mem، Claude Code Setup، Agent Reach، agent-skills) | [`claude-code-addons-links.md`](claude-code-addons-links.md) | تثبيت إضافات أو مهارات لـ Claude Code |
+| أوامر تثبيت الإضافات الست على جهازك، مع تقييم المخاطر | [`install-all-addons.md`](install-all-addons.md) | «فعّل/ثبّت جميع الروابط» |
 | n8n: وكيل واتساب يرسل إيميلات عبر Gmail | [`n8n/whatsapp-email-agent.md`](n8n/whatsapp-email-agent.md) + JSON | تجهيز أو إصلاح أتمتة واتساب/إيميل |
 
 النسخ الأصلية (PDF ولقطات الشاشة) في `originals/`.
