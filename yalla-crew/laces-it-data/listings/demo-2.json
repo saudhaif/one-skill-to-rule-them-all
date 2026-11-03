@@ -1,0 +1,17 @@
+{
+  "category": "shoes",
+  "condition": "used",
+  "createdAt": "2026-11-04T00:00:00.000Z",
+  "descKey": "exi2d",
+  "description": "إعلان تجريبي للمعاينة.",
+  "emirate": "SHJ",
+  "example": true,
+  "phone": "+971 50 000 0000",
+  "photo": null,
+  "price": 180,
+  "sellerId": null,
+  "sold": false,
+  "sport": "run",
+  "title": "مثال: حذاء جري مقاس 43",
+  "titleKey": "exi2"
+}
