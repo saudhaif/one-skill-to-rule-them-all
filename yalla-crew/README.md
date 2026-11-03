@@ -9,3 +9,5 @@ Arabic, English, Filipino and Hindi.
 - `laces-it-data/` — the demo rides and listings the app holds.
 - `yalla-crew.html` — the earlier version under the name Yalla Crew, kept for
   reference (https://claude.ai/artifact/JpB2p9Jcy2iFszBixE8Jq9).
+- `../laces-it-web/` — the standalone version on Firebase, with Google (and
+  UAE PASS) sign-in. Setup steps are in `laces-it-web/SETUP.md`.
