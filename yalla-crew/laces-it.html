@@ -225,7 +225,13 @@ textarea { min-height: 80px; resize: vertical; }
 .photo-pick .lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
 .pick-btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; border: 2px dashed var(--field); border-radius: 14px; background: var(--bg); color: var(--ink); font: 700 15px var(--font); cursor: pointer; }
 .pick-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-#s-photo:focus-visible + .pick-btn { outline: 3px solid var(--accent-text); outline-offset: 2px; }
+.pick-btn { position: relative; overflow: hidden; }
+/* The file field covers the whole button, so a tap lands on the field itself (some in-app browsers ignore taps passed on by a label). */
+.pick-btn input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 100px; border: 0; padding: 0; }
+.pick-btn:focus-within { outline: 3px solid var(--accent-text); outline-offset: 2px; }
+.pick-help { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: var(--accent-soft); color: var(--ink); font-size: 13px; }
+.pick-help p { margin: 0; }
+.pick-help .cp { justify-self: start; min-height: 40px; padding: 6px 14px; border-radius: 12px; border: 0; background: var(--ink); color: var(--card); font: 700 13px var(--font); cursor: pointer; }
 .preview { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 3; max-width: 100%; background: var(--line); }
 .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .preview .close { position: absolute; top: 8px; inset-inline-end: 8px; background: var(--card); }
@@ -510,8 +516,8 @@ textarea { min-height: 80px; resize: vertical; }
       <div class="fields">
         <div id="s-photo-wrap" class="photo-pick">
           <span class="lbl" id="s-photo-lbl" data-i18n="sPhoto"></span>
-          <input id="s-photo" class="vh" type="file" accept="image/*" aria-labelledby="s-photo-lbl">
-          <label for="s-photo" class="pick-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span id="pickTxt" data-i18n="addPhoto"></span></label>
+          <div class="pick-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span id="pickTxt" data-i18n="addPhoto"></span><input id="s-photo" type="file" accept="image/*" aria-labelledby="s-photo-lbl"></div>
+          <div class="pick-help" id="pickHelp" hidden><p id="pickHelpTxt"></p><button type="button" class="cp" id="pickCopy"></button></div>
           <p class="sub" id="photoDiag" aria-live="polite"></p>
           <div class="preview" id="photoPrev" hidden><img id="photoImg" alt=""><button type="button" class="close" id="photoClear" data-i18n-aria="removePhoto">✕</button></div>
         </div>
@@ -1715,7 +1721,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
 
   $("#fab").addEventListener("click", () => {
     if (state.tab === "market") {
-      $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true;
+      $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true; $("#pickHelp").hidden = true;
       diag("diagReady");
       applyAiVisibility(); $("#aiAdOut").textContent = "";
       openSheet("#sellSheet", "#s-title");
@@ -1868,8 +1874,35 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     $("#s-photo").value = ""; $("#pickTxt").textContent = t("addPhoto");
   }
   function diag(key, extra) { $("#photoDiag").textContent = t(key) + (extra ? " (" + extra + ")" : ""); }
-  $("#s-photo").addEventListener("change", async (e) => {
-    const f = e.target.files[0]; if (!f) { diag("diagNoFile"); return; }
+  // When the gallery does not open (the Claude phone app can block it), say what to do instead.
+  const PICK = {
+    ar: { help: "تطبيق Claude ما فتح معرض الصور. افتح الرابط في Chrome أو Safari وأضف الصورة من هناك، أو انسخ الصورة من المعرض والصقها هنا.", copy: "انسخ رابط التطبيق", copied: "انتسخ ✓ الصقه في Chrome" },
+    en: { help: "The Claude app didn't open your gallery. Open the link in Chrome or Safari and add the photo there, or copy the photo from your gallery and paste it here.", copy: "Copy app link", copied: "Copied ✓ paste it in Chrome" },
+    fil: { help: "Hindi nabuksan ng Claude app ang gallery. Buksan ang link sa Chrome o Safari at doon idagdag ang larawan, o kopyahin ang larawan at i-paste dito.", copy: "Kopyahin ang link", copied: "Nakopya ✓ i-paste sa Chrome" },
+    hi: { help: "Claude ऐप ने गैलरी नहीं खोली। लिंक Chrome या Safari में खोलकर वहाँ फ़ोटो जोड़ें, या गैलरी से फ़ोटो कॉपी करके यहाँ पेस्ट करें।", copy: "ऐप लिंक कॉपी करें", copied: "कॉपी हुआ ✓ Chrome में पेस्ट करें" }
+  };
+  const pk = (k) => (PICK[lang] || PICK.en)[k];
+  $("#s-photo").addEventListener("click", () => {
+    let left = false;
+    const mark = () => { left = true; };
+    addEventListener("blur", mark, { once: true });
+    document.addEventListener("visibilitychange", mark, { once: true });
+    setTimeout(() => {
+      removeEventListener("blur", mark); document.removeEventListener("visibilitychange", mark);
+      if (!left && !photoBlob) { $("#pickHelpTxt").textContent = pk("help"); $("#pickCopy").textContent = pk("copy"); $("#pickHelp").hidden = false; }
+    }, 1800);
+  });
+  $("#pickCopy").addEventListener("click", (e) => copyText(ARTIFACT, e.currentTarget, pk("copied")));
+  // A photo pasted into the sell form counts as picked.
+  $("#sellSheet").addEventListener("paste", (e) => {
+    const item = [...(e.clipboardData?.items || [])].find((i) => i.kind === "file" && i.type.startsWith("image/"));
+    const file = item?.getAsFile();
+    if (file) { e.preventDefault(); takePhoto(file); }
+  });
+  $("#s-photo").addEventListener("change", (e) => takePhoto(e.target.files[0]));
+  async function takePhoto(f) {
+    if (!f) { diag("diagNoFile"); return; }
+    $("#pickHelp").hidden = true;
     diag("diagGot", (f.type || "?") + ", " + Math.round(f.size / 1024) + " KB");
     const err = $("#sellErr");
     err.textContent = t("preparing");
@@ -1880,7 +1913,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
       $("#photoImg").src = photoUrl; $("#photoPrev").hidden = false;
       $("#pickTxt").textContent = t("changePhoto"); err.textContent = "";
     } catch { clearPhoto(); err.textContent = t("errPhotoType"); diag("errPhotoType", f.type || "?"); }
-  });
+  }
   // Shrinks a photo until it fits inside a listing document (well under the 256 KB cap).
   async function inlinePhoto(blob) {
     const src = URL.createObjectURL(blob);
