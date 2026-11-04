@@ -368,6 +368,21 @@ textarea { min-height: 80px; resize: vertical; }
 .medal:not(.on) b { color: var(--muted); }
 .hero .rider { fill: var(--hero-ink); }
 @media (prefers-reduced-motion: reduce) { .hero .rider { display: none; } }
+/* Live location during a ride (standalone app only). */
+.live { display: grid; gap: 10px; border-radius: 16px; padding: 12px; background: var(--bg); }
+.live h4 { margin: 0; display: flex; align-items: center; gap: 8px; font: 700 14px var(--font); }
+.live h4 .pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); }
+@media (prefers-reduced-motion: no-preference) { .live h4 .pulse { animation: yc-pulse 1.4s ease-in-out infinite; } @keyframes yc-pulse { 50% { opacity: .25; } } }
+.live svg { width: 100%; height: auto; display: block; background: var(--card); border-radius: 12px; }
+.live .route { fill: none; stroke: var(--sport); stroke-width: 3; opacity: .55; stroke-linejoin: round; stroke-linecap: round; }
+.live .pin circle { fill: var(--accent); stroke: var(--ink); stroke-width: 2; }
+.live .pin.me circle { fill: var(--ink); stroke: var(--accent); }
+.live .pin text { fill: var(--ink); font: 700 11px var(--font); }
+.live ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.live li { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.live li span { color: var(--muted); }
+.live li a { color: var(--accent-text); font-weight: 600; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+.btn.stop { background: var(--danger); color: #fff; }
 </style>
 
 <div id="app" dir="rtl" lang="ar">
@@ -799,7 +814,7 @@ textarea { min-height: 80px; resize: vertical; }
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
-  let db = null, user = null, sample = null, assets = null, downloads = null, writeChain = Promise.resolve();
+  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
 
   function haversine(a, b) {
@@ -1072,6 +1087,97 @@ textarea { min-height: 80px; resize: vertical; }
     try { await queueWrite(() => mineJ() ? ref.update(body) : ref.set(body)); }
     catch (e) { flash(t(e.code === "invalid_argument" ? "errJoinPerm" : "errSave")); }
   }
+  // ---------- Live location ----------
+  // Only where the host offers it (the standalone app). Members who joined a ride can
+  // share their position with each other from 30 minutes before the start until an hour
+  // after the estimated finish; sharing stops by itself when that window closes.
+  const LIVE = {
+    ar: { title: "مباشر", share: "شارك موقعي المباشر", stop: "أوقف مشاركة موقعي", note: "موقعك يتحدّث كل 15 ثانية ويشوفه بس المسجّلين في الطلعة. يتوقف تلقائياً بعد نهايتها.",
+      nobody: "ما أحد يشارك موقعه للحين.", now: "الحين", ago: "قبل {n} د", open: "الخريطة", denied: "ما سمحت للتطبيق يشوف موقعك. فعّله من إعدادات المتصفح.", fail: "ما قدرنا نحدد موقعك." },
+    en: { title: "Live", share: "Share my live location", stop: "Stop sharing", note: "Your position updates every 15 seconds and only members of this ride see it. It stops by itself after the ride.",
+      nobody: "No one is sharing their location yet.", now: "now", ago: "{n} min ago", open: "Map", denied: "Location access is off. Turn it on in your browser settings.", fail: "Couldn't find your location." },
+    fil: { title: "Live", share: "Ibahagi ang live location ko", stop: "Itigil ang pagbahagi", note: "Nag-a-update ang posisyon mo bawat 15 segundo at ang mga kasali lang ang nakakakita. Kusang titigil pagkatapos ng ride.",
+      nobody: "Wala pang nagbabahagi ng location.", now: "ngayon", ago: "{n} min ang nakalipas", open: "Mapa", denied: "Naka-off ang location access. Buksan ito sa settings ng browser.", fail: "Hindi mahanap ang location mo." },
+    hi: { title: "लाइव", share: "मेरी लाइव लोकेशन शेयर करें", stop: "शेयर करना बंद करें", note: "आपकी लोकेशन हर 15 सेकंड में अपडेट होती है और सिर्फ़ इस राइड के सदस्य देखते हैं। राइड के बाद अपने आप बंद हो जाती है।",
+      nobody: "अभी कोई लोकेशन शेयर नहीं कर रहा।", now: "अभी", ago: "{n} मिनट पहले", open: "मैप", denied: "लोकेशन की अनुमति बंद है। ब्राउज़र सेटिंग में चालू करें।", fail: "आपकी लोकेशन नहीं मिली।" }
+  };
+  const lv = (k, v) => { let s = LIVE[lang][k] ?? LIVE.en[k]; if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b); return s; };
+  const live = { pos: {}, subs: {}, watch: null, ride: null, last: 0, err: "" };
+  function liveWindow(r) {
+    const s = Date.parse(r.startAt), h = rideHours(r) || 3;
+    return [s - 30 * 6e4, s + (h + 1) * 36e5];
+  }
+  const isLive = (r) => { const [a, b] = liveWindow(r), n = Date.now(); return n >= a && n <= b; };
+  // Subscribe to the open, live rides the member joined; drop the rest.
+  function syncLive() {
+    if (!geo || !db) return;
+    const want = new Set(state.rides.filter((r) => state.open[r.id] && isLive(r) && riders(r.id).includes(state.me)).map((r) => r.id));
+    for (const id of Object.keys(live.subs)) if (!want.has(id)) { live.subs[id](); delete live.subs[id]; delete live.pos[id]; }
+    for (const id of want) if (!live.subs[id]) {
+      live.subs[id] = db.collection("live/" + id + "/pos").onSnapshot((s) => {
+        live.pos[id] = s.docs.map((d) => ({ uid: d.id, ...d.data() }));
+        const box = document.querySelector(`.ride[data-id="${CSS.escape(id)}"] [data-live]`);
+        const r = state.rides.find((x) => x.id === id);
+        if (box && r) { box.outerHTML = liveBlock(r); fillPins(id); }
+      }, () => {});
+    }
+    if (live.ride && !state.rides.some((r) => r.id === live.ride && isLive(r) && riders(r.id).includes(state.me))) stopShare();
+  }
+  function startShare(id) {
+    if (!navigator.geolocation) { live.err = lv("fail"); renderRides(); return; }
+    stopShare(true);
+    live.ride = id; live.last = 0; live.err = "";
+    live.watch = navigator.geolocation.watchPosition((p) => {
+      const r = state.rides.find((x) => x.id === id);
+      if (!r || !isLive(r)) { stopShare(); return; }
+      if (Date.now() - live.last < 15000) return;
+      live.last = Date.now();
+      db.doc("live/" + id + "/pos/" + state.me).set({ lat: +p.coords.latitude.toFixed(5), lon: +p.coords.longitude.toFixed(5), acc: Math.round(p.coords.accuracy), at: new Date().toISOString() }).catch(() => {});
+    }, (e) => { live.err = lv(e.code === 1 ? "denied" : "fail"); stopShare(); }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
+    renderRides();
+  }
+  function stopShare(quiet) {
+    if (live.watch != null) navigator.geolocation.clearWatch(live.watch);
+    const id = live.ride;
+    live.watch = null; live.ride = null;
+    if (id && db && state.me) db.doc("live/" + id + "/pos/" + state.me).delete().catch(() => {});
+    if (!quiet) renderRides();
+  }
+  function liveSvg(r, pts) {
+    const W = 360, H = 200, P = 22, all = [...(r.route || []), ...pts.map((p) => [p.lat, p.lon])];
+    if (!all.length) return "";
+    const lats = all.map((p) => p[0]), lons = all.map((p) => p[1]);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLon = Math.min(...lons), maxLon = Math.max(...lons);
+    const k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+    const sx = Math.max((maxLon - minLon) * k, 2e-3), sy = Math.max(maxLat - minLat, 2e-3), s = Math.min((W - 2 * P) / sx, (H - 2 * P) / sy);
+    const ox = (W - sx * s) / 2, oy = (H - sy * s) / 2, xy = (a, b) => [ox + (b - minLon) * k * s, oy + (maxLat - a) * s];
+    const d = (r.route || []).map((p, i) => { const [x, y] = xy(p[0], p[1]); return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }).join("");
+    const pins = pts.map((p) => { const [x, y] = xy(p.lat, p.lon); return `<g class="pin${p.uid === state.me ? " me" : ""}" data-pin="${esc(p.uid)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7"/><text x="${(x + 11).toFixed(1)}" y="${(y + 4).toFixed(1)}"></text></g>`; }).join("");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(lv("title"))}">${d ? `<path class="route" d="${d}"/>` : ""}${pins}</svg>`;
+  }
+  function liveBlock(r) {
+    if (!geo || state.mode !== "live" || !isLive(r) || !riders(r.id).includes(state.me)) return "";
+    const pts = (live.pos[r.id] || []).filter((p) => Date.now() - Date.parse(p.at) < 30 * 6e4);
+    const mine = live.ride === r.id;
+    const ago = (p) => { const m = Math.round((Date.now() - Date.parse(p.at)) / 6e4); return m < 1 ? lv("now") : lv("ago", { n: m }); };
+    return `<div class="live" data-live>
+      <h4><span class="pulse"></span>${esc(lv("title"))}</h4>
+      ${pts.length ? liveSvg(r, pts) + `<ul>${pts.map((p) => `<li data-pin-row="${esc(p.uid)}"><b></b><span>${esc(ago(p))}</span><a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}" target="_blank" rel="noopener">${esc(lv("open"))}</a></li>`).join("")}</ul>` : `<p class="sub">${esc(lv("nobody"))}</p>`}
+      <button type="button" class="btn block${mine ? " stop" : ""}" data-act="${mine ? "liveStop" : "liveStart"}">${esc(lv(mine ? "stop" : "share"))}</button>
+      ${mine ? `<p class="sub">${esc(lv("note"))}</p>` : ""}${live.err ? `<p class="err">${esc(live.err)}</p>` : ""}
+    </div>`;
+  }
+  // Names on pins and rows, resolved like the faces on ride cards.
+  async function fillPins(id) {
+    if (!user) return;
+    const ids = (live.pos[id] || []).map((p) => p.uid);
+    if (!ids.length) return;
+    const ps = await user.profiles(ids);
+    for (const uid of ids) {
+      const name = (ps[uid]?.isMe ? t("you") : ps[uid]?.name) || t("member");
+      document.querySelectorAll(`[data-pin="${CSS.escape(uid)}"] text, [data-pin-row="${CSS.escape(uid)}"] b`).forEach((el) => { el.textContent = name; });
+    }
+  }
   let heroKey = "";
   function renderHero() {
     const now = Date.now(), all = state.mode === "live" ? state.rides : state.mode === "example" ? EXAMPLES : [];
@@ -1171,6 +1277,7 @@ textarea { min-height: 80px; resize: vertical; }
         ${live ? `<button type="button" class="linkbtn" data-act="link">${esc(t("copyLink"))}</button>` : ""}
       </div>
       ${open ? `<div class="details">
+        ${liveBlock(r)}
         ${sunBlock(r, past)}
         <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}</div>
         ${r.gainM ? `<p class="sub">${esc(t("climb", { n: r.gainM }))}</p>` : ""}
@@ -1201,6 +1308,8 @@ textarea { min-height: 80px; resize: vertical; }
     $("#rides").innerHTML = ordered.map(rideCard).join("") ||
       (state.mode === "live" && state.rides.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
     fillFaces();
+    syncLive();
+    for (const id of Object.keys(live.pos)) fillPins(id);
     focusTarget();
   }
 
@@ -1488,6 +1597,8 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     else if (act === "del") confirmThen(b, () => db.doc("rides/" + id).delete());
     else if (act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
     else if (act === "cheer") setMine("cheers", id, !(mineJ()?.cheers?.[id] === true));
+    else if (act === "liveStart") startShare(id);
+    else if (act === "liveStop") stopShare();
     else if (act === "ai" && r) askAi(r, b);
   });
 
@@ -1676,7 +1787,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
   applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample, assets, downloads] = await Promise.all(["db", "user", "sample", "assets", "downloads"].map((n) => claude.use(n)));
+    [db, user, sample, assets, downloads, geo] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;

@@ -225,5 +225,6 @@ function api(u, F, fs, S, st) {
     list: async () => ({ assets: [], usage: { files: 0, bytes: 0, maxFiles: 0, maxBytes: 0 } })
   };
 
-  return { db, user, assets, sample: null, downloads: null };
+  // The page offers live location sharing only where this is set.
+  return { db, user, assets, sample: null, downloads: null, geo: !!navigator.geolocation };
 }

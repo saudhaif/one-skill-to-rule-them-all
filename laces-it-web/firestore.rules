@@ -21,6 +21,15 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid == uid;
     }
 
+    // Live positions during a ride, visible only to members who joined it.
+    function joined(rideId) {
+      return get(/databases/$(database)/documents/joins/$(request.auth.uid)).data.rides[rideId] == true;
+    }
+    match /live/{rideId}/pos/{uid} {
+      allow read: if signedIn() && joined(rideId);
+      allow write: if signedIn() && request.auth.uid == uid && (request.method == 'delete' || joined(rideId));
+    }
+
     match /listings/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;
