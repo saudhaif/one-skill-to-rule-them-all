@@ -335,6 +335,39 @@ textarea { min-height: 80px; resize: vertical; }
 .item .ph { width: 100%; overflow: hidden; }
 .item .ph img { position: absolute; inset: 0; object-fit: contain; }
 .item .body { gap: 6px; }
+/* Signature features: dawn & heat card, cheers, lifts, season passport. */
+.sun { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; background: var(--bg); border-radius: 14px; padding: 10px 4px; text-align: center; }
+.sun div + div { border-inline-start: 1px solid var(--line); }
+.sun b { display: block; font: 800 17px/1.2 var(--logo); font-variant-numeric: tabular-nums; }
+.sun span { font-size: 11px; color: var(--muted); }
+.callout { margin: 0; border-radius: 12px; padding: 9px 12px; font-size: 13px; font-weight: 600; background: var(--accent-soft); color: var(--accent-text); }
+.callout.moon { background: color-mix(in srgb, var(--bike) 14%, var(--card)); color: var(--ink); }
+.cheer { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: 700 13px var(--font); cursor: pointer; font-variant-numeric: tabular-nums; }
+.cheer svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cheer[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.cheer[aria-pressed="true"] svg { fill: currentColor; }
+.lift { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.lift select { width: auto; min-height: 40px; padding: 6px 10px; }
+.lift b { color: var(--ink); }
+.season { padding: 18px; display: grid; gap: 14px; }
+.season .tot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: center; }
+.season .tot div + div { border-inline-start: 1px solid var(--line); }
+.season .tot b { display: block; font: 800 26px/1.1 var(--logo); font-variant-numeric: tabular-nums; }
+.season .tot span { font-size: 12px; color: var(--muted); }
+.season h3 { margin: 0; font: 700 15px var(--font); display: flex; justify-content: space-between; gap: 8px; }
+.season h3 small { font: 600 12px var(--font); color: var(--muted); }
+.stamps { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.stamp { aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 2px dashed var(--field); display: grid; place-items: center; font: 800 11px var(--logo); color: var(--muted); text-align: center; }
+.stamp.on { border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink); transform: rotate(-8deg); }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.medal { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--bg); }
+.medal i { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 800 12px var(--logo); font-style: normal; background: var(--line); color: var(--muted); }
+.medal.on i { background: var(--accent); color: var(--accent-ink); }
+.medal b { display: block; font-size: 13px; }
+.medal span { font-size: 11px; color: var(--muted); }
+.medal:not(.on) b { color: var(--muted); }
+.hero .rider { fill: var(--hero-ink); }
+@media (prefers-reduced-motion: reduce) { .hero .rider { display: none; } }
 </style>
 
 <div id="app" dir="rtl" lang="ar">
@@ -375,6 +408,7 @@ textarea { min-height: 80px; resize: vertical; }
         <h2 class="h2" data-i18n="boardTitle"></h2>
         <p class="sub" data-i18n="boardSub"></p>
       </div>
+      <div class="card season" id="season" hidden></div>
       <div class="chips" id="bFilters"></div>
       <div class="card rank"><ol id="boardList"></ol></div>
       <p class="notice" id="boardEmpty" data-i18n="boardEmpty" hidden></p>
@@ -926,6 +960,118 @@ textarea { min-height: 80px; resize: vertical; }
   Object.assign(I18N.hi, { ex3: "जेबेल जैस चढ़ाई", ex3n: "लंबी राइड। कम से कम 3 लीटर पानी रखें।", ex3m: "जेबेल जैस का बेस" });
   const LOGO = { ar: ["ليز", "ات"], en: ["Laces", "It"], fil: ["Laces", "It"], hi: ["लेसेस", "इट"] };
   const HERO = { ar: "الطلعة القادمة", en: "Next ride", fil: "Susunod na ride", hi: "अगली राइड" };
+  const FEAT = {
+    ar: { sunrise: "الشروق", sunset: "الغروب", finish: "النهاية تقريباً", heat: "الجو حار هالأيام، خلّص قبل {t}.", ramadan: "رمضان كريم · الإفطار {t}",
+      cheer: "تشجيع", lift: "عندي مكان بالسيارة", liftNone: "لا", seats: "{n} مقاعد متوفرة بالسيارات", addCal: "أضف للتقويم",
+      waMsg: "السلام عليكم، شفت إعلانك «{title}» بسعر {price} درهم على Laces It. للحين متوفر؟",
+      season: "موسمي", rides: "طلعة", km: "كم", streak: "أسابيع ورا بعض", passport: "جواز الإمارات السبع", passportOf: "{n} من 7",
+      medals: "الأوسمة", b_first: "أول طلعة", b_firstS: "سجّلت وخلّصت أول طلعة", b_100: "نادي 100", b_100S: "100 كم مع الكرو", b_500: "نادي 500", b_500S: "500 كم مع الكرو",
+      b_dawn: "طيور الفجر", b_dawnS: "3 طلعات قبل 6 الصبح", b_climb: "متسلّق", b_climbS: "طلعة فيها 1000 م صعود", b_duo: "سيكل وجري", b_duoS: "شاركت في الرياضتين",
+      b_seven: "الإمارات السبع", b_sevenS: "طلعة في كل إمارة", b_lift: "فزعة", b_liftS: "عرضت مكان بسيارتك" },
+    en: { sunrise: "Sunrise", sunset: "Sunset", finish: "Est. finish", heat: "Hot season: aim to finish by {t}.", ramadan: "Ramadan · Iftar at {t}",
+      cheer: "Cheer", lift: "Seats in my car", liftNone: "None", seats: "{n} car seats offered", addCal: "Add to calendar",
+      waMsg: "Hi, I saw your listing \"{title}\" for {price} AED on Laces It. Is it still available?",
+      season: "My season", rides: "rides", km: "km", streak: "week streak", passport: "Seven Emirates passport", passportOf: "{n} of 7",
+      medals: "Medals", b_first: "First ride", b_firstS: "Joined and finished a ride", b_100: "100 club", b_100S: "100 km with the crew", b_500: "500 club", b_500S: "500 km with the crew",
+      b_dawn: "Dawn patrol", b_dawnS: "3 rides starting before 6 am", b_climb: "Climber", b_climbS: "A ride with 1,000 m of climbing", b_duo: "Ride & run", b_duoS: "Joined both sports",
+      b_seven: "Seven Emirates", b_sevenS: "A ride in every emirate", b_lift: "Fazaa", b_liftS: "Offered a seat in your car" },
+    fil: { sunrise: "Pagsikat", sunset: "Paglubog", finish: "Tantyang tapos", heat: "Mainit ngayon: tapusin bago mag-{t}.", ramadan: "Ramadan · Iftar sa {t}",
+      cheer: "Cheer", lift: "Upuan sa kotse ko", liftNone: "Wala", seats: "{n} upuan sa kotse", addCal: "Idagdag sa kalendaryo",
+      waMsg: "Hi, nakita ko ang listing mo na \"{title}\" sa {price} AED sa Laces It. Available pa ba?",
+      season: "Aking season", rides: "ride", km: "km", streak: "linggong sunod-sunod", passport: "Passport ng 7 Emirates", passportOf: "{n} sa 7",
+      medals: "Mga medalya", b_first: "Unang ride", b_firstS: "Sumali at natapos ang ride", b_100: "100 club", b_100S: "100 km kasama ang crew", b_500: "500 club", b_500S: "500 km kasama ang crew",
+      b_dawn: "Dawn patrol", b_dawnS: "3 ride bago mag-6 am", b_climb: "Climber", b_climbS: "Ride na may 1,000 m na akyat", b_duo: "Bike at takbo", b_duoS: "Sumali sa dalawang sport",
+      b_seven: "Pitong Emirates", b_sevenS: "Ride sa bawat emirate", b_lift: "Fazaa", b_liftS: "Nag-alok ng upuan sa kotse" },
+    hi: { sunrise: "सूर्योदय", sunset: "सूर्यास्त", finish: "अनुमानित अंत", heat: "गर्मी का मौसम: {t} तक खत्म करें।", ramadan: "रमज़ान · इफ़्तार {t}",
+      cheer: "चीयर", lift: "मेरी कार में सीटें", liftNone: "नहीं", seats: "कारों में {n} सीटें", addCal: "कैलेंडर में जोड़ें",
+      waMsg: "नमस्ते, मैंने Laces It पर आपकी लिस्टिंग \"{title}\" {price} AED में देखी। क्या यह अभी उपलब्ध है?",
+      season: "मेरा सीज़न", rides: "राइड", km: "किमी", streak: "हफ़्ते लगातार", passport: "सात अमीरात पासपोर्ट", passportOf: "7 में से {n}",
+      medals: "मेडल", b_first: "पहली राइड", b_firstS: "राइड में शामिल होकर पूरी की", b_100: "100 क्लब", b_100S: "क्रू के साथ 100 किमी", b_500: "500 क्लब", b_500S: "क्रू के साथ 500 किमी",
+      b_dawn: "डॉन पेट्रोल", b_dawnS: "सुबह 6 से पहले 3 राइड", b_climb: "क्लाइंबर", b_climbS: "1,000 मी चढ़ाई वाली राइड", b_duo: "राइड और रन", b_duoS: "दोनों खेलों में शामिल", 
+      b_seven: "सात अमीरात", b_sevenS: "हर अमीरात में एक राइड", b_lift: "फ़ज़ा", b_liftS: "अपनी कार में सीट दी" }
+  };
+  const f = (k, v) => { let s = FEAT[lang][k] ?? FEAT.en[k]; if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b); return s; };
+  // Rough centre of each emirate, for sun times when a ride has no route.
+  const EM_LL = { AUH: [24.47, 54.37], DXB: [25.2, 55.27], SHJ: [25.35, 55.4], AJM: [25.4, 55.45], UAQ: [25.55, 55.55], RAK: [25.79, 55.94], FUJ: [25.12, 56.33] };
+  const EM_ABBR = { AUH: "AUH", DXB: "DXB", SHJ: "SHJ", AJM: "AJM", UAQ: "UAQ", RAK: "RAK", FUJ: "FUJ" };
+  // Sunrise and sunset (NOAA approximation), for the ride's date in UAE time (UTC+4).
+  function sunTimes(start, lat, lon) {
+    const u = new Date(start.getTime() + 4 * 36e5), y = u.getUTCFullYear(), base = Date.UTC(y, u.getUTCMonth(), u.getUTCDate());
+    const day = (base - Date.UTC(y, 0, 0)) / 864e5, g = 2 * Math.PI / 365 * (day - 1), rad = Math.PI / 180;
+    const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    const dec = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+    const ha = Math.acos(Math.cos(90.833 * rad) / (Math.cos(lat * rad) * Math.cos(dec)) - Math.tan(lat * rad) * Math.tan(dec)) / rad;
+    const noon = 720 - 4 * lon - eq;
+    return { rise: new Date(base + (noon - 4 * ha) * 6e4), set: new Date(base + (noon + 4 * ha) * 6e4), month: u.getUTCMonth() };
+  }
+  const where = (r) => r.route?.length ? r.route[0] : (EM_LL[r.emirate] || EM_LL.DXB);
+  function isRamadan(d) {
+    try { return parseInt(new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { month: "numeric", timeZone: "Asia/Dubai" }).format(d), 10) === 9; } catch { return false; }
+  }
+  function rideHours(r) {
+    return sportOf(r) === "run" ? (r.paceMinKm ? r.distanceKm * r.paceMinKm / 60 : null) : (r.paceKmh ? r.distanceKm / r.paceKmh : null);
+  }
+  const stamp = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  function calUrl(r) {
+    const s = new Date(r.startAt), e = new Date(s.getTime() + (rideHours(r) || 2) * 36e5);
+    const q = new URLSearchParams({ action: "TEMPLATE", text: txt(r, "title"), dates: stamp(s) + "/" + stamp(e),
+      details: (txt(r, "notes") || "") + "\n" + ARTIFACT + "#" + r.id, location: (txt(r, "meet") ?? r.meetPoint) + ", " + I18N.en["em_" + r.emirate] });
+    return "https://calendar.google.com/calendar/render?" + q.toString();
+  }
+  const mineJ = () => state.joins.find((j) => j.id === state.me);
+  function cheersOf(id) { return state.joins.filter((j) => j.cheers && j.cheers[id] === true).length; }
+  function seatsOf(id) { return state.joins.reduce((a, j) => a + (j.rides?.[id] === true ? (+j.lifts?.[id] || 0) : 0), 0); }
+  function sunBlock(r, past) {
+    const start = new Date(r.startAt), [lat, lon] = where(r), sun = sunTimes(start, lat, lon), h = rideHours(r);
+    const end = h ? new Date(start.getTime() + h * 36e5) : null;
+    const hotBy = new Date(sun.rise.getTime() + 3 * 36e5);
+    const hot = !past && sun.month >= 4 && sun.month <= 8 && end && end > hotBy;
+    const ram = isRamadan(start);
+    return `<div class="sun"><div><b>${esc(fmtTime.format(sun.rise))}</b><span>${esc(f("sunrise"))}</span></div>
+      <div><b>${esc(end ? fmtTime.format(end) : "—")}</b><span>${esc(f("finish"))}</span></div>
+      <div><b>${esc(fmtTime.format(sun.set))}</b><span>${esc(f("sunset"))}</span></div></div>
+      ${hot ? `<p class="callout">${esc(f("heat", { t: fmtTime.format(hotBy) }))}</p>` : ""}
+      ${ram ? `<p class="callout moon">${esc(f("ramadan", { t: fmtTime.format(sun.set) }))}</p>` : ""}`;
+  }
+  // Season numbers for the signed-in member, from finished rides they joined.
+  function season() {
+    const now = Date.now(), me = mineJ();
+    const done = state.rides.filter((r) => Date.parse(r.startAt) < now && me?.rides?.[r.id] === true);
+    const km = done.reduce((a, r) => a + (+r.distanceKm || 0), 0);
+    const ems = new Set(done.map((r) => r.emirate));
+    const sports = new Set(done.map(sportOf));
+    const dawn = done.filter((r) => new Date(new Date(r.startAt).getTime() + 4 * 36e5).getUTCHours() < 6).length;
+    const wk = (t) => Math.floor((t + 4 * 36e5 + 3 * 864e5) / (7 * 864e5));
+    const weeks = new Set(done.map((r) => wk(Date.parse(r.startAt))));
+    let streak = 0, w = wk(now);
+    if (!weeks.has(w)) w -= 1;
+    while (weeks.has(w)) { streak += 1; w -= 1; }
+    const lifted = Object.values(me?.lifts || {}).some((n) => +n > 0);
+    const medals = [
+      ["b_first", "1", done.length >= 1], ["b_100", "100", km >= 100], ["b_500", "500", km >= 500],
+      ["b_dawn", "5:30", dawn >= 3], ["b_climb", "1K", done.some((r) => +r.gainM >= 1000)],
+      ["b_duo", "2", sports.size >= 2], ["b_seven", "7", ems.size >= 7], ["b_lift", "+1", lifted]
+    ];
+    return { rides: done.length, km: Math.round(km), ems, streak, medals };
+  }
+  function renderSeason() {
+    const el = $("#season");
+    if (state.mode !== "live" || !state.me) { el.hidden = true; return; }
+    const s = season();
+    el.hidden = false;
+    el.innerHTML = `<h3>${esc(f("season"))}</h3>
+      <div class="tot"><div><b>${s.rides}</b><span>${esc(f("rides"))}</span></div><div><b>${s.km}</b><span>${esc(f("km"))}</span></div><div><b>${s.streak}</b><span>${esc(f("streak"))}</span></div></div>
+      <h3>${esc(f("passport"))}<small>${esc(f("passportOf", { n: s.ems.size }))}</small></h3>
+      <div class="stamps">${EMIRATES.map((e) => `<div class="stamp${s.ems.has(e) ? " on" : ""}" title="${esc(t("em_" + e))}" aria-label="${esc(t("em_" + e))}">${EM_ABBR[e]}</div>`).join("")}</div>
+      <h3>${esc(f("medals"))}<small>${s.medals.filter((m) => m[2]).length}/${s.medals.length}</small></h3>
+      <div class="badges">${s.medals.map(([k, g, on]) => `<div class="medal${on ? " on" : ""}"><i>${esc(g)}</i><div><b>${esc(f(k))}</b><span>${esc(f(k + "S"))}</span></div></div>`).join("")}</div>`;
+  }
+  async function setMine(field, rideId, value) {
+    if (!db || !state.me) return;
+    const ref = db.doc("joins/" + state.me), body = { [field]: { [rideId]: value } };
+    try { await queueWrite(() => mineJ() ? ref.update(body) : ref.set(body)); }
+    catch (e) { flash(t(e.code === "invalid_argument" ? "errJoinPerm" : "errSave")); }
+  }
   let heroKey = "";
   function renderHero() {
     const now = Date.now(), all = state.mode === "live" ? state.rides : state.mode === "example" ? EXAMPLES : [];
@@ -946,9 +1092,9 @@ textarea { min-height: 80px; resize: vertical; }
       const q = pts.map((p) => [200 - w / 2 + (p[0] - x0) * sc, 125 - h / 2 + (p[1] - y0) * sc]);
       const d = q.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
       const echoes = [1.22, 1.5, 1.84, 2.26, 2.8, 3.5].map((k) => `<path class="echo" d="${d}" transform="translate(200 125) scale(${k}) translate(-200 -125)"/>`).join("");
-      art = `<svg class="art" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${echoes}<path class="line" pathLength="1" d="${d}"/><circle class="dot" cx="${q[0][0].toFixed(1)}" cy="${q[0][1].toFixed(1)}" r="7"/></svg>`;
+      art = `<svg class="art" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${echoes}<path class="line" pathLength="1" d="${d}"/><circle class="dot" cx="${q[0][0].toFixed(1)}" cy="${q[0][1].toFixed(1)}" r="7"/><circle class="rider" r="5"><animateMotion dur="9s" begin="1.6s" repeatCount="indefinite" path="${d}"/></circle></svg>`;
     }
-    el.innerHTML = `${art}<p class="eyebrow">${esc(HERO[lang])} · ${esc(soon)}</p><h2>${esc(txt(r, "title"))}</h2>
+    el.innerHTML = `${art}<p class="eyebrow">${esc(HERO[lang])} · ${esc(soon)}${isRamadan(start) ? " · " + esc(f("ramadan", { t: fmtTime.format(sunTimes(start, ...where(r)).set) })) : ""}</p><h2>${esc(txt(r, "title"))}</h2>
       <div class="foot-row"><p class="facts"><b>${esc(r.distanceKm)}</b><span>${esc(t("km"))} · ${esc(fmtTime.format(start))} · ${esc(t("em_" + r.emirate))}</span></p>
       <button type="button" data-hero="${esc(r.id)}">${esc(t("details"))}</button></div>`;
   }
@@ -1015,13 +1161,17 @@ textarea { min-height: 80px; resize: vertical; }
       <div class="row">
         <div class="faces" data-faces="${esc(ids.slice(0, 6).join(","))}"></div>
         <span class="count">${esc(count)}${full && !past ? ` · <span class="full-tag">${esc(t("full"))}</span>` : ""}</span>
+        ${live && state.me ? `<button type="button" class="cheer" data-act="cheer" aria-pressed="${mineJ()?.cheers?.[r.id] === true}" aria-label="${esc(f("cheer"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11l3-7a2 2 0 0 1 2 2v4h5a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 16 20H7zM7 11H4v9h3"/></svg>${cheersOf(r.id)}</button>` : ""}
         ${canJoin ? `<button type="button" class="btn${joined ? " soft" : ""}${state.pulse === r.id ? " just" : ""}" data-act="join">${esc(t(joined ? "leave" : "join"))}</button>` : ""}
       </div>
+      ${joined && !past ? `<label class="lift">${esc(f("lift"))}<select data-lift="${esc(r.id)}">${[0, 1, 2, 3, 4].map((n) => `<option value="${n}"${(+mineJ()?.lifts?.[r.id] || 0) === n ? " selected" : ""}>${n ? n : esc(f("liftNone"))}</option>`).join("")}</select></label>` : ""}
+      ${seatsOf(r.id) ? `<p class="sub">${esc(f("seats", { n: seatsOf(r.id) }))}</p>` : ""}
       <div class="links">
         <button type="button" class="linkbtn" data-act="toggle" aria-expanded="${open}">${esc(t(open ? "hide" : "details"))}</button>
         ${live ? `<button type="button" class="linkbtn" data-act="link">${esc(t("copyLink"))}</button>` : ""}
       </div>
       ${open ? `<div class="details">
+        ${sunBlock(r, past)}
         <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}</div>
         ${r.gainM ? `<p class="sub">${esc(t("climb", { n: r.gainM }))}</p>` : ""}
         ${notes ? `<p class="notes">${esc(notes)}</p>` : ""}
@@ -1029,6 +1179,7 @@ textarea { min-height: 80px; resize: vertical; }
           <a class="linkbtn" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t("openMaps"))}</a>
           ${r.route?.length > 1 ? `<a class="linkbtn sat" href="${esc(satUrl(r.route))}" target="_blank" rel="noopener">${esc(SAT[lang].view)}</a>` : ""}
           ${r.route?.length > 1 ? `<a class="linkbtn" href="${esc(routeUrl(r))}" target="_blank" rel="noopener">${esc(SAT[lang].route)}</a>` : ""}
+          ${!past ? `<a class="linkbtn" href="${esc(calUrl(r))}" target="_blank" rel="noopener">${esc(f("addCal"))}</a>` : ""}
           ${sample ? `<button type="button" class="linkbtn" data-act="ai">${esc(t("assistant"))}</button>` : ""}
           ${live && r.createdBy && r.createdBy === state.me ? `<button type="button" class="linkbtn danger" data-act="del">${esc(t("delRide"))}</button>` : ""}
         </div>
@@ -1054,6 +1205,7 @@ textarea { min-height: 80px; resize: vertical; }
   }
 
   function renderBoard() {
+    renderSeason();
     $("#bFilters").innerHTML = sportChips(state.sport, "data-f");
     const totals = {};
     if (state.mode === "live") {
@@ -1215,7 +1367,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
         <div class="meta">${esc(t("cat_" + x.category))} · ${esc(t("cond_" + x.condition))} · ${esc(t("em_" + x.emirate))}</div>
         ${desc ? `<p class="desc">${esc(desc)}</p>` : ""}
         ${x.sold ? "" : wa.length >= 8 && !x.example
-          ? `<div class="contact"><div class="acts"><a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a></div></div>`
+          ? `<div class="contact"><div class="acts"><a class="wa" href="https://wa.me/${wa}?text=${encodeURIComponent(f("waMsg", { title: txt(x, "title"), price: x.price }))}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a></div></div>`
           : `<div class="contact"><span class="num">${esc(x.phone)}</span><div class="acts"><button type="button" class="cp" data-act="copynum">${esc(t("copyNum"))}</button></div></div>`}
         ${mine ? `<div class="links" style="margin-top:6px">
           ${!x.photo && !x.sold ? `<button type="button" class="linkbtn" data-act="addPhotoItem">${esc(t("addPhoto"))}</button>` : ""}
@@ -1321,6 +1473,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     morph(() => { if (b.hasAttribute("data-mine")) state.mine = !state.mine; else state.sport = b.dataset.f; renderRides(); });
   });
   $("#filters").addEventListener("change", (e) => { if (e.target.id === "emirateFilter") { state.emirate = e.target.value; renderRides(); } });
+  $("#rides").addEventListener("change", (e) => { const id = e.target.dataset.lift; if (id) setMine("lifts", id, +e.target.value); });
   $("#bFilters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-f]"); if (!b) return;
     state.sport = b.dataset.f; renderBoard();
@@ -1334,6 +1487,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     else if (act === "join") { b.classList.add("busy"); b.disabled = true; state.pulse = id; setTimeout(() => { if (state.pulse === id) state.pulse = null; }, 1500); toggleJoin(id); }
     else if (act === "del") confirmThen(b, () => db.doc("rides/" + id).delete());
     else if (act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
+    else if (act === "cheer") setMine("cheers", id, !(mineJ()?.cheers?.[id] === true));
     else if (act === "ai" && r) askAi(r, b);
   });
 
