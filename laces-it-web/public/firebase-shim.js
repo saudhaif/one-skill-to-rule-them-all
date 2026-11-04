@@ -2,7 +2,7 @@
 // configured), Firestore for rides, sign-ups and listings, Storage for photos.
 // It serves the same small `claude.use(name)` surface the page was written for,
 // so the page code stays the same as the Claude-hosted version.
-import { firebaseConfig, uaePass, sdk, emulators } from "./firebase-config.js";
+import { firebaseConfig, uaePass, sdk, emulators, aiEnabled } from "./firebase-config.js";
 
 const TXT = {
   ar: { title: "سجّل دخولك", sub: "طلعات السياكل والجري وسوق العدّة في الإمارات.", google: "المتابعة بحساب Google", uae: "الدخول بـ UAE PASS", soon: "قريباً", out: "خروج",
@@ -226,5 +226,48 @@ function api(u, F, fs, S, st) {
   };
 
   // The page offers live location sharing only where this is set.
-  return { db, user, assets, sample: null, downloads: null, geo: !!navigator.geolocation };
+  return { db, user, assets, sample: aiEnabled ? aiSample(u) : null, downloads: null, geo: !!navigator.geolocation };
+}
+
+function aiSample(user) {
+  async function request(prompt, image) {
+    let photo;
+    if (image) {
+      if (image.size > 2 * 1024 * 1024) throw new Error("AI photo exceeds 2 MiB");
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(image);
+      });
+      photo = { type: image.type, data: dataUrl.split(",")[1] };
+    }
+    const response = await fetch("/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + await user.getIdToken()
+      },
+      body: JSON.stringify({ prompt, photo }),
+      signal: AbortSignal.timeout(45000)
+    });
+    if (!response.ok) {
+      throw Object.assign(new Error("AI request failed"), {
+        code: response.status === 429 ? "rate_limited" : "upstream_error"
+      });
+    }
+    return response.json();
+  }
+
+  const sample = (prompt) => request(prompt);
+  sample.limits = async () => ({ images: true });
+  sample.json = async (prompt, { images } = {}) => {
+    const { text } = await request(prompt, images?.[0]);
+    const result = JSON.parse(text.trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
+    if (!result || typeof result !== "object" || Array.isArray(result)) {
+      throw new Error("Expected an AI response object");
+    }
+    return result;
+  };
+  return sample;
 }

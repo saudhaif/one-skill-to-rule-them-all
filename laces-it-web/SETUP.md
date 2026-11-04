@@ -38,7 +38,7 @@ npm install -g firebase-tools
 firebase login
 cd laces-it-web
 firebase use --add          # اختر مشروعك
-firebase deploy
+firebase deploy --except functions
 ```
 
 بعدها يعطيك رابط مثل `https://<project>.web.app`، وهذا رابط التطبيق اللي
@@ -86,3 +86,23 @@ firebase emulators:start --only auth,firestore,storage,hosting --project demo-la
 ```
 
 افتح `http://localhost:5000/?emu`.
+
+## تفعيل ميزات الذكاء الاصطناعي
+
+تشغّل دالة Firebase ميزات تخطيط الطلعة وكتابة الإعلان من الصورة والتدريب والترجمة
+(وكذلك اقتراحات التجهيز). يرسل التطبيق نص الطلب والصورة المختارة عند كتابة الإعلان
+إلى Anthropic. الطلبات متاحة بعد تسجيل الدخول وتُحسب على حساب Anthropic الخاص
+بالمشروع. الحد 10 طلبات لكل عضو و100 للمشروع يومياً بتوقيت UTC.
+
+بعد إعداد Firebase وتفعيل خطة Blaze، نفّذ من مجلد `laces-it-web`:
+
+```sh
+npm --prefix functions install
+firebase functions:secrets:set ANTHROPIC_API_KEY
+firebase deploy --only functions:lacesAi
+```
+
+أدخل مفتاح Anthropic عند مطالبة CLI به. بعد نشر الدالة، غيّر `aiEnabled` إلى
+`true` في `public/firebase-config.js` ثم نفّذ `firebase deploy --only hosting`.
+جرّب الميزات بعد الدخول بحساب Google. لإيقاف ظهورها، أعد الخيار إلى `false`
+وارفع الاستضافة. لإيقاف الوصول المباشر أيضاً، احذف دالة `lacesAi` من المشروع.
