@@ -20,3 +20,6 @@ export const sdk = "https://www.gstatic.com/firebasejs/10.12.2";
 
 // Local testing against the Firebase emulators (firebase emulators:start).
 export const emulators = location.hostname === "localhost" && new URLSearchParams(location.search).has("emu");
+
+// Enable after deploying the lacesAi function (see SETUP.md).
+export const aiEnabled = false;
