@@ -24,10 +24,6 @@ page = swap(page, '<link rel="preconnect" href="https://fonts.googleapis.com">',
             '<link rel="preconnect" href="https://fonts.googleapis.com">')
 page = swap(page, 'const ARTIFACT = "https://claude.ai/artifact/4HJev2ajB5nrLajaq4Lru8";',
             'const ARTIFACT = location.origin + location.pathname;')
-page = swap(page, '<img src="/_blob/${esc(x.photo)}"', '<img src="${esc(photoSrc(x.photo))}"')
-page = swap(page, 'const res = await fetch("/_blob/" + x.photo);', 'const res = await fetch(photoSrc(x.photo));')
-page = swap(page, "  const txt = (r, f) =>",
-            '  const photoSrc = (p) => /^https?:/.test(p) ? p : "/_blob/" + p;\n  const txt = (r, f) =>')
 page = swap(page, "  for (const k in EXTRA) Object.assign(I18N[k], EXTRA[k]);",
             """  for (const k in EXTRA) Object.assign(I18N[k], EXTRA[k]);
   const WEB = {

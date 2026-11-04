@@ -850,7 +850,9 @@ textarea { min-height: 80px; resize: vertical; }
     { id: "exi1", example: true, titleKey: "exi1", descKey: "exi1d", sport: "bike", category: "watches", condition: "likenew", price: 650, emirate: "DXB", phone: "+971 50 000 0000" },
     { id: "exi2", example: true, titleKey: "exi2", descKey: "exi2d", sport: "run", category: "shoes", condition: "used", price: 180, emirate: "SHJ", phone: "+971 55 000 0000" }
   ];
-  const photoSrc = (p) => /^https?:/.test(p) ? p : "/_blob/" + p;
+  // A listing photo is an uploaded asset id, a Firebase download URL, or a small JPEG kept
+  // in the listing itself (used where uploads are not available, as on some phones).
+  const photoSrc = (p) => /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(p) || /^https?:/.test(p) ? p : "/_blob/" + p;
   const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
 
   const state = {
@@ -1735,7 +1737,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
   $("#fab").addEventListener("click", () => {
     if (state.tab === "market") {
       $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true;
-      diag(assets ? "diagReady" : "photoOff");
+      diag("diagReady");
       applyAiVisibility(); $("#aiAdOut").textContent = "";
       openSheet("#sellSheet", "#s-title");
     } else {
@@ -1788,14 +1790,13 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     if (b.dataset.act === "copynum") copyText(x.phone, b, t("copiedNum"));
     else if (b.dataset.act === "tr") translate(b.dataset.key, txt(x, "desc"), b);
     else if (b.dataset.act === "savePhoto") savePhoto(x, b);
-    else if (b.dataset.act === "addPhotoItem" && !assets) flash(t("photoOff"));
     else if (b.dataset.act === "addPhotoItem") { pendingItem = x; $("#itemPhoto").value = ""; $("#itemPhoto").click(); }
     else if (b.dataset.act === "sold") {
       b.disabled = true;
       try { await db.doc("listings/" + id).update({ sold: !x.sold }); } catch { flash(t("errSave")); b.disabled = false; }
     } else if (b.dataset.act === "delItem") confirmThen(b, async () => {
       await db.doc("listings/" + id).delete();
-      if (x.photo && assets) assets.delete(x.photo).catch(() => {});
+      if (x.photo && assets && !String(x.photo).startsWith("data:")) assets.delete(x.photo).catch(() => {});
     });
   });
 
@@ -1888,7 +1889,6 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     $("#s-photo").value = ""; $("#pickTxt").textContent = t("addPhoto");
   }
   function diag(key, extra) { $("#photoDiag").textContent = t(key) + (extra ? " (" + extra + ")" : ""); }
-  $("#s-photo").addEventListener("click", (e) => { if (!assets) { e.preventDefault(); diag("photoOff"); } });
   $("#s-photo").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) { diag("diagNoFile"); return; }
     diag("diagGot", (f.type || "?") + ", " + Math.round(f.size / 1024) + " KB");
@@ -1902,16 +1902,38 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
       $("#pickTxt").textContent = t("changePhoto"); err.textContent = "";
     } catch { clearPhoto(); err.textContent = t("errPhotoType"); diag("errPhotoType", f.type || "?"); }
   });
+  // Shrinks a photo until it fits inside a listing document (well under the 256 KB cap).
+  async function inlinePhoto(blob) {
+    const src = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+      for (const [side, q] of [[900, .72], [720, .62], [560, .55], [420, .5]]) {
+        const k = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        const url = c.toDataURL("image/jpeg", q);
+        if (url.startsWith("data:image/jpeg") && url.length < 180000) return url;
+      }
+      throw { code: "too_large" };
+    } finally { URL.revokeObjectURL(src); }
+  }
+  async function storePhoto(blob) {
+    if (assets) {
+      try { return (await assets.upload(blob, { type: blob.type || "image/jpeg" })).id; }
+      catch (ex) { if (ex?.code === "too_large" || ex?.code === "unsupported_type") throw ex; }
+    }
+    return inlinePhoto(blob);
+  }
   // Add a photo to a listing that was posted without one.
   let pendingItem = null;
   $("#itemPhoto").addEventListener("change", async (e) => {
     const f = e.target.files[0], x = pendingItem; pendingItem = null;
-    if (!f || !x || !assets) { if (x) flash(t("diagNoFile")); return; }
+    if (!f || !x) { if (x) flash(t("diagNoFile")); return; }
     flash(t("uploading"));
     try {
       const blob = await photoFrom(f);
-      const id = (await assets.upload(blob, { type: blob.type || "image/jpeg" })).id;
-      await db.doc("listings/" + x.id).update({ photo: id });
+      await db.doc("listings/" + x.id).update({ photo: await storePhoto(blob) });
       $("#status").hidden = true;
     } catch (ex) { flash((ex?.code ? photoErr(ex) : t("errPhotoType")) + " (" + (ex?.code || f.type || "?") + ")"); }
   });
@@ -1940,9 +1962,9 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     const btn = $("#sellBtn"); btn.disabled = true;
     let photo = null;
     try {
-      if (photoBlob && assets) {
+      if (photoBlob) {
         err.textContent = t("uploading");
-        try { photo = (await assets.upload(photoBlob, { type: photoBlob.type || "image/jpeg" })).id; err.textContent = ""; }
+        try { photo = await storePhoto(photoBlob); err.textContent = ""; }
         catch (ex) { err.textContent = photoErr(ex); diag("errPhoto", ex?.code || "?"); btn.disabled = false; return; }
       }
       await db.collection("listings").add({
