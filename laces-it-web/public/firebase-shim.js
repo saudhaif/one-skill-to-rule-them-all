@@ -235,5 +235,23 @@ function api(u, F, fs, S, st) {
       return { status: "saved" };
     }
   };
-  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation };
+  // Hourly ride-day forecast and dust from Open-Meteo (free, no key), cached for 30 minutes.
+  const wxMemo = {};
+  const weather = {
+    hourly: async (lat, lon, day) => {
+      const key = [lat.toFixed(2), lon.toFixed(2), day].join("|");
+      if (wxMemo[key] && Date.now() - wxMemo[key].at < 18e5) return wxMemo[key].hours;
+      const q = `latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&timezone=Asia%2FDubai&start_date=${day}&end_date=${day}`;
+      const [f, a] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?${q}&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,uv_index,precipitation_probability`).then((r) => r.ok ? r.json() : null).catch(() => null),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${q}&hourly=pm10,dust`).then((r) => r.ok ? r.json() : null).catch(() => null)
+      ]);
+      const h = f?.hourly; if (!h?.time) return [];
+      const aq = {}; (a?.hourly?.time || []).forEach((t, i) => { aq[t] = { pm10: a.hourly.pm10?.[i], dust: a.hourly.dust?.[i] }; });
+      const hours = h.time.map((t, i) => ({ t, temp: h.temperature_2m?.[i], feels: h.apparent_temperature?.[i], hum: h.relative_humidity_2m?.[i], wind: h.wind_speed_10m?.[i], gust: h.wind_gusts_10m?.[i], uv: h.uv_index?.[i], rain: h.precipitation_probability?.[i], pm10: aq[t]?.pm10, dust: aq[t]?.dust }));
+      wxMemo[key] = { at: Date.now(), hours };
+      return hours;
+    }
+  };
+  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation, weather };
 }

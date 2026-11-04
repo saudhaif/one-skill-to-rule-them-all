@@ -485,6 +485,22 @@ button.pp { cursor: pointer; }
 .tslots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .tslots button { min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: 700 13px var(--font); font-variant-numeric: tabular-nums; cursor: pointer; }
 .tslots button[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+/* Ride-day weather. */
+.wx { display: grid; gap: 10px; padding: 12px; border-radius: 16px; background: var(--bg); }
+.wx .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wx .head b { font: 700 14px var(--font); }
+.wx .score { font: 700 12px var(--font); padding: 3px 10px; border-radius: 999px; }
+.wx .score.good { background: color-mix(in srgb, var(--ok) 18%, var(--card)); color: var(--ok); }
+.wx .score.caution { background: #fff3c4; color: #7a5a00; }
+.wx .score.hard { background: var(--accent-soft); color: var(--accent-text); }
+.wx .score.danger { background: var(--danger); color: #fff; }
+.wx .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.wx .grid div { background: var(--card); border-radius: 12px; padding: 8px; text-align: center; }
+.wx .grid b { display: block; font: 800 18px/1.2 var(--logo); font-variant-numeric: tabular-nums; }
+.wx .grid span { font-size: 11px; color: var(--muted); }
+.wx ul { margin: 0; padding-inline-start: 18px; font-size: 13px; display: grid; gap: 2px; }
+.wx .best { margin: 0; font-size: 13px; font-weight: 700; color: var(--accent-text); }
+.wx .src { margin: 0; font-size: 11px; color: var(--muted); }
 .coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
@@ -997,7 +1013,7 @@ button.pp { cursor: pointer; }
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
-  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, writeChain = Promise.resolve();
+  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
 
   function haversine(a, b) {
@@ -1797,6 +1813,92 @@ Their upcoming rides: ${next}.`;
     const cur = $("#f-time").value;
     $("#tslots").innerHTML = SLOTS.map((v) => `<button type="button" data-slot="${v}" aria-pressed="${v === cur}">${esc(fmtTime.format(new Date("2000-01-01T" + v + ":00")))}</button>`).join("");
   }
+  // ---------- Ride-day weather (where the host offers a forecast: the standalone app) ----------
+  const WX = {
+    ar: { title: "الجو وقت الطلعة", feels: "المحسوس", hum: "الرطوبة", wind: "الرياح كم/س", uv: "الأشعة UV", dust: "الغبار", rain: "مطر",
+      good: "جو ممتاز", caution: "انتبه", hard: "جو صعب", danger: "خطر، فكّر تأجّل", loading: "جاري جلب توقعات الجو…", none: "التوقعات تطلع قبل الطلعة بأسبوعين تقريباً.",
+      best: "أفضل وقت للانطلاق: {t} (المحسوس {f}°)", src: "التوقعات من Open-Meteo",
+      r_heat: "حرارة محسوسة توصل {n}°", r_hum: "رطوبة عالية {n}%", r_wind: "رياح قوية لين {n} كم/س", r_uv: "أشعة UV عالية ({n})", r_dust: "غبار في الجو (PM10 {n})", r_rain: "احتمال مطر {n}%" },
+    en: { title: "Ride-time weather", feels: "Feels like", hum: "Humidity", wind: "Wind km/h", uv: "UV", dust: "Dust", rain: "Rain",
+      good: "Great conditions", caution: "Take care", hard: "Tough conditions", danger: "Dangerous: consider postponing", loading: "Getting the forecast…", none: "The forecast appears about two weeks before the ride.",
+      best: "Best start time: {t} (feels {f}°)", src: "Forecast by Open-Meteo",
+      r_heat: "Feels up to {n}°", r_hum: "High humidity {n}%", r_wind: "Strong wind up to {n} km/h", r_uv: "High UV ({n})", r_dust: "Dust in the air (PM10 {n})", r_rain: "{n}% chance of rain" },
+    fil: { title: "Panahon sa oras ng ride", feels: "Pakiramdam", hum: "Halumigmig", wind: "Hangin km/h", uv: "UV", dust: "Alikabok", rain: "Ulan",
+      good: "Magandang panahon", caution: "Mag-ingat", hard: "Mahirap na panahon", danger: "Delikado: pag-isipang ipagpaliban", loading: "Kinukuha ang forecast…", none: "Lalabas ang forecast mga dalawang linggo bago ang ride.",
+      best: "Pinakamagandang simula: {t} (pakiramdam {f}°)", src: "Forecast mula sa Open-Meteo",
+      r_heat: "Pakiramdam hanggang {n}°", r_hum: "Mataas na halumigmig {n}%", r_wind: "Malakas na hangin hanggang {n} km/h", r_uv: "Mataas na UV ({n})", r_dust: "May alikabok (PM10 {n})", r_rain: "{n}% tsansa ng ulan" },
+    hi: { title: "राइड के समय मौसम", feels: "महसूस", hum: "नमी", wind: "हवा किमी/घं", uv: "UV", dust: "धूल", rain: "बारिश",
+      good: "बढ़िया मौसम", caution: "सावधान", hard: "कठिन मौसम", danger: "ख़तरा: टालने पर विचार करें", loading: "मौसम का पूर्वानुमान आ रहा है…", none: "पूर्वानुमान राइड से लगभग दो हफ़्ते पहले दिखेगा।",
+      best: "शुरू करने का सबसे अच्छा समय: {t} (महसूस {f}°)", src: "पूर्वानुमान: Open-Meteo",
+      r_heat: "{n}° तक महसूस", r_hum: "ज़्यादा नमी {n}%", r_wind: "तेज़ हवा {n} किमी/घं तक", r_uv: "ज़्यादा UV ({n})", r_dust: "हवा में धूल (PM10 {n})", r_rain: "बारिश की {n}% संभावना" }
+  };
+  const wxT = (k, v) => { let x = (WX[lang] || WX.en)[k] ?? WX.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const wxCache = {};
+  const hourKey = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Dubai", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false }).format(d).replace(" ", "T").slice(0, 13);
+  function loadWeather(r) {
+    if (!weather || wxCache[r.id]) return;
+    const start = Date.parse(r.startAt);
+    if (start - Date.now() > 15 * 864e5 || start < Date.now() - 36e5 * 6) { wxCache[r.id] = { status: "none" }; return; }
+    wxCache[r.id] = { status: "loading" };
+    const [lat, lon] = where(r);
+    weather.hourly(lat, lon, uaeDay(r.startAt)).then((hours) => { wxCache[r.id] = hours?.length ? { status: "ok", hours } : { status: "none" }; refreshWx(r); })
+      .catch(() => { wxCache[r.id] = { status: "none" }; refreshWx(r); });
+  }
+  function refreshWx(r) { const box = document.querySelector(`.ride[data-id="${CSS.escape(r.id)}"] [data-wx]`); if (box) box.outerHTML = weatherBlock(r); }
+  // Hours the ride covers, then a verdict from the worst of them.
+  function rideHoursWx(r, hours, startMs) {
+    const h = rideHours(r) || 2, keys = [];
+    for (let t = startMs; t <= startMs + h * 36e5; t += 36e5) keys.push(hourKey(new Date(t)));
+    return hours.filter((x) => keys.includes(x.t.slice(0, 13)));
+  }
+  function verdict(span) {
+    const mx = (k) => Math.max(...span.map((x) => +x[k] || 0));
+    const v = { feels: Math.round(mx("feels")), hum: Math.round(mx("hum")), wind: Math.round(Math.max(mx("wind"), mx("gust") * .8)), uv: Math.round(mx("uv")), pm10: Math.round(mx("pm10")), rain: Math.round(mx("rain")) };
+    let lvl = 0; const why = [];
+    const bump = (n, k, val) => { if (n > lvl) lvl = n; if (n) why.push(wxT(k, { n: val })); };
+    bump(v.feels >= 43 ? 3 : v.feels >= 38 ? 2 : v.feels >= 32 ? 1 : 0, "r_heat", v.feels);
+    if (v.hum >= 75 && v.feels >= 30) bump(1, "r_hum", v.hum);
+    bump(v.wind >= 45 ? 3 : v.wind >= 35 ? 2 : v.wind >= 25 ? 1 : 0, "r_wind", v.wind);
+    if (v.uv >= 8) bump(1, "r_uv", v.uv);
+    bump(v.pm10 >= 500 ? 3 : v.pm10 >= 300 ? 2 : v.pm10 >= 150 ? 1 : 0, "r_dust", v.pm10);
+    bump(v.rain >= 60 ? 2 : v.rain >= 30 ? 1 : 0, "r_rain", v.rain);
+    return { v, lvl, why, key: ["good", "caution", "hard", "danger"][lvl] };
+  }
+  // The start hour that day (dawn or evening) with the coolest worst hour.
+  function bestStart(r, hours) {
+    const day = uaeDay(r.startAt), cand = [4, 5, 6, 7, 8, 16, 17, 18, 19, 20];
+    let best = null;
+    for (const h of cand) {
+      const t = Date.parse(`${day}T${String(h).padStart(2, "0")}:00:00+04:00`);
+      const span = rideHoursWx(r, hours, t); if (!span.length) continue;
+      const f = Math.max(...span.map((x) => +x.feels || 0));
+      if (!best || f < best.f) best = { t, f };
+    }
+    return best;
+  }
+  function weatherBlock(r) {
+    if (!weather) return "";
+    loadWeather(r);
+    const c = wxCache[r.id] || { status: "loading" };
+    if (c.status !== "ok") return `<div class="wx" data-wx><div class="head"><b>${esc(wxT("title"))}</b></div><p class="sub">${esc(wxT(c.status === "loading" ? "loading" : "none"))}</p></div>`;
+    const start = Date.parse(r.startAt), span = rideHoursWx(r, c.hours, start);
+    if (!span.length) return `<div class="wx" data-wx><div class="head"><b>${esc(wxT("title"))}</b></div><p class="sub">${esc(wxT("none"))}</p></div>`;
+    const v = verdict(span), best = bestStart(r, c.hours);
+    const better = best && Math.abs(best.t - start) >= 36e5 && v.v.feels - best.f >= 2;
+    return `<div class="wx" data-wx>
+      <div class="head"><b>${esc(wxT("title"))}</b><span class="score ${v.key}">${esc(wxT(v.key))}</span></div>
+      <div class="grid"><div><b>${v.v.feels}°</b><span>${esc(wxT("feels"))}</span></div><div><b>${v.v.wind}</b><span>${esc(wxT("wind"))}</span></div><div><b>${v.v.hum}%</b><span>${esc(wxT("hum"))}</span></div>
+        <div><b>${v.v.uv}</b><span>${esc(wxT("uv"))}</span></div><div><b>${v.v.pm10 || "—"}</b><span>${esc(wxT("dust"))} PM10</span></div><div><b>${v.v.rain}%</b><span>${esc(wxT("rain"))}</span></div></div>
+      ${v.why.length ? `<ul>${v.why.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : ""}
+      ${better ? `<p class="best">${esc(wxT("best", { t: fmtTime.format(new Date(best.t)), f: Math.round(best.f) }))}</p>` : ""}
+      <p class="src">${esc(wxT("src"))}</p></div>`;
+  }
+  function weatherForAi(r) {
+    const c = wxCache[r.id]; if (c?.status !== "ok") return "not available";
+    const span = rideHoursWx(r, c.hours, Date.parse(r.startAt)); if (!span.length) return "not available";
+    const v = verdict(span).v;
+    return `feels like up to ${v.feels}°C, humidity up to ${v.hum}%, wind up to ${v.wind} km/h, UV ${v.uv}, PM10 dust ${v.pm10 || "n/a"}, rain chance ${v.rain}%`;
+  }
   let heroKey = "";
   function renderHero() {
     const now = Date.now(), all = state.mode === "live" ? state.rides : state.mode === "example" ? EXAMPLES : [];
@@ -1902,6 +2004,7 @@ Their upcoming rides: ${next}.`;
       ${open ? `<div class="details">
         ${liveBlock(r)}
         ${sunBlock(r, past)}
+        ${!past ? weatherBlock(r) : ""}
         <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}</div>
         ${r.gainM ? `<p class="sub">${esc(t("climb", { n: r.gainM }))}</p>` : ""}
         ${notes ? `<p class="notes">${esc(shown("r" + r.id, notes))}</p>${r.example ? "" : trBtn("r" + r.id, notes)}` : ""}
@@ -2036,7 +2139,8 @@ Meeting point: ${txt(r, "meet") ?? r.meetPoint}
 When: ${start.toString()}
 Distance: ${r.distanceKm} km; ${run ? `pace ${r.paceMinKm || "not set"} min/km` : `average speed ${r.paceKmh || "not set"} km/h`}; climb ${r.gainM || "unknown"} m
 Level: ${I18N.en["lvl_" + r.level]}
-Organiser notes: ${txt(r, "notes") || "none"}`;
+Organiser notes: ${txt(r, "notes") || "none"}
+Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base the heat, wind and dust advice on it and say plainly if the ride should move earlier or be postponed.`;
     try {
       const { text } = await sample(prompt, { modelTier: "quick", onText: ({ text }) => {
         state.ai[r.id] = text;
@@ -2497,7 +2601,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
   applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample, assets, downloads, geo] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo"].map((n) => claude.use(n)));
+    [db, user, sample, assets, downloads, geo, weather] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;
