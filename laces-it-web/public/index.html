@@ -391,6 +391,17 @@ textarea { min-height: 80px; resize: vertical; }
 .live li span { color: var(--muted); }
 .live li a { color: var(--accent-text); font-weight: 600; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
 .btn.stop { background: var(--danger); color: #fff; }
+/* AI helpers: one quiet panel per sheet, a button that says what it will do. */
+.aibox { display: grid; gap: 8px; padding: 12px; border-radius: 16px; background: var(--accent-soft); }
+.aibox strong { font: 700 14px var(--font); color: var(--accent-text); }
+.aibox p { margin: 0; font-size: 12px; color: var(--muted); }
+.aibox textarea { min-height: 64px; background: var(--card); }
+.aibtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 16px; border-radius: 14px; border: 0; background: var(--ink); color: var(--card); font: 700 14px var(--font); cursor: pointer; }
+.aibtn:disabled { opacity: .6; cursor: default; }
+.aibtn .spark { color: var(--accent); }
+.aiout { margin: 0; font-size: 13px; font-weight: 600; color: var(--accent-text); min-height: 1em; }
+.tr { border: 0; background: none; padding: 0; min-height: 32px; color: var(--accent-text); font: 600 12px var(--font); cursor: pointer; justify-self: start; }
+.coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
 <div id="app" dir="rtl" lang="ar">
@@ -463,6 +474,12 @@ textarea { min-height: 80px; resize: vertical; }
     <form class="sheet pad" id="addForm" novalidate>
       <div class="grab"></div>
       <header><h2 class="h2" data-i18n="formTitle"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="aibox" id="aiPlan" hidden>
+        <strong id="aiPlanT"></strong>
+        <textarea id="aiPlanIn" maxlength="400" aria-labelledby="aiPlanT"></textarea>
+        <button type="button" class="aibtn" id="aiPlanBtn"><span class="spark" aria-hidden="true">✦</span><span></span></button>
+        <p class="aiout" id="aiPlanOut" role="status"></p>
+      </div>
       <div class="fields">
         <label><span data-i18n="fTitle"></span><input id="f-title" maxlength="80" data-i18n-ph="fTitlePh" required></label>
         <div class="two">
@@ -507,6 +524,12 @@ textarea { min-height: 80px; resize: vertical; }
           <div class="preview" id="photoPrev" hidden><img id="photoImg" alt=""><button type="button" class="close" id="photoClear" data-i18n-aria="removePhoto">✕</button></div>
         </div>
         <p class="sub" id="s-photo-off" hidden data-i18n="photoOff"></p>
+        <div class="aibox" id="aiAd" hidden>
+          <strong id="aiAdT"></strong>
+          <p id="aiAdHelp"></p>
+          <button type="button" class="aibtn" id="aiAdBtn"><span class="spark" aria-hidden="true">✦</span><span></span></button>
+          <p class="aiout" id="aiAdOut" role="status"></p>
+        </div>
         <label><span data-i18n="sTitle"></span><input id="s-title" maxlength="80" data-i18n-ph="sTitlePh" required></label>
         <div class="two">
           <label><span data-i18n="sPrice"></span><input id="s-price" type="number" min="0" max="200000" step="1" inputmode="numeric" required></label>
@@ -1101,7 +1124,9 @@ textarea { min-height: 80px; resize: vertical; }
       <h3>${esc(f("passport"))}<small>${esc(f("passportOf", { n: s.ems.size }))}</small></h3>
       <div class="stamps">${EMIRATES.map((e) => `<div class="stamp${s.ems.has(e) ? " on" : ""}" title="${esc(t("em_" + e))}" aria-label="${esc(t("em_" + e))}">${EM_ABBR[e]}</div>`).join("")}</div>
       <h3>${esc(f("medals"))}<small>${s.medals.filter((m) => m[2]).length}/${s.medals.length}</small></h3>
-      <div class="badges">${s.medals.map(([k, g, on]) => `<div class="medal${on ? " on" : ""}"><i>${esc(g)}</i><div><b>${esc(f(k))}</b><span>${esc(f(k + "S"))}</span></div></div>`).join("")}</div>`;
+      <div class="badges">${s.medals.map(([k, g, on]) => `<div class="medal${on ? " on" : ""}"><i>${esc(g)}</i><div><b>${esc(f(k))}</b><span>${esc(f(k + "S"))}</span></div></div>`).join("")}</div>
+      ${sample ? `<button type="button" class="aibtn" data-coach><span class="spark" aria-hidden="true">✦</span><span>${esc(ai("coachBtn"))}</span></button>` : ""}
+      ${aiState.coach ? `<div class="coach" id="coachOut">${esc(aiState.coach)}</div>` : ""}`;
   }
   async function setMine(field, rideId, value) {
     if (!db || !state.me) return;
@@ -1200,6 +1225,124 @@ textarea { min-height: 80px; resize: vertical; }
       document.querySelectorAll(`[data-pin="${CSS.escape(uid)}"] text, [data-pin-row="${CSS.escape(uid)}"] b`).forEach((el) => { el.textContent = name; });
     }
   }
+  // ---------- AI helpers (Claude, on the viewer's own account) ----------
+  const AI = {
+    ar: { planT: "خطّط الطلعة بالذكاء الاصطناعي", planPh: "مثال: طلعة سيكل سهلة الجمعة الصبح في القدرة، 50 كم للمبتدئين", planBtn: "عبّ النموذج لي", planDone: "تم! راجع التفاصيل وعدّل اللي تبيه قبل النشر.", planNeed: "اكتب وصف قصير للطلعة.",
+      adT: "اكتب الإعلان بالذكاء الاصطناعي", adHelp: "اكتب اسم الغرض (وأضف صورة إذا تبي)، ويكتب لك الوصف ويقترح الفئة والسعر.", adBtn: "اكتب الإعلان", adDone: "سعر مقترح: {lo}–{hi} درهم", adNeed: "اكتب اسم الغرض أول.",
+      coachBtn: "خطة أسبوعي من المدرب", coachT: "المدرب", tr: "ترجم", orig: "النص الأصلي", busy: "يفكّر…" },
+    en: { planT: "Plan the ride with AI", planPh: "e.g. easy Friday morning bike ride at Al Qudra, 50 km for beginners", planBtn: "Fill in the form", planDone: "Done. Check the details and change anything before you publish.", planNeed: "Write a short description of the ride.",
+      adT: "Write the listing with AI", adHelp: "Type the item's name (add a photo if you like) and it writes the description and suggests a category and price.", adBtn: "Write the listing", adDone: "Suggested price: {lo}–{hi} AED", adNeed: "Type the item's name first.",
+      coachBtn: "Weekly plan from the coach", coachT: "Coach", tr: "Translate", orig: "Original", busy: "Thinking…" },
+    fil: { planT: "Planuhin ang ride gamit ang AI", planPh: "hal. madaling bike ride sa Al Qudra sa Biyernes ng umaga, 50 km para sa baguhan", planBtn: "Punan ang form", planDone: "Tapos na. Suriin ang detalye bago i-publish.", planNeed: "Sumulat ng maikling paglalarawan ng ride.",
+      adT: "Isulat ang listing gamit ang AI", adHelp: "I-type ang pangalan ng gamit (at larawan kung gusto mo) at isusulat nito ang paglalarawan at magmumungkahi ng kategorya at presyo.", adBtn: "Isulat ang listing", adDone: "Mungkahing presyo: {lo}–{hi} AED", adNeed: "I-type muna ang pangalan ng gamit.",
+      coachBtn: "Lingguhang plano mula sa coach", coachT: "Coach", tr: "Isalin", orig: "Orihinal", busy: "Nag-iisip…" },
+    hi: { planT: "AI से राइड प्लान करें", planPh: "जैसे: शुक्रवार सुबह अल कुदरा में आसान साइकिल राइड, शुरुआती लोगों के लिए 50 किमी", planBtn: "फ़ॉर्म भर दें", planDone: "हो गया। पब्लिश करने से पहले जानकारी जाँच लें।", planNeed: "राइड के बारे में छोटा विवरण लिखें।",
+      adT: "AI से लिस्टिंग लिखें", adHelp: "सामान का नाम लिखें (चाहें तो फ़ोटो जोड़ें), यह विवरण लिखेगा और श्रेणी व कीमत सुझाएगा।", adBtn: "लिस्टिंग लिखें", adDone: "सुझाई गई कीमत: {lo}–{hi} AED", adNeed: "पहले सामान का नाम लिखें।",
+      coachBtn: "कोच से साप्ताहिक प्लान", coachT: "कोच", tr: "अनुवाद करें", orig: "मूल", busy: "सोच रहा है…" }
+  };
+  const ai = (k, v) => { let s = AI[lang][k] ?? AI.en[k]; if (v) for (const [a, b] of Object.entries(v)) s = s.split("{" + a + "}").join(b); return s; };
+  const aiState = { coach: "", tr: {}, trOn: {} };
+  const dubaiDay = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dubai" }).format(new Date());
+  function aiErr(e) {
+    if (["not_granted", "sampling_disabled", "capability_disabled", "not_declared", "capability_removed"].includes(e?.code)) { sample = null; applyAiVisibility(); return ""; }
+    return t(e?.code === "rate_limited" ? "rateLimit" : "aiFail");
+  }
+  function applyAiVisibility() {
+    $("#aiPlan").hidden = !sample; $("#aiAd").hidden = !sample;
+  }
+  function paintAi() {
+    $("#aiPlanT").textContent = ai("planT"); $("#aiPlanIn").placeholder = ai("planPh");
+    $("#aiPlanBtn span:last-child").textContent = ai("planBtn");
+    $("#aiAdT").textContent = ai("adT"); $("#aiAdHelp").textContent = ai("adHelp");
+    $("#aiAdBtn span:last-child").textContent = ai("adBtn");
+  }
+  // 1. Ride planner: free text in, the ride form filled out.
+  async function planRide() {
+    const out = $("#aiPlanOut"), btn = $("#aiPlanBtn"), want = $("#aiPlanIn").value.trim();
+    if (!want) { out.textContent = ai("planNeed"); return; }
+    btn.disabled = true; out.textContent = ai("busy");
+    const today = dubaiDay(), wd = new Intl.DateTimeFormat("en", { weekday: "long", timeZone: "Asia/Dubai" }).format(new Date());
+    const prompt = `You plan group rides and runs for a UAE crew app. Turn the member's request into one event.
+Today in the UAE is ${wd} ${today}. Pick a real UAE venue that fits (for example Al Qudra Cycle Track, Hudayriyat Island, Yas Marina Circuit, Nad Al Sheba cycle park, Meydan, Jebel Jais, Jebel Hafeet, Abu Dhabi Corniche, Kite Beach, Al Marjan Island) unless the member names one. Prefer an early-morning start in hot months.
+Reply with only a JSON object:
+{"title": string (short, in ${t("aiLang")}), "sport": "bike" | "run", "emirate": one of ${JSON.stringify(EMIRATES)}, "level": "beg" | "int" | "adv",
+ "date": "YYYY-MM-DD" (on or after today), "time": "HH:MM" (24h, UAE time), "meetPoint": string (in ${t("aiLang")}), "distanceKm": number,
+ "pace": number (average km/h for bike, minutes per km for run), "maxRiders": number or null, "notes": string (2-3 short safety and kit notes, in ${t("aiLang")})}
+
+Member's request: ${want}`;
+    try {
+      const r = await sample.json(prompt, { modelTier: "quick", cache: false });
+      const set = (sel, v) => { if (v !== undefined && v !== null && v !== "") $(sel).value = v; };
+      if (r.sport === "bike" || r.sport === "run") { $("#f-sport").value = r.sport; syncPace(true); }
+      set("#f-title", String(r.title || "").slice(0, 80)); set("#f-meet", String(r.meetPoint || "").slice(0, 120));
+      if (EMIRATES.includes(r.emirate)) $("#f-emirate").value = r.emirate;
+      if (LEVELS.includes(r.level)) $("#f-level").value = r.level;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(r.date || "")) $("#f-date").value = r.date;
+      if (/^\d{2}:\d{2}$/.test(r.time || "")) $("#f-time").value = r.time;
+      if (+r.distanceKm > 0) $("#f-km").value = Math.round(+r.distanceKm * 10) / 10;
+      if (+r.pace > 0) $("#f-pace").value = +r.pace;
+      $("#f-max").value = +r.maxRiders >= 2 ? Math.round(+r.maxRiders) : "";
+      set("#f-notes", String(r.notes || "").slice(0, 600));
+      out.textContent = ai("planDone");
+    } catch (e) { out.textContent = aiErr(e); }
+    finally { btn.disabled = false; }
+  }
+  // 2. Listing writer: name (and photo, where images are allowed) in, description, category and a price range out.
+  async function writeAd() {
+    const out = $("#aiAdOut"), btn = $("#aiAdBtn"), name = $("#s-title").value.trim();
+    if (!name && !photoBlob) { out.textContent = ai("adNeed"); $("#s-title").focus(); return; }
+    btn.disabled = true; out.textContent = ai("busy");
+    let images;
+    try { const lim = await sample.limits(); if (photoBlob && lim.images) images = [photoBlob]; } catch {}
+    const prompt = `You write second-hand listings for a UAE cycling and running gear market.${images ? " The photo shows the item; use what you can see (brand, model, size, wear)." : ""}
+Item: ${name || "(see photo)"}${$("#s-desc").value.trim() ? "\nSeller's notes: " + $("#s-desc").value.trim() : ""}
+Reply with only a JSON object:
+{"title": string (clear, at least 6 characters, in ${t("aiLang")}), "description": string (3-4 short honest lines: what it is, size, condition, what is included; in ${t("aiLang")}),
+ "category": one of ${JSON.stringify(CATS)}, "sport": "bike" | "run" | "both", "condition": "new" | "likenew" | "used",
+ "priceMin": number, "priceMax": number (a fair used-market range in AED in the UAE)}`;
+    try {
+      const r = await sample.json(prompt, { modelTier: images ? "default" : "quick", cache: false, images });
+      if (r.title && String(r.title).length >= 6) $("#s-title").value = String(r.title).slice(0, 80);
+      if (r.description) $("#s-desc").value = String(r.description).slice(0, 600);
+      if (CATS.includes(r.category)) $("#s-cat").value = r.category;
+      if (["bike", "run", "both"].includes(r.sport)) $("#s-sport").value = r.sport;
+      if (CONDS.includes(r.condition)) $("#s-cond").value = r.condition;
+      const lo = Math.round(+r.priceMin), hi = Math.round(+r.priceMax);
+      if (lo > 0 && hi >= lo) {
+        if (!$("#s-price").value) $("#s-price").value = Math.round((lo + hi) / 2 / 10) * 10;
+        out.textContent = ai("adDone", { lo, hi });
+      } else out.textContent = "";
+    } catch (e) { out.textContent = aiErr(e); }
+    finally { btn.disabled = false; }
+  }
+  // 3. Coach: a week of training from the member's season and upcoming rides.
+  async function askCoach(btn) {
+    btn.disabled = true; aiState.coach = ai("busy"); renderSeason();
+    const s = season(), now = Date.now(), me = mineJ();
+    const next = state.rides.filter((r) => Date.parse(r.startAt) >= now && me?.rides?.[r.id] === true).slice(0, 3)
+      .map((r) => `${sportOf(r)} ${r.distanceKm} km on ${new Date(r.startAt).toDateString()} (${I18N.en["lvl_" + r.level]})`).join("; ") || "none yet";
+    const prompt = `You are a friendly cycling and running coach in the UAE. Give this crew member a 7-day plan, Monday to Sunday, one short line per day (rest days included), built around their upcoming group rides. Mind the UAE heat: early or late sessions, hydration. End with one line of encouragement. Reply in ${t("aiLang")}. Plain text, no Markdown.
+
+Their season so far: ${s.rides} finished rides, ${s.km} km, ${s.streak}-week streak, emirates ridden: ${[...s.ems].map((e) => I18N.en["em_" + e]).join(", ") || "none"}.
+Their upcoming rides: ${next}.`;
+    try {
+      const { text } = await sample(prompt, { modelTier: "quick", cache: false, onText: ({ text }) => { aiState.coach = text; const el = $("#coachOut"); if (el) el.textContent = text; } });
+      aiState.coach = text;
+    } catch (e) { aiState.coach = e.text || aiErr(e); }
+    renderSeason();
+  }
+  // 4. Translate a ride's notes or a listing's description into the viewer's language.
+  async function translate(key, textIn, btn) {
+    if (aiState.tr[key + lang]) { aiState.trOn[key] = !aiState.trOn[key]; render(); return; }
+    btn.disabled = true; btn.textContent = ai("busy");
+    try {
+      const { text } = await sample(`Translate this into ${t("aiLang")}. Keep names, numbers and units as they are. Reply with only the translation.\n\n${textIn}`, { modelTier: "quick" });
+      aiState.tr[key + lang] = text.trim(); aiState.trOn[key] = true;
+    } catch (e) { flash(aiErr(e) || t("aiFail")); }
+    render();
+  }
+  const shown = (key, textIn) => aiState.trOn[key] && aiState.tr[key + lang] ? aiState.tr[key + lang] : textIn;
+  const trBtn = (key, textIn) => sample && textIn && textIn.length > 3 ? `<button type="button" class="tr" data-act="tr" data-key="${esc(key)}">${esc(aiState.trOn[key] && aiState.tr[key + lang] ? ai("orig") : ai("tr"))}</button>` : "";
   let heroKey = "";
   function renderHero() {
     const now = Date.now(), all = state.mode === "live" ? state.rides : state.mode === "example" ? EXAMPLES : [];
@@ -1303,7 +1446,7 @@ textarea { min-height: 80px; resize: vertical; }
         ${sunBlock(r, past)}
         <div class="map">${routeSvg(r.route)}${elevSvg(r.route)}</div>
         ${r.gainM ? `<p class="sub">${esc(t("climb", { n: r.gainM }))}</p>` : ""}
-        ${notes ? `<p class="notes">${esc(notes)}</p>` : ""}
+        ${notes ? `<p class="notes">${esc(shown("r" + r.id, notes))}</p>${r.example ? "" : trBtn("r" + r.id, notes)}` : ""}
         <div class="links">
           <a class="linkbtn" href="${esc(maps)}" target="_blank" rel="noopener">${esc(t("openMaps"))}</a>
           ${r.route?.length > 1 ? `<a class="linkbtn sat" href="${esc(satUrl(r.route))}" target="_blank" rel="noopener">${esc(SAT[lang].view)}</a>` : ""}
@@ -1496,7 +1639,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
         <div class="price">${esc(Number(x.price).toLocaleString(I18N[lang].locale))} <small>${esc(t("aed"))}</small></div>
         <span class="tag">${esc(t(sp))}</span>
         <div class="meta">${esc(t("cat_" + x.category))} · ${esc(t("cond_" + x.condition))} · ${esc(t("em_" + x.emirate))}</div>
-        ${desc ? `<p class="desc">${esc(desc)}</p>` : ""}
+        ${desc ? `<p class="desc">${esc(shown("m" + x.id, desc))}</p>${x.example ? "" : trBtn("m" + x.id, desc)}` : ""}
         ${x.sold ? "" : wa.length >= 8 && !x.example
           ? `<div class="contact"><div class="acts"><a class="wa" href="https://wa.me/${wa}?text=${encodeURIComponent(f("waMsg", { title: txt(x, "title"), price: x.price }))}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a></div></div>`
           : `<div class="contact"><span class="num">${esc(x.phone)}</span><div class="acts"><button type="button" class="cp" data-act="copynum">${esc(t("copyNum"))}</button></div></div>`}
@@ -1573,6 +1716,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     options("#s-cond", CONDS, "cond_");
     if (!$("#f-emirate").dataset.init) { $("#f-emirate").value = "DXB"; $("#s-emirate").value = "DXB"; $("#f-level").value = "int"; $("#s-cond").value = "likenew"; $("#f-emirate").dataset.init = 1; }
     syncPace(false);
+    paintAi();
     render();
   }
   $("#langSel").addEventListener("change", (e) => {
@@ -1592,10 +1736,12 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     if (state.tab === "market") {
       $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true;
       diag(assets ? "diagReady" : "photoOff");
+      applyAiVisibility(); $("#aiAdOut").textContent = "";
       openSheet("#sellSheet", "#s-title");
     } else {
       if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
-      openSheet("#rideSheet", "#f-title");
+      applyAiVisibility(); $("#aiPlanOut").textContent = "";
+      openSheet("#rideSheet", sample ? "#aiPlanIn" : "#f-title");
     }
   });
 
@@ -1605,6 +1751,9 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
   });
   $("#filters").addEventListener("change", (e) => { if (e.target.id === "emirateFilter") { state.emirate = e.target.value; renderRides(); } });
   $("#rides").addEventListener("change", (e) => { const id = e.target.dataset.lift; if (id) setMine("lifts", id, +e.target.value); });
+  $("#season").addEventListener("click", (e) => { const b = e.target.closest("[data-coach]"); if (b && sample) askCoach(b); });
+  $("#aiPlanBtn").addEventListener("click", () => planRide());
+  $("#aiAdBtn").addEventListener("click", () => writeAd());
   $("#bFilters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-f]"); if (!b) return;
     state.sport = b.dataset.f; renderBoard();
@@ -1620,6 +1769,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     else if (act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
     else if (act === "cheer") setMine("cheers", id, !(mineJ()?.cheers?.[id] === true));
     else if (act === "liveStart") startShare(id);
+    else if (act === "tr" && r) translate(b.dataset.key, txt(r, "notes"), b);
     else if (act === "liveStop") stopShare();
     else if (act === "ai" && r) askAi(r, b);
   });
@@ -1636,6 +1786,7 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     const x = (state.mode === "live" ? state.listings : EXAMPLE_ITEMS).find((i) => i.id === id);
     if (!x) return;
     if (b.dataset.act === "copynum") copyText(x.phone, b, t("copiedNum"));
+    else if (b.dataset.act === "tr") translate(b.dataset.key, txt(x, "desc"), b);
     else if (b.dataset.act === "savePhoto") savePhoto(x, b);
     else if (b.dataset.act === "addPhotoItem" && !assets) flash(t("photoOff"));
     else if (b.dataset.act === "addPhotoItem") { pendingItem = x; $("#itemPhoto").value = ""; $("#itemPhoto").click(); }
