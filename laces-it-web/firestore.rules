@@ -30,6 +30,12 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid == uid && (request.method == 'delete' || joined(rideId));
     }
 
+    // Ride chat: one document per member holding their own messages per ride.
+    match /chatmsgs/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
     match /listings/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;

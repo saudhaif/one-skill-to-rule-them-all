@@ -226,5 +226,14 @@ function api(u, F, fs, S, st) {
   };
 
   // The page offers live location sharing only where this is set.
-  return { db, user, assets, sample: null, downloads: null, geo: !!navigator.geolocation };
+  // Saving a generated file (the ride poster) as a normal browser download.
+  const downloads = {
+    save: async ({ filename, data }) => {
+      const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+      const a = document.createElement("a"); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      return { status: "saved" };
+    }
+  };
+  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation };
 }

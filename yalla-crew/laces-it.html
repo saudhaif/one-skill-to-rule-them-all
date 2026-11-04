@@ -194,7 +194,7 @@ select.chip { border-radius: 999px; padding-block: 8px; padding-inline-start: 18
 
 /* Bottom bar + FAB */
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 6; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tabbar .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+.tabbar .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
 .tabbar button { border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 3px; padding: 9px 4px 8px; font: 600 12px var(--font); cursor: pointer; }
 .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar button[aria-current="page"] { color: var(--accent-text); }
@@ -399,18 +399,99 @@ textarea { min-height: 80px; resize: vertical; }
 .aibtn .spark { color: var(--accent); }
 .aiout { margin: 0; font-size: 13px; font-weight: 600; color: var(--accent-text); min-height: 1em; }
 .tr { border: 0; background: none; padding: 0; min-height: 32px; color: var(--accent-text); font: 600 12px var(--font); cursor: pointer; justify-self: start; }
+.appbar .bar-end { display: flex; gap: 8px; align-items: center; }
+.askbtn { min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 0; background: var(--ink); color: var(--card); font: 700 13px var(--font); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.askbtn .spark { color: var(--accent); }
+.digest { justify-self: stretch; }
+.share-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.share-row a, .share-row button { display: grid; justify-items: center; gap: 4px; min-height: 64px; padding: 8px 4px; border-radius: 14px; border: 0; background: var(--bg); color: var(--ink); text-decoration: none; font: 600 12px var(--font); cursor: pointer; }
+.share-row i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 800 14px var(--logo); font-style: normal; color: #fff; }
+.poster { display: grid; gap: 8px; }
+.poster img { width: 100%; max-width: 100%; border-radius: 16px; display: block; background: var(--line); aspect-ratio: 4 / 5; object-fit: cover; }
+.chat { display: grid; gap: 8px; max-height: 50vh; overflow-y: auto; }
+.msg { padding: 10px 12px; border-radius: 16px; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 88%; }
+.msg.me { justify-self: end; background: var(--accent); color: var(--accent-ink); }
+.msg.bot { justify-self: start; background: var(--bg); }
+.ask-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.ask-sugg { display: flex; gap: 6px; flex-wrap: wrap; }
+.ask-sugg button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 600 12px var(--font); cursor: pointer; min-height: 36px; }
+/* Profile, crew level, open seats and ride chat. */
+.me-card { padding: 18px; display: grid; gap: 14px; }
+.me-head { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: center; }
+.avatar-pick { position: relative; width: 88px; height: 88px; border-radius: 50%; overflow: hidden; background: var(--line); display: grid; place-items: center; }
+.avatar-pick img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-pick span { position: absolute; inset: auto 0 0; padding: 3px 0 5px; background: rgba(0, 0, 0, .55); color: #fff; font: 700 11px var(--font); text-align: center; }
+.avatar-pick input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; font-size: 100px; }
+.avatar-pick:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.me-head h2 { margin: 0; font: 800 22px/1.2 var(--font); overflow-wrap: anywhere; }
+.me-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.lvl { display: grid; gap: 6px; padding: 14px; border-radius: 16px; background: var(--ink); color: var(--card); }
+.lvl .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.lvl b { font: 800 44px/1 var(--logo); letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.lvl span { font-size: 12px; opacity: .8; }
+.lvl .bar { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.lvl .bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.sport-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+.slot { width: 26px; height: 26px; border-radius: 50%; border: 2px dashed var(--field); margin-inline-start: -8px; background: var(--card); display: inline-grid; place-items: center; color: var(--muted); font: 700 13px var(--font); }
+.faces .slot:first-child { margin-inline-start: 0; }
+.fit { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 16%, var(--card)); color: var(--ok); }
+.fit.hard { background: var(--accent-soft); color: var(--accent-text); }
+.chatlog { display: grid; gap: 10px; max-height: 55vh; overflow-y: auto; padding-block: 4px; }
+.cmsg { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: start; }
+.cmsg img { width: 32px; height: 32px; border-radius: 50%; background: var(--line); }
+.cmsg .bub { background: var(--bg); border-radius: 4px 16px 16px 16px; padding: 8px 12px; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; justify-self: start; max-width: 100%; }
+.cmsg .who { display: block; font: 700 12px var(--font); color: var(--accent-text); }
+.cmsg .when { display: block; font-size: 11px; color: var(--muted); }
+.cmsg.me { grid-template-columns: minmax(0, 1fr); }
+.cmsg.me img { display: none; }
+.cmsg.me .bub { justify-self: end; background: var(--accent); color: var(--accent-ink); border-radius: 16px 4px 16px 16px; }
+.cmsg.me .who { display: none; }
+.cmsg.me .when { color: inherit; opacity: .75; }
+/* Open-match roster: everyone going with their level, dashed circles for open seats. */
+.roster { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 6px; padding-block: 4px; }
+.pp { display: grid; justify-items: center; gap: 3px; text-align: center; min-width: 0; border: 0; background: none; padding: 0; font: inherit; color: inherit; }
+.pp img, .pp .ring { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: var(--line); }
+.pp .ring { border: 2px dashed var(--sport); background: transparent; display: grid; place-items: center; color: var(--sport); font: 400 28px/1 var(--font); }
+button.pp { cursor: pointer; }
+.pp b { font-size: 12px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pp.more .ring { border-style: solid; font-size: 15px; font-weight: 700; }
+.mfoot { display: grid; grid-template-columns: minmax(0, 1fr) auto; border-radius: 14px; overflow: hidden; background: var(--bg); }
+.mfoot .lv { padding: 10px 12px; font-size: 13px; display: grid; gap: 2px; align-content: center; }
+.mfoot .lv b { font-weight: 700; }
+.mfoot .lv span { color: var(--muted); font-size: 12px; }
+.mfoot .mblock { background: var(--sport); color: #fff; padding: 10px 18px; display: grid; place-content: center; text-align: center; }
+.mfoot .mblock b { font: 800 18px/1.1 var(--logo); font-variant-numeric: tabular-nums; }
+.mfoot .mblock span { font-size: 12px; opacity: .9; }
+/* Day strip and time slots. */
+.days { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); padding-block: 2px 4px; }
+.days::-webkit-scrollbar { display: none; }
+.day { flex: none; width: 58px; display: grid; justify-items: center; gap: 2px; padding: 8px 0 6px; border: 0; border-radius: 18px; background: var(--card); color: var(--ink); cursor: pointer; font: inherit; }
+.day small { font: 600 11px var(--font); color: var(--muted); text-transform: uppercase; }
+.day b { font: 800 20px/1.2 var(--logo); font-variant-numeric: tabular-nums; }
+.day i { font-style: normal; font: 700 10px var(--font); min-height: 16px; padding: 1px 6px; border-radius: 999px; }
+.day i.has { background: var(--accent-soft); color: var(--accent-text); }
+.day[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+.day[aria-pressed="true"] small { color: inherit; opacity: .75; }
+.day.all { width: auto; padding-inline: 14px; align-content: center; }
+.tslots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tslots button { min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: 700 13px var(--font); font-variant-numeric: tabular-nums; cursor: pointer; }
+.tslots button[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
 .coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
 <div id="app" dir="rtl" lang="ar">
   <div class="appbar pad">
     <h1 class="logo" id="logo"></h1>
+    <div class="bar-end">
+    <button type="button" class="askbtn" id="askOpen" hidden><span class="spark" aria-hidden="true">✦</span><span id="askOpenT"></span></button>
     <select id="langSel" class="langsel" data-i18n-aria="langLabel">
       <option value="ar" lang="ar">عربي</option>
       <option value="en" lang="en">English</option>
       <option value="fil" lang="fil">Filipino</option>
       <option value="hi" lang="hi">हिन्दी</option>
     </select>
+    </div>
   </div>
   <section class="hero" id="hero"></section>
 
@@ -423,7 +504,9 @@ textarea { min-height: 80px; resize: vertical; }
         <div class="stat"><b id="st-km">0</b><span data-i18n="stKm"></span></div>
         <div class="stat"><b id="st-riders">0</b><span data-i18n="stSignups"></span></div>
       </div>
+      <div class="days" id="days" role="group"></div>
       <div class="chips" id="filters"></div>
+      <button type="button" class="aibtn digest" id="digestBtn" hidden><span class="spark" aria-hidden="true">✦</span><span id="digestT"></span></button>
       <div class="list" id="rides" aria-live="polite"></div>
     </section>
 
@@ -435,12 +518,16 @@ textarea { min-height: 80px; resize: vertical; }
       <input id="itemPhoto" class="vh" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
     </section>
 
+    <section class="screen" id="tab-me" hidden>
+      <div class="card me-card" id="meCard"></div>
+      <div class="card season" id="season" hidden></div>
+    </section>
+
     <section class="screen" id="tab-board" hidden>
       <div>
         <h2 class="h2" data-i18n="boardTitle"></h2>
         <p class="sub" data-i18n="boardSub"></p>
       </div>
-      <div class="card season" id="season" hidden></div>
       <div class="chips" id="bFilters"></div>
       <div class="card rank"><ol id="boardList"></ol></div>
       <p class="notice" id="boardEmpty" data-i18n="boardEmpty" hidden></p>
@@ -463,6 +550,10 @@ textarea { min-height: 80px; resize: vertical; }
       <button type="button" data-tab="board">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg>
         <span data-i18n="tabBoard"></span>
+      </button>
+      <button type="button" data-tab="me">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span id="tabMeT"></span>
       </button>
     </div>
   </nav>
@@ -488,6 +579,7 @@ textarea { min-height: 80px; resize: vertical; }
           <label><span data-i18n="fDate"></span><input id="f-date" type="date" required></label>
           <label><span data-i18n="fTime"></span><input id="f-time" type="time" value="05:30" required></label>
         </div>
+        <div class="tslots" id="tslots" role="group"></div>
         <label><span data-i18n="fEmirate"></span><select id="f-emirate"></select></label>
         <label><span data-i18n="fMeet"></span><input id="f-meet" maxlength="120" required></label>
         <div class="garmin" id="drop">
@@ -546,6 +638,44 @@ textarea { min-height: 80px; resize: vertical; }
       <p class="err" id="sellErr" role="alert"></p>
       <button class="btn block" type="submit" id="sellBtn" data-i18n="publishAd"></button>
     </form>
+  </div>
+
+  <!-- Share sheet: a message for any app, an AI caption and a poster image -->
+  <div class="sheet-bg" id="shareSheet" hidden>
+    <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="shareT">
+      <div class="grab"></div>
+      <header><h2 class="h2" id="shareT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <textarea id="shareText" maxlength="1200" aria-labelledby="shareT"></textarea>
+      <button type="button" class="aibtn" id="captionBtn" hidden><span class="spark" aria-hidden="true">✦</span><span id="captionT"></span></button>
+      <p class="aiout" id="shareOut" role="status"></p>
+      <div class="share-row" id="shareRow"></div>
+      <div class="poster" id="poster" hidden>
+        <img id="posterImg" alt="">
+        <p class="sub" id="posterHelp"></p>
+        <button type="button" class="btn block" id="posterSave"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ride chat -->
+  <div class="sheet-bg" id="chatSheet" hidden>
+    <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="chatT">
+      <div class="grab"></div>
+      <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="chatlog" id="chatLog" aria-live="polite"></div>
+      <form class="ask-row" id="chatForm"><input id="chatIn" maxlength="500" autocomplete="off"><button class="btn" type="submit" id="chatSend"></button></form>
+    </div>
+  </div>
+
+  <!-- Ask Laces: questions about rides and the market -->
+  <div class="sheet-bg" id="askSheet" hidden>
+    <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="askT">
+      <div class="grab"></div>
+      <header><h2 class="h2" id="askT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="ask-sugg" id="askSugg"></div>
+      <form class="ask-row" id="askForm"><input id="askIn" maxlength="400" autocomplete="off"><button class="btn" type="submit" id="askSend"></button></form>
+    </div>
   </div>
 </div>
 
@@ -841,9 +971,9 @@ textarea { min-height: 80px; resize: vertical; }
   const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
 
   const state = {
-    mode: "pending", rides: [], joins: [], listings: [], me: null, canWrite: true,
-    sport: "all", emirate: "all", mine: false, ai: {}, open: {}, gpx: null,
-    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : "rides",
+    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], me: null, canWrite: true,
+    sport: "all", emirate: "all", day: "all", mine: false, ai: {}, open: {}, gpx: null,
+    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
   let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, writeChain = Promise.resolve();
@@ -937,6 +1067,7 @@ textarea { min-height: 80px; resize: vertical; }
     let list = state.mode === "live" ? state.rides : EXAMPLES;
     if (state.sport !== "all") list = list.filter((r) => sportOf(r) === state.sport);
     if (state.emirate !== "all") list = list.filter((r) => r.emirate === state.emirate);
+    if (state.day !== "all") list = list.filter((r) => uaeDay(r.startAt) === state.day);
     if (state.mine) list = list.filter((r) => riders(r.id).includes(state.me) || r.createdBy === state.me);
     return list;
   }
@@ -960,7 +1091,7 @@ textarea { min-height: 80px; resize: vertical; }
     else if (!state.canWrite && state.tab !== "board") html = esc(t("readOnly"));
     el.innerHTML = html; el.hidden = !html;
     const fab = $("#fab");
-    fab.hidden = !(state.mode === "live" && state.canWrite && state.tab !== "board");
+    fab.hidden = !(state.mode === "live" && state.canWrite && (state.tab === "rides" || state.tab === "market"));
     fab.setAttribute("aria-label", t(state.tab === "market" ? "sellA" : "newRideA"));
   }
 
@@ -1208,7 +1339,7 @@ textarea { min-height: 80px; resize: vertical; }
     if (!ids.length) return;
     const ps = await user.profiles(ids);
     for (const uid of ids) {
-      const name = (ps[uid]?.isMe ? t("you") : ps[uid]?.name) || t("member");
+      const name = (ps[uid]?.isMe ? t("you") : (prof(uid).nick || ps[uid]?.name)) || t("member");
       document.querySelectorAll(`[data-pin="${CSS.escape(uid)}"] text, [data-pin-row="${CSS.escape(uid)}"] b`).forEach((el) => { el.textContent = name; });
     }
   }
@@ -1330,6 +1461,321 @@ Their upcoming rides: ${next}.`;
   }
   const shown = (key, textIn) => aiState.trOn[key] && aiState.tr[key + lang] ? aiState.tr[key + lang] : textIn;
   const trBtn = (key, textIn) => sample && textIn && textIn.length > 3 ? `<button type="button" class="tr" data-act="tr" data-key="${esc(key)}">${esc(aiState.trOn[key] && aiState.tr[key + lang] ? ai("orig") : ai("tr"))}</button>` : "";
+  // ---------- Sharing and the crew assistant ----------
+  const SH = {
+    ar: { share: "شارك", shareT: "شارك الطلعة", digestT: "شارك رسالة للكرو", caption: "اكتب منشور بالذكاء الاصطناعي", copy: "نسخ", copied: "انتسخ ✓",
+      poster: "صورة الطلعة للستوري", posterSave: "احفظ الصورة", posterHelp: "احفظ الصورة وانشرها في انستغرام أو Strava أو الواتساب. أو اضغط عليها مطوّلاً واحفظها.",
+      digest: "رسالة الكرو", askOpen: "اسأل", askT: "اسأل Laces", askPh: "مثال: وش الطلعات يوم الجمعة في دبي؟", send: "أرسل",
+      sugg: ["وش الطلعات هالأسبوع؟", "أرخص خوذة في السوق؟", "أي طلعة تناسب مبتدئ؟", "كم كم قطعت هالموسم؟"], hello: "هلا! اسألني عن الطلعات، السوق، أو موسمك." },
+    en: { share: "Share", shareT: "Share the ride", digestT: "Share a crew message", caption: "Write a post with AI", copy: "Copy", copied: "Copied ✓",
+      poster: "Ride poster for stories", posterSave: "Save image", posterHelp: "Save the image and post it on Instagram, Strava or WhatsApp, or long-press it to save.",
+      digest: "Crew message", askOpen: "Ask", askT: "Ask Laces", askPh: "e.g. What rides are on Friday in Dubai?", send: "Send",
+      sugg: ["What's on this week?", "Cheapest helmet in the market?", "Which ride suits a beginner?", "How many km this season?"], hello: "Hi! Ask me about rides, the market or your season." },
+    fil: { share: "Ibahagi", shareT: "Ibahagi ang ride", digestT: "Ibahagi ang mensahe sa crew", caption: "Sumulat ng post gamit ang AI", copy: "Kopyahin", copied: "Nakopya ✓",
+      poster: "Poster ng ride para sa stories", posterSave: "I-save ang larawan", posterHelp: "I-save at i-post sa Instagram, Strava o WhatsApp, o pindutin nang matagal para i-save.",
+      digest: "Mensahe sa crew", askOpen: "Magtanong", askT: "Tanungin ang Laces", askPh: "hal. Anong ride sa Biyernes sa Dubai?", send: "Ipadala",
+      sugg: ["Ano ang ride ngayong linggo?", "Pinakamurang helmet?", "Aling ride para sa baguhan?", "Ilang km ngayong season?"], hello: "Hi! Magtanong tungkol sa ride, market o season mo." },
+    hi: { share: "शेयर करें", shareT: "राइड शेयर करें", digestT: "क्रू मैसेज शेयर करें", caption: "AI से पोस्ट लिखें", copy: "कॉपी", copied: "कॉपी हुआ ✓",
+      poster: "स्टोरी के लिए राइड पोस्टर", posterSave: "इमेज सेव करें", posterHelp: "इमेज सेव करके Instagram, Strava या WhatsApp पर पोस्ट करें, या देर तक दबाकर सेव करें।",
+      digest: "क्रू मैसेज", askOpen: "पूछें", askT: "Laces से पूछें", askPh: "जैसे: शुक्रवार को दुबई में कौन सी राइड है?", send: "भेजें",
+      sugg: ["इस हफ़्ते क्या है?", "मार्केट में सबसे सस्ता हेलमेट?", "शुरुआती के लिए कौन सी राइड?", "इस सीज़न कितने किमी?"], hello: "नमस्ते! राइड्स, मार्केट या अपने सीज़न के बारे में पूछें।" }
+  };
+  const sh = (k) => (SH[lang] || SH.en)[k] ?? SH.en[k];
+  const shareState = { ride: null, poster: null, posterUrl: "" };
+  function rideText(r) {
+    const start = new Date(r.startAt);
+    return `${txt(r, "title")}\n${fmtDate.format(start)} · ${fmtTime.format(start)} · ${t("em_" + r.emirate)}\n${r.distanceKm} ${t("km")} · ${txt(r, "meet") ?? r.meetPoint}\n${ARTIFACT}#${r.id}`;
+  }
+  function paintShareRow() {
+    const text = $("#shareText").value, link = shareState.ride ? ARTIFACT + "#" + shareState.ride.id : ARTIFACT;
+    const e = encodeURIComponent;
+    const apps = [
+      ["WhatsApp", "#25d366", "W", `https://wa.me/?text=${e(text)}`],
+      ["Telegram", "#229ed9", "T", `https://t.me/share/url?url=${e(link)}&text=${e(text.replace(link, "").trim())}`],
+      ["X", "#111", "X", `https://twitter.com/intent/tweet?text=${e(text)}`],
+      ["Facebook", "#1877f2", "f", `https://www.facebook.com/sharer/sharer.php?u=${e(link)}`]
+    ];
+    $("#shareRow").innerHTML = apps.map(([n, c, g, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener"><i style="background:${c}">${g}</i>${n}</a>`).join("") +
+      `<button type="button" data-share-copy><i style="background:var(--ink)">⧉</i>${esc(sh("copy"))}</button>`;
+  }
+  async function openShare(r, text) {
+    shareState.ride = r || null;
+    $("#shareT").textContent = sh(r ? "shareT" : "digestT");
+    $("#shareText").value = text || (r ? rideText(r) : "");
+    $("#captionT").textContent = sh("caption");
+    $("#captionBtn").hidden = !(sample && r);
+    $("#shareOut").textContent = "";
+    paintShareRow();
+    $("#poster").hidden = !r;
+    openSheet("#shareSheet", "#shareText");
+    if (r) {
+      $("#posterHelp").textContent = sh("posterHelp"); $("#posterSave").textContent = sh("posterSave");
+      $("#posterSave").hidden = !downloads;
+      try {
+        shareState.poster = await posterBlob(r);
+        if (shareState.posterUrl) URL.revokeObjectURL(shareState.posterUrl);
+        shareState.posterUrl = URL.createObjectURL(shareState.poster);
+        $("#posterImg").src = shareState.posterUrl; $("#posterImg").alt = sh("poster");
+      } catch { $("#poster").hidden = true; }
+    }
+  }
+  // A 1080×1350 poster: the route on the brand colour, title, date and the big distance.
+  async function posterBlob(r) {
+    try { await document.fonts.ready; } catch {}
+    const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"), css = getComputedStyle(document.documentElement), font = getComputedStyle($("#app")).fontFamily;
+    const bg = css.getPropertyValue("--accent").trim() || "#ff5a36", ink = "#1a0b06", rtl = I18N[lang].dir === "rtl";
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const pts = (r.route || []).map((p) => [p[1] * Math.cos(p[0] * Math.PI / 180), -p[0]]);
+    if (pts.length > 1) {
+      const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+      const sc = Math.min(860 / (Math.max(...xs) - x0 || 1e-6), 560 / (Math.max(...ys) - y0 || 1e-6));
+      const w = (Math.max(...xs) - x0) * sc, h = (Math.max(...ys) - y0) * sc;
+      const q = pts.map((p) => [540 - w / 2 + (p[0] - x0) * sc, 380 - h / 2 + (p[1] - y0) * sc]);
+      g.strokeStyle = "rgba(26,11,6,.14)"; g.lineWidth = 2;
+      for (const k of [1.25, 1.6, 2]) { g.beginPath(); q.forEach(([x, y], i) => { const X = 540 + (x - 540) * k, Y = 380 + (y - 380) * k; i ? g.lineTo(X, Y) : g.moveTo(X, Y); }); g.stroke(); }
+      g.strokeStyle = ink; g.lineWidth = 14; g.lineJoin = g.lineCap = "round";
+      g.beginPath(); q.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke();
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(q[0][0], q[0][1], 18, 0, Math.PI * 2); g.fill(); g.lineWidth = 8; g.stroke();
+    }
+    g.fillStyle = ink; g.direction = rtl ? "rtl" : "ltr"; g.textAlign = rtl ? "right" : "left";
+    const X = rtl ? W - 80 : 80, start = new Date(r.startAt);
+    g.font = `600 38px ${font}`; g.fillText(`${fmtDate.format(start)} · ${fmtTime.format(start)} · ${t("em_" + r.emirate)}`, X, 820);
+    g.font = `800 76px ${font}`;
+    const words = String(txt(r, "title")).split(/\s+/); let line = "", y = 910;
+    for (const wd of words) { const test = line ? line + " " + wd : wd; if (g.measureText(test).width > W - 160 && line) { g.fillText(line, X, y); line = wd; y += 88; } else line = test; }
+    g.fillText(line, X, y);
+    g.font = `800 230px ${font}`; g.fillText(String(r.distanceKm), X, 1190);
+    const numW = g.measureText(String(r.distanceKm)).width;
+    g.font = `700 56px ${font}`; g.fillText(t("km"), rtl ? X - numW - 24 : X + numW + 24, 1190);
+    g.font = `800 44px ${font}`; g.textAlign = rtl ? "left" : "right"; g.direction = "ltr"; g.fillText("Laces It", rtl ? 80 : W - 80, 1290);
+    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("png"))), "image/png"));
+  }
+  async function writeCaption() {
+    const r = shareState.ride, btn = $("#captionBtn"), out = $("#shareOut"); if (!r || !sample) return;
+    btn.disabled = true; out.textContent = ai("busy");
+    try {
+      const { text } = await sample(`Write a short, upbeat social media post (2-3 lines, then 4-6 hashtags including #LacesIt and #UAE) inviting people to this ${sportOf(r) === "run" ? "group run" : "group ride"}. Reply in ${t("aiLang")}. Plain text only.\n\n${rideText(r)}`, { modelTier: "quick", cache: false });
+      $("#shareText").value = text.trim() + "\n" + ARTIFACT + "#" + r.id; paintShareRow(); out.textContent = "";
+    } catch (e) { out.textContent = aiErr(e); }
+    finally { btn.disabled = false; }
+  }
+  // Crew digest: the coming week's rides and the newest gear, as one WhatsApp-ready message.
+  async function crewDigest(btn) {
+    btn.disabled = true;
+    const now = Date.now(), week = now + 7 * 864e5;
+    const rides = state.rides.filter((r) => { const s = Date.parse(r.startAt); return s >= now && s <= week; }).slice(0, 12)
+      .map((r) => `- ${txt(r, "title")} | ${sportOf(r)} | ${new Date(r.startAt).toString().slice(0, 21)} | ${I18N.en["em_" + r.emirate]} | ${r.distanceKm} km | ${I18N.en["lvl_" + r.level]} | ${riders(r.id).length} going`).join("\n") || "none";
+    const gear = state.listings.filter((x) => !x.sold).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 5)
+      .map((x) => `- ${x.title} | ${x.price} AED | ${I18N.en["em_" + x.emirate]}`).join("\n") || "none";
+    try {
+      const { text } = await sample(`Write a friendly WhatsApp group message for a UAE cycling and running crew: the rides in the next 7 days (day, time, place, distance, level) and a short "new in the market" list. Short lines, a few emojis are fine, no Markdown headings. Reply in ${t("aiLang")}. End with this link on its own line: ${ARTIFACT}\n\nRides:\n${rides}\n\nMarket:\n${gear}`, { modelTier: "quick", cache: false });
+      openShare(null, text.trim());
+    } catch (e) { flash(aiErr(e) || t("aiFail")); }
+    finally { btn.disabled = false; }
+  }
+  // Ask Laces: a chat that answers from the app's own data.
+  const chat = { turns: [] };
+  function appData() {
+    const now = Date.now(), s = state.mode === "live" && state.me ? season() : null;
+    return JSON.stringify({
+      today: dubaiDay(),
+      rides: state.rides.filter((r) => Date.parse(r.startAt) >= now - 864e5).slice(0, 40).map((r) => ({ title: txt(r, "title"), sport: sportOf(r), start: new Date(r.startAt).toISOString(), emirate: I18N.en["em_" + r.emirate], meet: txt(r, "meet") ?? r.meetPoint, km: r.distanceKm, level: I18N.en["lvl_" + r.level], going: riders(r.id).length, maxRiders: r.maxRiders || null, iJoined: riders(r.id).includes(state.me), link: ARTIFACT + "#" + r.id })),
+      market: state.listings.filter((x) => !x.sold).slice(0, 40).map((x) => ({ title: x.title, price: x.price, category: x.category, sport: x.sport, condition: x.condition, emirate: I18N.en["em_" + x.emirate] })),
+      mySeason: s && { rides: s.rides, km: s.km, weekStreak: s.streak, emirates: [...s.ems].map((e) => I18N.en["em_" + e]), medals: s.medals.filter((m) => m[2]).map((m) => FEAT.en[m[0]]) }
+    });
+  }
+  function paintChat() {
+    const box = $("#chat");
+    const items = chat.turns.length ? chat.turns : [{ role: "assistant", content: sh("hello") }];
+    box.innerHTML = items.map((m) => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${esc(m.content)}</div>`).join("");
+    box.scrollTop = box.scrollHeight;
+    $("#askSugg").innerHTML = chat.turns.length ? "" : sh("sugg").map((q) => `<button type="button">${esc(q)}</button>`).join("");
+  }
+  async function ask(q) {
+    q = q.trim(); if (!q || !sample) return;
+    chat.turns.push({ role: "user", content: q }, { role: "assistant", content: ai("busy") });
+    paintChat(); $("#askIn").value = ""; $("#askSend").disabled = true;
+    const rules = `You are the assistant inside Laces It, a UAE cycling and running crew app. Answer only from the app data below; if the answer is not there, say so briefly and suggest what the member can do in the app. Be short and practical, mind the UAE heat in advice, and reply in ${t("aiLang")}. Plain text, no Markdown.\n\nApp data (JSON): ${appData()}`;
+    const turns = [{ role: "user", content: rules }, ...chat.turns.slice(0, -1).slice(-10)];
+    try {
+      const { text } = await sample(turns, { modelTier: "quick", cache: false, onText: ({ text }) => { chat.turns[chat.turns.length - 1].content = text; paintChat(); } });
+      chat.turns[chat.turns.length - 1].content = text;
+    } catch (e) { chat.turns[chat.turns.length - 1].content = e.text || aiErr(e) || t("aiFail"); }
+    paintChat(); $("#askSend").disabled = false;
+  }
+  function paintAsk() {
+    $("#askOpen").hidden = !sample; $("#askOpenT").textContent = sh("askOpen");
+    $("#digestBtn").hidden = !(sample && state.mode === "live" && state.rides.length); $("#digestT").textContent = sh("digest");
+    $("#askT").textContent = sh("askT"); $("#askIn").placeholder = sh("askPh"); $("#askIn").setAttribute("aria-label", sh("askT")); $("#askSend").textContent = sh("send");
+  }
+  // ---------- Profiles, crew level, ride chat ----------
+  const SOC = {
+    ar: { tabMe: "حسابي", photo: "غيّر", nick: "اسمك في الكرو", bio: "نبذة عنك", bioPh: "سيكل طريق من 2019، أحب طلعات الفجر", home: "إمارتك", sports: "رياضاتك", save: "احفظ الملف", saved: "انحفظ ✓",
+      level: "مستواك في الكرو", lvlNext: "{n} للمستوى الجاي", lvlHow: "يرتفع مع كل طلعة تخلصها: المسافة، الصعود، والاستمرار.", fit: "يناسب مستواك", hard: "تحدّي لمستواك",
+      chat: "دردشة الطلعة", chatN: "دردشة الطلعة ({n})", chatPh: "اكتب رسالة للكرو…", send: "أرسل", chatEmpty: "ما فيه رسائل للحين. ابدأ السالفة!", open: "مقعد متاح", signIn: "سجّل دخولك عشان تعدّل ملفك." },
+    en: { tabMe: "Me", photo: "Change", nick: "Your crew name", bio: "About you", bioPh: "Road cyclist since 2019, love dawn rides", home: "Home emirate", sports: "Your sports", save: "Save profile", saved: "Saved ✓",
+      level: "Your crew level", lvlNext: "{n} to the next level", lvlHow: "It rises with every ride you finish: distance, climbing and keeping at it.", fit: "Fits your level", hard: "A stretch for your level",
+      chat: "Ride chat", chatN: "Ride chat ({n})", chatPh: "Message the crew…", send: "Send", chatEmpty: "No messages yet. Say hi!", open: "Open seat", signIn: "Sign in to edit your profile." },
+    fil: { tabMe: "Ako", photo: "Palitan", nick: "Pangalan mo sa crew", bio: "Tungkol sa iyo", bioPh: "Road cyclist mula 2019, gusto ang dawn ride", home: "Emirate mo", sports: "Mga sport mo", save: "I-save ang profile", saved: "Na-save ✓",
+      level: "Level mo sa crew", lvlNext: "{n} bago ang susunod na level", lvlHow: "Tumataas sa bawat natapos na ride: layo, akyat at tuloy-tuloy na pagsali.", fit: "Bagay sa level mo", hard: "Hamon sa level mo",
+      chat: "Chat ng ride", chatN: "Chat ng ride ({n})", chatPh: "Mag-message sa crew…", send: "Ipadala", chatEmpty: "Wala pang mensahe. Mag-hi!", open: "Bakanteng puwesto", signIn: "Mag-sign in para i-edit ang profile." },
+    hi: { tabMe: "मैं", photo: "बदलें", nick: "क्रू में आपका नाम", bio: "आपके बारे में", bioPh: "2019 से रोड साइक्लिस्ट, सुबह की राइड पसंद", home: "आपका अमीरात", sports: "आपके खेल", save: "प्रोफ़ाइल सेव करें", saved: "सेव हुआ ✓",
+      level: "क्रू में आपका लेवल", lvlNext: "अगले लेवल तक {n}", lvlHow: "हर पूरी राइड के साथ बढ़ता है: दूरी, चढ़ाई और लगातार आना।", fit: "आपके लेवल के लिए सही", hard: "आपके लेवल के लिए चुनौती",
+      chat: "राइड चैट", chatN: "राइड चैट ({n})", chatPh: "क्रू को मैसेज करें…", send: "भेजें", chatEmpty: "अभी कोई मैसेज नहीं। हाय कहें!", open: "खाली सीट", signIn: "प्रोफ़ाइल बदलने के लिए साइन इन करें।" }
+  };
+  const so = (k, v) => { let x = (SOC[lang] || SOC.en)[k] ?? SOC.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const prof = (uid) => state.profiles[uid] || {};
+  // Crew level 0–7 from finished rides: distance counts most, then climbing and how often.
+  function levelOf(uid) {
+    const j = state.joins.find((x) => x.id === uid), now = Date.now();
+    const done = state.rides.filter((r) => Date.parse(r.startAt) < now && j?.rides?.[r.id] === true);
+    const km = done.reduce((a, r) => a + (+r.distanceKm || 0), 0), climb = done.reduce((a, r) => a + (+r.gainM || 0), 0);
+    const v = 1 + 2.2 * Math.log10(1 + km / 25) + 0.8 * Math.log10(1 + done.length) + climb / 4000;
+    return Math.max(0, Math.min(7, Math.round(v * 10) / 10));
+  }
+  const crewLevel = () => levelOf(state.me);
+  const LVL_BAND = { beg: [0, 2.8], int: [2.2, 4.6], adv: [4, 7] };
+  function myLevel() { return state.mode === "live" && state.me ? levelOf(state.me) : null; }
+  const LVL_WORD = { ar: "المستوى", en: "Level", fil: "Level", hi: "लेवल" };
+  function roster(r, ids, past, canJoin, joined) {
+    const cap = r.maxRiders > 0 ? Math.min(r.maxRiders, 8) : Math.max(4, Math.ceil((ids.length + (past ? 0 : 1)) / 4) * 4);
+    const showIds = ids.slice(0, ids.length > cap ? cap - 1 : cap);
+    const cells = showIds.map((id) => `<div class="pp" data-person="${esc(id)}"><img alt=""><b></b><span>${state.mode === "live" ? levelOf(id).toFixed(1) : ""}</span></div>`);
+    if (ids.length > showIds.length) cells.push(`<div class="pp more"><div class="ring">+${ids.length - showIds.length}</div><b>&nbsp;</b><span>&nbsp;</span></div>`);
+    if (!past) {
+      const open = Math.max(0, cap - cells.length);
+      for (let i = 0; i < open; i++) {
+        const btn = i === 0 && canJoin && !joined;
+        cells.push(`<${btn ? 'button type="button" data-act="join"' : "div"} class="pp"><div class="ring" aria-hidden="true">+</div><b>${esc(so("open"))}</b><span>&nbsp;</span></${btn ? "button" : "div"}>`);
+      }
+    }
+    return `<div class="roster">${cells.join("")}</div>`;
+  }
+  function matchFoot(r, dur) {
+    const b = LVL_BAND[r.level] || [0, 7];
+    return `<div class="mfoot"><div class="lv"><b>${esc(t("lvl_" + r.level))} · ${esc(LVL_WORD[lang] || "Level")} <bdi dir="ltr">${b[0].toFixed(1)}–${b[1].toFixed(1)}</bdi></b><span>${esc(t(sportOf(r)))} · ${esc(t("em_" + r.emirate))}</span></div>
+      <div class="mblock"><b>${esc(r.distanceKm)} ${esc(t("km"))}</b><span>${esc(dur)}</span></div></div>`;
+  }
+  async function fillRoster() {
+    const cells = [...document.querySelectorAll("[data-person]")];
+    const ids = [...new Set(cells.map((c) => c.dataset.person))];
+    if (!ids.length) return;
+    const who = await people(ids);
+    for (const c of cells) { const w = who[c.dataset.person]; c.querySelector("img").src = w.photo; c.querySelector("img").alt = w.name; c.querySelector("b").textContent = w.name; }
+  }
+  function renderMe() {
+    const el = $("#meCard");
+    if (state.mode !== "live" || !state.me) { el.innerHTML = `<p class="sub">${esc(so("signIn"))}</p>`; renderSeason(); return; }
+    const p = prof(state.me), lv = myLevel(), next = Math.min(7, Math.floor(lv) + 1);
+    const pct = lv >= 7 ? 100 : Math.round((lv - Math.floor(lv)) * 100);
+    const sports = p.sports || [];
+    if (!el.dataset.ready) {
+      el.dataset.ready = "1";
+      el.innerHTML = `<div class="me-head">
+          <label class="avatar-pick"><img id="meAvatar" alt=""><span>${esc(so("photo"))}</span><input type="file" accept="image/*" id="meAvatarIn" aria-label="${esc(so("photo"))}"></label>
+          <div><h2 id="meName"></h2><p id="meSub"></p></div>
+        </div>
+        <div class="lvl" id="meLvl"></div>
+        <div class="fields">
+          <label><span>${esc(so("nick"))}</span><input id="meNick" maxlength="40"></label>
+          <label><span>${esc(so("bio"))}</span><textarea id="meBio" maxlength="200" placeholder="${esc(so("bioPh"))}"></textarea></label>
+          <div class="two"><label><span>${esc(so("home"))}</span><select id="meHome">${EMIRATES.map((e) => `<option value="${e}">${esc(t("em_" + e))}</option>`).join("")}</select></label>
+          <div><span class="sub">${esc(so("sports"))}</span><div class="sport-pick" id="meSports">${["bike", "run"].map((k) => `<button type="button" class="chip" data-sp="${k}" aria-pressed="false">${esc(t(k))}</button>`).join("")}</div></div></div>
+        </div>
+        <p class="err" id="meErr" role="alert"></p>
+        <button type="button" class="btn block" id="meSave">${esc(so("save"))}</button>`;
+      $("#meNick").value = p.nick || ""; $("#meBio").value = p.bio || ""; $("#meHome").value = p.home || "DXB";
+      for (const b of el.querySelectorAll("[data-sp]")) b.setAttribute("aria-pressed", sports.includes(b.dataset.sp));
+    }
+    $("#meLvl").innerHTML = `<div class="top"><div><span>${esc(so("level"))}</span><br><b>${lv.toFixed(1)}</b></div><span>${esc(lv >= 7 ? "7.0" : so("lvlNext", { n: (next - lv).toFixed(1) }))}</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div><span>${esc(so("lvlHow"))}</span>`;
+    paintMeHead();
+    renderSeason();
+  }
+  async function paintMeHead() {
+    const p = prof(state.me), ps = user ? await user.profiles([state.me]) : {};
+    const base = ps[state.me] || {};
+    $("#meAvatar").src = p.avatar ? photoSrc(p.avatar) : (base.avatarUrl || PH);
+    $("#meName").textContent = p.nick || base.name || t("you");
+    $("#meSub").textContent = [p.home ? t("em_" + p.home) : "", (p.sports || []).map((k) => t(k)).join(" · ")].filter(Boolean).join(" · ");
+  }
+  async function saveProfile(extra) {
+    const err = $("#meErr"), btn = $("#meSave");
+    const sports = [...document.querySelectorAll("#meSports [data-sp]")].filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.dataset.sp);
+    const body = { ...prof(state.me), nick: $("#meNick").value.trim(), bio: $("#meBio").value.trim(), home: $("#meHome").value, sports, updatedAt: new Date().toISOString(), ...extra };
+    btn.disabled = true;
+    try { await db.doc("profiles/" + state.me).set(body); state.profiles[state.me] = body; btn.textContent = so("saved"); err.textContent = ""; paintMeHead(); setTimeout(() => { btn.textContent = so("save"); }, 1500); }
+    catch (e) { err.textContent = writeErr(e); }
+    finally { btn.disabled = false; }
+  }
+  // Square-cropped 320px avatar.
+  async function avatarBlob(file) {
+    const src = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+      const side = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement("canvas"); c.width = c.height = 320;
+      c.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 320, 320);
+      return await new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", 0.82));
+    } finally { URL.revokeObjectURL(src); }
+  }
+  // Who someone is, for faces, the ranking, live pins and chat: their profile first, then the account.
+  async function people(ids) {
+    const ps = user && ids.length ? await user.profiles(ids) : {};
+    return Object.fromEntries(ids.map((id) => {
+      const p = prof(id), b = ps[id] || {};
+      return [id, { name: id === state.me ? t("you") : (p.nick || b.name || t("member")), photo: p.avatar ? photoSrc(p.avatar) : (b.avatarUrl || PH) }];
+    }));
+  }
+  // Ride chat: each member keeps their own messages in chatmsgs/<their id>, so only they can change them.
+  const chatRide = { id: null };
+  function rideMsgs(id) {
+    return state.msgs.flatMap((d) => (d.rides?.[id] || []).map((m) => ({ uid: d.id, ...m }))).sort((a, b) => String(a.at).localeCompare(String(b.at)));
+  }
+  async function paintChatLog() {
+    const id = chatRide.id; if (!id) return;
+    const list = rideMsgs(id), who = await people([...new Set(list.map((m) => m.uid))]);
+    const box = $("#chatLog");
+    box.innerHTML = list.length ? list.map((m) => `<div class="cmsg${m.uid === state.me ? " me" : ""}"><img src="${esc(who[m.uid].photo)}" alt=""><div class="bub"><span class="who">${esc(who[m.uid].name)}</span>${esc(m.t)}<span class="when">${esc(fmtDate.format(new Date(m.at)))} · ${esc(fmtTime.format(new Date(m.at)))}</span></div></div>`).join("")
+      : `<p class="sub">${esc(so("chatEmpty"))}</p>`;
+    box.scrollTop = box.scrollHeight;
+  }
+  function openChat(r) {
+    chatRide.id = r.id;
+    $("#chatT").textContent = so("chat") + " · " + txt(r, "title");
+    $("#chatIn").placeholder = so("chatPh"); $("#chatSend").textContent = so("send");
+    $("#chatForm").hidden = !(state.canWrite && state.me);
+    paintChatLog(); openSheet("#chatSheet", "#chatIn");
+  }
+  async function sendChat() {
+    const text = $("#chatIn").value.trim(), id = chatRide.id; if (!text || !id || !db || !state.me) return;
+    const mine = state.msgs.find((d) => d.id === state.me);
+    const list = [...(mine?.rides?.[id] || []), { t: text.slice(0, 500), at: new Date().toISOString() }].slice(-40);
+    $("#chatIn").value = ""; $("#chatSend").disabled = true;
+    const ref = db.doc("chatmsgs/" + state.me);
+    try { await queueWrite(() => mine ? ref.update({ rides: { [id]: list } }) : ref.set({ rides: { [id]: list } })); }
+    catch (e) { flash(writeErr(e)); $("#chatIn").value = text; }
+    finally { $("#chatSend").disabled = false; }
+  }
+  // ---------- Day strip (next two weeks) and quick start times ----------
+  const uaeDay = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dubai" }).format(new Date(iso));
+  const ALLDAYS = { ar: "كل الأيام", en: "All days", fil: "Lahat", hi: "सभी दिन" };
+  function renderDays() {
+    const L = I18N[lang].locale, wd = new Intl.DateTimeFormat(L, { weekday: "short", timeZone: "Asia/Dubai" }), dn = new Intl.DateTimeFormat(L, { day: "numeric", timeZone: "Asia/Dubai" }), mo = new Intl.DateTimeFormat(L, { month: "short", timeZone: "Asia/Dubai" });
+    const list = state.mode === "live" ? state.rides : EXAMPLES, count = {};
+    for (const r of list) { const k = uaeDay(r.startAt); count[k] = (count[k] || 0) + 1; }
+    const cells = [`<button type="button" class="day all" data-day="all" aria-pressed="${state.day === "all"}"><b style="font-size:14px">${esc(ALLDAYS[lang] || ALLDAYS.en)}</b></button>`];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(Date.now() + i * 864e5), k = uaeDay(d.toISOString()), n = count[k] || 0;
+      cells.push(`<button type="button" class="day" data-day="${k}" aria-pressed="${state.day === k}"><small>${esc(wd.format(d))}</small><b>${esc(dn.format(d))}</b><i class="${n ? "has" : ""}">${n ? n : esc(mo.format(d))}</i></button>`);
+    }
+    $("#days").innerHTML = cells.join("");
+  }
+  const SLOTS = ["05:00", "05:30", "06:00", "06:30", "07:00", "17:30", "18:30", "20:00"];
+  function renderSlots() {
+    const cur = $("#f-time").value;
+    $("#tslots").innerHTML = SLOTS.map((v) => `<button type="button" data-slot="${v}" aria-pressed="${v === cur}">${esc(fmtTime.format(new Date("2000-01-01T" + v + ":00")))}</button>`).join("");
+  }
   let heroKey = "";
   function renderHero() {
     const now = Date.now(), all = state.mode === "live" ? state.rides : state.mode === "example" ? EXAMPLES : [];
@@ -1408,6 +1854,7 @@ Their upcoming rides: ${next}.`;
       <div class="top">
         <span class="tag">${esc(t(sportOf(r)))}</span><span>${esc(t("em_" + r.emirate))} · ${esc(t("lvl_" + r.level))}</span>
         ${r.example ? `<span class="badge">${esc(t("example"))}</span>` : ""}${past ? `<span class="badge muted">${esc(t("ended"))}</span>` : ""}
+        ${!past && myLevel() !== null && LVL_BAND[r.level] ? (myLevel() >= LVL_BAND[r.level][0] && myLevel() <= LVL_BAND[r.level][1] + 1 ? `<span class="fit">${esc(so("fit"))}</span>` : myLevel() < LVL_BAND[r.level][0] ? `<span class="fit hard">${esc(so("hard"))}</span>` : "") : ""}
       </div>
       <h3>${esc(txt(r, "title"))}</h3>
       <p class="when">${esc(fmtDate.format(start))} · ${esc(fmtTime.format(start))}<br>${esc(meet)}</p>
@@ -1416,8 +1863,9 @@ Their upcoming rides: ${next}.`;
         <div><b>${esc(paceTxt)}</b><span>${esc(t(run ? "minkm" : "kmh"))}</span></div>
         <div><b>${esc(dur)}</b><span>${esc(t("dur"))}</span></div>
       </div>
+      ${roster(r, ids, past, canJoin, joined)}
+      ${matchFoot(r, dur)}
       <div class="row">
-        <div class="faces" data-faces="${esc(ids.slice(0, 6).join(","))}"></div>
         <span class="count">${esc(count)}${full && !past ? ` · <span class="full-tag">${esc(t("full"))}</span>` : ""}</span>
         ${live && state.me ? `<button type="button" class="cheer" data-act="cheer" aria-pressed="${mineJ()?.cheers?.[r.id] === true}" aria-label="${esc(f("cheer"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11l3-7a2 2 0 0 1 2 2v4h5a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 16 20H7zM7 11H4v9h3"/></svg>${cheersOf(r.id)}</button>` : ""}
         ${canJoin ? `<button type="button" class="btn${joined ? " soft" : ""}${state.pulse === r.id ? " just" : ""}" data-act="join">${esc(t(joined ? "leave" : "join"))}</button>` : ""}
@@ -1427,6 +1875,8 @@ Their upcoming rides: ${next}.`;
       <div class="links">
         <button type="button" class="linkbtn" data-act="toggle" aria-expanded="${open}">${esc(t(open ? "hide" : "details"))}</button>
         ${live ? `<button type="button" class="linkbtn" data-act="link">${esc(t("copyLink"))}</button>` : ""}
+        <button type="button" class="linkbtn" data-act="share">${esc(sh("share"))}</button>
+        ${live ? `<button type="button" class="linkbtn" data-act="chat">${esc(rideMsgs(r.id).length ? so("chatN", { n: rideMsgs(r.id).length }) : so("chat"))}</button>` : ""}
       </div>
       ${open ? `<div class="details">
         ${liveBlock(r)}
@@ -1454,19 +1904,19 @@ Their upcoming rides: ${next}.`;
       `<select class="chip" id="emirateFilter" aria-label="${esc(t("fEmirate"))}">` +
       `<option value="all">${esc(t("allEmirates"))}</option>` + EMIRATES.map((e) => `<option value="${e}"${e === state.emirate ? " selected" : ""}>${esc(t("em_" + e))}</option>`).join("") + `</select>`;
     renderStats();
+    renderDays();
     const now = Date.now();
     const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const ordered = [...list.filter((r) => Date.parse(r.startAt) >= now), ...list.filter((r) => Date.parse(r.startAt) < now).reverse()];
     $("#rides").innerHTML = ordered.map(rideCard).join("") ||
       (state.mode === "live" && state.rides.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
-    fillFaces();
+    fillRoster();
     syncLive();
     for (const id of Object.keys(live.pos)) fillPins(id);
     focusTarget();
   }
 
   function renderBoard() {
-    renderSeason();
     $("#bFilters").innerHTML = sportChips(state.sport, "data-f");
     const totals = {};
     if (state.mode === "live") {
@@ -1493,8 +1943,8 @@ Their upcoming rides: ${next}.`;
     if (user && rows.length) user.profiles(rows.map((r) => r[0])).then((ps) => {
       for (const li of list.children) {
         const p = ps[li.dataset.uid];
-        li.querySelector("img").src = p?.avatarUrl || "";
-        li.querySelector(".nm").textContent = (p?.isMe ? t("you") : p?.name) || t("member");
+        li.querySelector("img").src = prof(li.dataset.uid).avatar ? photoSrc(prof(li.dataset.uid).avatar) : (p?.avatarUrl || "");
+        li.querySelector(".nm").textContent = (p?.isMe ? t("you") : (prof(li.dataset.uid).nick || p?.name)) || t("member");
       }
     });
   }
@@ -1505,7 +1955,7 @@ Their upcoming rides: ${next}.`;
     if (targetDone || state.mode !== "live") return;
     targetDone = true;
     const id = location.hash.slice(1);
-    if (!id || id === "market" || id === "ranking") return;
+    if (!id || id === "market" || id === "ranking" || id === "me") return;
     const el = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
     if (!el) return;
     state.open[id] = true; renderRides();
@@ -1528,7 +1978,7 @@ Their upcoming rides: ${next}.`;
     for (const b of boxes) {
       b.replaceChildren(...b.dataset.faces.split(",").map((id) => {
         const img = document.createElement("img");
-        img.src = ps[id]?.avatarUrl || ""; img.alt = ps[id]?.name || t("member"); img.title = ps[id]?.name || t("member");
+        img.src = prof(id).avatar ? photoSrc(prof(id).avatar) : (ps[id]?.avatarUrl || ""); const nm = prof(id).nick || ps[id]?.name || t("member"); img.alt = nm; img.title = nm;
         return img;
       }));
     }
@@ -1649,12 +2099,14 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
 
   function render() {
     renderStatus();
+    paintAsk();
     renderHero();
-    for (const id of ["rides", "market", "board"]) $("#tab-" + id).hidden = state.tab !== id;
+    for (const id of ["rides", "market", "board", "me"]) $("#tab-" + id).hidden = state.tab !== id;
+    $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else renderBoard();
+    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else renderBoard();
     moveInd(!document.querySelector("#tabInd").style.width);
   }
 
@@ -1728,6 +2180,8 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     } else {
       if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
       applyAiVisibility(); $("#aiPlanOut").textContent = "";
+      if (state.day !== "all") $("#f-date").value = state.day;
+      renderSlots();
       openSheet("#rideSheet", sample ? "#aiPlanIn" : "#f-title");
     }
   });
@@ -1740,6 +2194,32 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
   $("#rides").addEventListener("change", (e) => { const id = e.target.dataset.lift; if (id) setMine("lifts", id, +e.target.value); });
   $("#season").addEventListener("click", (e) => { const b = e.target.closest("[data-coach]"); if (b && sample) askCoach(b); });
   $("#aiPlanBtn").addEventListener("click", () => planRide());
+  $("#captionBtn").addEventListener("click", () => writeCaption());
+  $("#shareText").addEventListener("input", () => paintShareRow());
+  $("#shareRow").addEventListener("click", (e) => { const b = e.target.closest("[data-share-copy]"); if (b) copyText($("#shareText").value, b, sh("copied")); });
+  $("#posterSave").addEventListener("click", async (e) => {
+    const r = shareState.ride; if (!r || !shareState.poster || !downloads) return;
+    try { await downloads.save({ filename: "laces-it-" + String(txt(r, "title")).replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 40) + ".png", data: shareState.poster }); }
+    catch (ex) { if (ex?.code !== "declined") flash(t("errSavePhoto")); }
+  });
+  $("#digestBtn").addEventListener("click", (e) => crewDigest(e.currentTarget));
+  $("#days").addEventListener("click", (e) => { const b = e.target.closest("[data-day]"); if (!b) return; state.day = b.dataset.day; renderRides(); });
+  $("#tslots").addEventListener("click", (e) => { const b = e.target.closest("[data-slot]"); if (!b) return; $("#f-time").value = b.dataset.slot; renderSlots(); });
+  $("#f-time").addEventListener("input", () => renderSlots());
+  $("#chatForm").addEventListener("submit", (e) => { e.preventDefault(); sendChat(); });
+  $("#tab-me").addEventListener("click", (e) => {
+    const sp = e.target.closest("[data-sp]"); if (sp) sp.setAttribute("aria-pressed", sp.getAttribute("aria-pressed") !== "true");
+    if (e.target.closest("#meSave")) saveProfile();
+  });
+  $("#tab-me").addEventListener("change", async (e) => {
+    if (e.target.id !== "meAvatarIn" || !e.target.files[0]) return;
+    $("#meErr").textContent = t("uploading");
+    try { const id = await storePhoto(await avatarBlob(e.target.files[0])); await saveProfile({ avatar: id }); $("#meErr").textContent = ""; }
+    catch (ex) { $("#meErr").textContent = ex?.code ? photoErr(ex) : t("errPhotoType"); }
+  });
+  $("#askOpen").addEventListener("click", () => { paintChat(); openSheet("#askSheet", "#askIn"); });
+  $("#askForm").addEventListener("submit", (e) => { e.preventDefault(); ask($("#askIn").value); });
+  $("#askSugg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) ask(b.textContent); });
   $("#aiAdBtn").addEventListener("click", () => writeAd());
   $("#bFilters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-f]"); if (!b) return;
@@ -1756,6 +2236,8 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
     else if (act === "link") copyText(ARTIFACT + "#" + id, b, t("copied"));
     else if (act === "cheer") setMine("cheers", id, !(mineJ()?.cheers?.[id] === true));
     else if (act === "liveStart") startShare(id);
+    else if (act === "share" && r) openShare(r);
+    else if (act === "chat" && r) openChat(r);
     else if (act === "tr" && r) translate(b.dataset.key, txt(r, "notes"), b);
     else if (act === "liveStop") stopShare();
     else if (act === "ai" && r) askAi(r, b);
@@ -2012,6 +2494,15 @@ Organiser notes: ${txt(r, "notes") || "none"}`;
       state.listings = s.docs.map((d) => ({ id: d.id, ...d.data(), desc: d.data().description }));
       if (state.mode === "live" && state.tab === "market") render();
     }, fail);
+    db.collection("profiles").onSnapshot((s) => {
+      state.profiles = Object.fromEntries(s.docs.map((d) => [d.id, d.data()]));
+      if (state.mode === "live" && state.tab !== "me") render(); else if (state.tab === "me") paintMeHead();
+    }, () => {});
+    db.collection("chatmsgs").onSnapshot((s) => {
+      state.msgs = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (!$("#chatSheet").hidden) paintChatLog();
+      if (state.mode === "live" && state.tab === "rides") renderRides();
+    }, () => {});
   })();
 })();
 </script>
