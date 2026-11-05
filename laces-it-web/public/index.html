@@ -544,6 +544,19 @@ button.pp { cursor: pointer; }
 .voice .vp b { font-size: 11px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .voice .vacts { display: flex; gap: 8px; }
 .voice .vacts .btn { flex: 1; }
+.livebox { position: relative; border-radius: 18px; overflow: hidden; background: #000; height: min(50vh, 440px); }
+.livebox video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.livebox.mirror video { transform: scaleX(-1); }
+.livebox .lbadge { position: absolute; top: 10px; inset-inline-start: 10px; display: flex; gap: 6px; align-items: center; font: 800 12px var(--font); color: #fff; }
+.livebox .lbadge b { background: #e5202e; padding: 3px 8px; border-radius: 6px; letter-spacing: .04em; }
+.livebox .lbadge span { background: rgba(0, 0, 0, .5); padding: 3px 8px; border-radius: 6px; }
+.livebox .lhost { position: absolute; top: 8px; inset-inline-end: 10px; display: flex; gap: 6px; align-items: center; color: #fff; font: 700 13px var(--font); background: rgba(0, 0, 0, .45); padding: 3px 10px 3px 3px; border-radius: 999px; }
+.livebox .lhost img { width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, .2); }
+.livebox .lidle { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: rgba(255, 255, 255, .8); font-size: 14px; }
+.livebox .lsound { position: absolute; bottom: 10px; inset-inline-start: 50%; transform: translateX(-50%); border: 0; border-radius: 999px; padding: 6px 14px; font: 700 13px var(--font); background: rgba(0, 0, 0, .6); color: #fff; cursor: pointer; }
+.btn.live { background: #e5202e; color: #fff; }
+.roomview.liveview .chatlog { max-height: 26vh; }
+.room .tags span.live { background: #e5202e; }
 .btn.mic { background: var(--ok); color: #fff; }
 /* Room screen, HelloTalk-style: stage, audience, chat pills, quick replies. */
 .sheet.roomview { --rbg: #2b2366; background: var(--rbg); color: #fff; max-height: 96vh; min-height: 80vh; align-content: start; }
@@ -783,6 +796,7 @@ button.pp { cursor: pointer; }
       <div class="fields">
         <label><span id="rfName"></span><input id="r-title" maxlength="60" required></label>
         <div class="two"><label><span id="rfCat"></span><select id="r-cat"></select></label><label><span id="rfLang"></span><select id="r-lang"></select></label></div>
+        <label id="rTypeWrap" hidden><span id="rfType"></span><select id="r-type"></select></label>
       </div>
       <p class="err" id="roomErr" role="alert"></p>
       <button class="btn block" type="submit" id="roomBtn"></button>
@@ -795,6 +809,7 @@ button.pp { cursor: pointer; }
       <div class="grab"></div>
       <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
       <div class="chatbar" id="chatBar"></div>
+      <div class="livebox" id="liveBox" hidden><video id="liveVideo" playsinline autoplay></video><div class="lidle" id="liveIdle"></div><div class="lbadge" id="liveBadge" hidden></div><div class="lhost" id="liveHost" hidden></div><button type="button" class="lsound" id="liveSound" hidden></button></div>
       <div class="voice" id="voiceBox" hidden></div>
       <div class="audience" id="audience" hidden></div>
       <div class="chatlog" id="chatLog" aria-live="polite"></div>
@@ -2135,18 +2150,20 @@ Their upcoming rides: ${next}.`;
   const roomTitle = (x) => x.titleKey ? rm(x.titleKey) : x.title;
   const roomMembers = (id) => state.joins.filter((j) => j.rooms?.[id] === true).map((j) => j.id);
   function renderRooms() {
-    $("#roomCats").innerHTML = ["all", ...ROOM_CATS].map((c) => `<button type="button" class="chip" data-rcat="${c}" aria-pressed="${state.roomCat === c}">${esc(c === "all" ? rm("all") : rm("c_" + c))}</button>`).join("");
+    $("#roomCats").innerHTML = ["all", ...(voice ? ["live"] : []), ...ROOM_CATS].map((c) => `<button type="button" class="chip" data-rcat="${c}" aria-pressed="${state.roomCat === c}">${esc(c === "all" ? rm("all") : c === "live" ? lvv("chip") : rm("c_" + c))}</button>`).join("");
     $("#roomLangs").innerHTML = ["all", ...ROOM_LANGS].map((l) => `<button type="button" class="chip" data-rlang="${l}" aria-pressed="${state.roomLang === l}">${esc(l === "all" ? rm("allLang") : rm("l_" + l))}</button>`).join("");
     let list = state.mode === "live" ? state.rooms : EXAMPLE_ROOMS;
-    if (state.roomCat !== "all") list = list.filter((x) => x.category === state.roomCat);
+    if (!voice) list = list.filter((x) => !isLiveRoom(x));
+    if (state.roomCat === "live") list = list.filter(isLiveRoom);
+    else if (state.roomCat !== "all") list = list.filter((x) => x.category === state.roomCat);
     if (state.roomLang !== "all") list = list.filter((x) => x.lang === state.roomLang);
     const activity = (x) => { const m = rideMsgs("rm_" + x.id); return m.length ? m[m.length - 1].at : x.createdAt || ""; };
-    list = list.slice().sort((a, b) => String(activity(b)).localeCompare(String(activity(a))));
+    list = list.slice().sort((a, b) => (onAir(b) - onAir(a)) || String(activity(b)).localeCompare(String(activity(a))));
     $("#roomList").innerHTML = list.map((x) => {
       const mem = roomMembers(x.id), msgs = rideMsgs("rm_" + x.id), last = msgs[msgs.length - 1];
       const ids = [...new Set([...mem, ...msgs.map((m) => m.uid)])];
       return `<button type="button" class="room rc-${esc(x.category)}" data-room="${esc(x.id)}">
-        <div class="tags"><span>${esc(rm("l_" + x.lang) || x.lang)}</span><span># ${esc(rm("c_" + x.category))}</span>${x.example ? `<span>${esc(t("example"))}</span>` : ""}</div>
+        <div class="tags">${onAir(x) ? `<span class="live">${esc(lvv("live"))} · ${esc(lvv("viewers", { n: x.viewers || 0 }))}</span>` : isLiveRoom(x) ? `<span>${esc(lvv("t_live"))}</span>` : ""}<span>${esc(rm("l_" + x.lang) || x.lang)}</span><span># ${esc(rm("c_" + x.category))}</span>${x.example ? `<span>${esc(t("example"))}</span>` : ""}</div>
         <h3><span class="eq" aria-hidden="true"><i style="height:7px"></i><i style="height:12px"></i><i style="height:16px"></i></span>${esc(roomTitle(x))}</h3>
         <div class="foot"><div class="host">${x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><b data-pn="${esc(x.hostId)}"></b>` : `<b>Laces It</b>`}</div>
           <div class="crowd">${ids.slice(0, 4).map((id) => `<img data-pp="${esc(id)}" alt="">`).join("")}<span class="n">${ids.length}</span></div></div>
@@ -2170,8 +2187,19 @@ Their upcoming rides: ${next}.`;
     fil: { join: "Sumali sa voice", talking: "{n} nasa voice ngayon", mute: "I-mute", unmute: "I-unmute", leave: "Umalis sa voice", micDenied: "Naka-off ang mic access.", fail: "Hindi masimulan ang voice.", alone: "Ikaw ang una sa voice. Kokonekta ang iba pagpasok nila." },
     hi: { join: "वॉइस में जुड़ें", talking: "अभी वॉइस में {n}", mute: "म्यूट करें", unmute: "अनम्यूट करें", leave: "वॉइस छोड़ें", micDenied: "माइक की अनुमति बंद है।", fail: "वॉइस शुरू नहीं हुआ।", alone: "आप वॉइस में पहले हैं। बाकी लोग आते ही जुड़ेंगे।" }
   };
+  const LVV = {
+    ar: { type: "نوع الغرفة", t_chat: "دردشة وصوت", t_live: "بث مباشر 🔴", chip: "🔴 بث مباشر", live: "LIVE", viewers: "👁 {n}", start: "ابدأ البث 🔴", end: "أنهِ البث", flip: "اقلب الكاميرا", watch: "شاهد البث", stop: "اطلع من البث", off: "البث متوقف. يبدأ أول ما يشغّله المضيف.", hostOff: "اضغط «ابدأ البث» وتشتغل الكاميرا والمايك. أعضاء الغرفة يشوفونك ويدردشون تحت.", wait: "يتصل بالبث…", camDenied: "ما سمحت للتطبيق يستخدم الكاميرا والمايك.", sound: "🔇 اضغط للصوت", watching: "{n} يشاهدون الحين" },
+    en: { type: "Room type", t_chat: "Chat & voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Go live 🔴", end: "End live", flip: "Flip camera", watch: "Watch live", stop: "Stop watching", off: "Not live right now. It starts when the host goes live.", hostOff: "Tap Go live to turn on your camera and mic. Room members watch you and chat below.", wait: "Connecting to the live…", camDenied: "Camera and microphone access is off.", sound: "🔇 Tap for sound", watching: "{n} watching now" },
+    fil: { type: "Uri ng room", t_chat: "Chat at voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Mag-live 🔴", end: "Tapusin ang live", flip: "Ibaligtad ang camera", watch: "Panoorin ang live", stop: "Huminto sa panonood", off: "Hindi pa live. Magsisimula kapag nag-live ang host.", hostOff: "Pindutin ang Mag-live para buksan ang camera at mic. Manonood at magcha-chat ang mga miyembro sa ibaba.", wait: "Kumokonekta sa live…", camDenied: "Naka-off ang access sa camera at mic.", sound: "🔇 Pindutin para sa tunog", watching: "{n} nanonood ngayon" },
+    hi: { type: "रूम का प्रकार", t_chat: "चैट और वॉइस", t_live: "लाइव वीडियो 🔴", chip: "🔴 लाइव", live: "LIVE", viewers: "👁 {n}", start: "लाइव जाएँ 🔴", end: "लाइव खत्म करें", flip: "कैमरा पलटें", watch: "लाइव देखें", stop: "देखना बंद करें", off: "अभी लाइव नहीं है। होस्ट के लाइव जाते ही शुरू होगा।", hostOff: "कैमरा और माइक चालू करने के लिए लाइव जाएँ दबाएँ। रूम के सदस्य आपको देखेंगे और नीचे चैट करेंगे।", wait: "लाइव से जुड़ रहे हैं…", camDenied: "कैमरा और माइक की अनुमति बंद है।", sound: "🔇 आवाज़ के लिए दबाएँ", watching: "अभी {n} देख रहे हैं" }
+  };
+  const lvv = (k, v) => { let x = (LVV[lang] || LVV.en)[k] ?? LVV.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const isLiveRoom = (x) => x?.type === "live";
+  const onAir = (x) => !!(isLiveRoom(x) && x.liveAt && Date.now() - Date.parse(x.liveAt) < 60000);
   const vc = (k, v) => { let x = (VC[lang] || VC.en)[k] ?? VC.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
-  const vs = { room: null, watch: null, peers: [], pcs: {}, stream: null, muted: false, unsub: [], beat: null, audios: {}, ctx: null, meters: {}, raf: 0 };
+  const vs = { room: null, watch: null, peers: [], pcs: {}, stream: null, muted: false, unsub: [], beat: null, audios: {}, ctx: null, meters: {}, raf: 0, live: false, host: false, facing: "user" };
+  // In a live room the host sends video to every viewer and offers each connection; viewers only connect to the host.
+  const offerer = (id) => vs.live ? vs.host : state.me < id;
   const livePeers = () => vs.peers.filter((p) => Date.now() - Date.parse(p.at) < 60000);
   // Who is in a room's voice, watched while the room is open (also when not joined).
   function watchVoice(roomId) {
@@ -2188,14 +2216,25 @@ Their upcoming rides: ${next}.`;
   const sig = (roomId) => db.collection("voice/" + roomId + "/sig");
   async function joinVoice() {
     const roomId = vs.watch; if (!voice || !roomId || vs.room) return;
-    try { vs.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
-    catch (e) { flash(vc(e?.name === "NotAllowedError" ? "micDenied" : "fail")); return; }
+    const x = chatRide.room;
+    vs.live = isLiveRoom(x); vs.host = vs.live && x.hostId === state.me;
+    const audio = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    if (!vs.live || vs.host) {
+      try { vs.stream = await navigator.mediaDevices.getUserMedia(vs.live ? { audio, video: camera(vs.facing = "user") } : { audio }); }
+      catch (e) { flash(vs.live ? (e?.name === "NotAllowedError" ? lvv("camDenied") : vc("fail")) : vc(e?.name === "NotAllowedError" ? "micDenied" : "fail")); return; }
+    }
     vs.room = roomId; vs.muted = false;
+    const role = vs.live ? (vs.host ? "host" : "viewer") : "voice";
+    const beat = () => {
+      const now = new Date().toISOString();
+      if (vs.host) db.doc("rooms/" + roomId).update({ liveAt: now, viewers: livePeers().filter((p) => p.id !== state.me).length }).catch(() => {});
+      return db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: now, muted: vs.muted, role });
+    };
     try {
-      await db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: false });
-      vs.beat = setInterval(() => { db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: vs.muted }).catch(() => {}); }, 15000);
+      await beat();
+      vs.beat = setInterval(() => { beat().catch(() => {}); }, 15000);
       vs.unsub.push(sig(roomId).where("to", "==", state.me).onSnapshot((s) => { for (const c of s.docChanges()) if (c.type === "added") onSig(c.doc.id, c.doc.data()); }, () => {}));
-      meter(state.me, vs.stream);
+      if (vs.stream && !vs.live) meter(state.me, vs.stream);
       syncPeers();
     } catch { flash(vc("fail")); leaveVoice(); }
     paintVoice();
@@ -2207,30 +2246,36 @@ Their upcoming rides: ${next}.`;
     vs.stream?.getTracks().forEach((t) => t.stop()); vs.stream = null;
     cancelAnimationFrame(vs.raf); vs.raf = 0; vs.meters = {}; vs.ctx?.close().catch(() => {}); vs.ctx = null;
     db?.doc("voice/" + roomId + "/peers/" + state.me).delete().catch(() => {});
-    vs.room = null;
+    if (vs.host) db?.doc("rooms/" + roomId).update({ liveAt: null, viewers: 0 }).catch(() => {});
+    const v = $("#liveVideo"); if (v) v.srcObject = null;
+    vs.room = null; vs.live = false; vs.host = false;
     paintVoice();
   }
   function syncPeers() {
-    const here = new Set(livePeers().map((p) => p.id).filter((id) => id !== state.me));
+    let ids = livePeers().map((p) => p.id).filter((id) => id !== state.me);
+    if (vs.live && !vs.host) ids = ids.filter((id) => id === chatRide.room?.hostId);
+    const here = new Set(ids);
     for (const id of Object.keys(vs.pcs)) if (!here.has(id)) dropPeer(id);
-    for (const id of here) if (!vs.pcs[id]) { const pc = makePc(id); if (state.me < id) offer(id, pc); }
+    for (const id of here) if (!vs.pcs[id]) { const pc = makePc(id); if (offerer(id)) offer(id, pc); }
   }
   function makePc(id) {
     const pc = new RTCPeerConnection({ iceServers: voice.iceServers }); pc.q = [];
-    vs.stream.getTracks().forEach((t) => pc.addTrack(t, vs.stream));
+    vs.stream?.getTracks().forEach((t) => pc.addTrack(t, vs.stream));
     pc.onicecandidate = (e) => { if (e.candidate) send(id, { type: "cand", cand: JSON.stringify(e.candidate.toJSON()) }); };
     pc.ontrack = (e) => {
+      if (vs.live) { showLive(e.streams[0]); return; }
       let a = vs.audios[id];
       if (!a) { a = vs.audios[id] = document.createElement("audio"); a.autoplay = true; a.playsInline = true; document.body.appendChild(a); }
       a.srcObject = e.streams[0]; a.play().catch(() => {});
       meter(id, e.streams[0]);
     };
-    pc.onconnectionstatechange = () => { if (pc.connectionState === "failed") { dropPeer(id); if (state.me < id && livePeers().some((p) => p.id === id)) offer(id, makePc(id)); } paintVoice(); };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === "failed") { dropPeer(id); if (offerer(id) && livePeers().some((p) => p.id === id)) offer(id, makePc(id)); } paintVoice(); };
     vs.pcs[id] = pc;
     return pc;
   }
   function dropPeer(id) {
     vs.pcs[id]?.close(); delete vs.pcs[id];
+    if (vs.live && !vs.host) { $("#liveVideo").srcObject = null; $("#liveSound").hidden = true; }
     if (vs.audios[id]) { vs.audios[id].srcObject = null; vs.audios[id].remove(); delete vs.audios[id]; }
     delete vs.meters[id];
   }
@@ -2281,6 +2326,43 @@ Their upcoming rides: ${next}.`;
     }
     vs.raf = requestAnimationFrame(tick);
   }
+  const camera = (facing) => ({ facingMode: facing, width: { ideal: 720 }, height: { ideal: 1280 }, frameRate: { ideal: 24 } });
+  // A viewer's video: plays with sound when the browser allows it, otherwise muted with a tap-for-sound button.
+  function showLive(stream) {
+    const v = $("#liveVideo"); if (v.srcObject === stream) return;
+    v.srcObject = stream; v.muted = false;
+    v.play().catch(() => { v.muted = true; v.play().catch(() => {}); $("#liveSound").hidden = false; });
+    paintVoice();
+  }
+  async function flipCamera() {
+    if (!vs.host || !vs.stream) return;
+    const facing = vs.facing === "user" ? "environment" : "user";
+    try {
+      const nv = (await navigator.mediaDevices.getUserMedia({ video: camera(facing) })).getVideoTracks()[0];
+      for (const pc of Object.values(vs.pcs)) pc.getSenders().find((s) => s.track?.kind === "video")?.replaceTrack(nv);
+      const old = vs.stream.getVideoTracks()[0]; vs.stream.removeTrack(old); old.stop(); vs.stream.addTrack(nv);
+      vs.facing = facing; paintVoice();
+    } catch { flash(vc("fail")); }
+  }
+  function paintLive() {
+    const x = chatRide.room, box = $("#liveBox"), live = !!voice && isLiveRoom(x) && state.mode === "live" && !!state.me;
+    $("#chatSheet .sheet").classList.toggle("liveview", live);
+    box.hidden = !live; if (!live) return;
+    const v = $("#liveVideo"), mine = vs.room === x.id;
+    if (mine && vs.host && v.srcObject !== vs.stream) { v.srcObject = vs.stream; v.muted = true; v.play().catch(() => {}); }
+    if (!mine && v.srcObject) v.srcObject = null;
+    const host = livePeers().some((p) => p.id === x.hostId), showing = !!v.srcObject;
+    box.classList.toggle("mirror", mine && vs.host && vs.facing === "user");
+    $("#liveIdle").hidden = showing;
+    $("#liveIdle").textContent = x.hostId === state.me ? lvv("hostOff") : mine && host ? lvv("wait") : lvv("off");
+    const viewers = livePeers().filter((p) => p.id !== x.hostId).length;
+    $("#liveBadge").hidden = !host;
+    $("#liveBadge").innerHTML = `<b>${esc(lvv("live"))}</b><span>${esc(lvv("viewers", { n: viewers }))}</span>`;
+    $("#liveHost").hidden = !x.hostId;
+    $("#liveHost").innerHTML = x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><b data-pn="${esc(x.hostId)}"></b>` : "";
+    if (!showing || !v.muted || (mine && vs.host)) $("#liveSound").hidden = true;
+    $("#liveSound").textContent = lvv("sound");
+  }
   function toggleMute() {
     vs.muted = !vs.muted;
     vs.stream?.getAudioTracks().forEach((t) => { t.enabled = !vs.muted; });
@@ -2289,8 +2371,20 @@ Their upcoming rides: ${next}.`;
   }
   function paintVoice() {
     const box = $("#voiceBox"); if (!box) return;
-    if (!voice || !vs.watch || state.mode !== "live" || !state.me) { box.hidden = true; return; }
+    if (!voice || !vs.watch || state.mode !== "live" || !state.me) { box.hidden = true; paintLive(); return; }
     box.hidden = false;
+    if (isLiveRoom(chatRide.room)) {
+      paintLive();
+      const mine = vs.room === vs.watch, amHost = chatRide.room.hostId === state.me;
+      const n = livePeers().filter((p) => p.id !== chatRide.room.hostId).length;
+      box.innerHTML = `${n ? `<p class="sub">${esc(lvv("watching", { n }))}</p>` : ""}` + (amHost
+        ? (mine ? `<div class="vacts"><button type="button" class="btn ${vs.muted ? "soft" : "mic"}" data-vmute>${esc(vc(vs.muted ? "unmute" : "mute"))}</button><button type="button" class="btn soft" data-vflip>${esc(lvv("flip"))}</button><button type="button" class="btn stop" data-vleave>${esc(lvv("end"))}</button></div>`
+          : `<button type="button" class="btn block live" data-vjoin>${esc(lvv("start"))}</button>`)
+        : (mine ? `<button type="button" class="btn block stop" data-vleave>${esc(lvv("stop"))}</button>`
+          : `<button type="button" class="btn block live" data-vjoin>${esc(lvv("watch"))}</button>`));
+      fillPeopleMarks();
+      return;
+    }
     const ps = livePeers(), inVoice = vs.room === vs.watch, hostId = chatRide.room?.hostId;
     const micOff = `<span class="mic-off" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 9v2a3 3 0 0 0 5.1 2.1M15 10V5a3 3 0 0 0-5.7-1.3M5 11a7 7 0 0 0 11.5 5.4M19 11a7 7 0 0 1-.6 2.8M12 18v3M3 3l18 18"/></svg></span>`;
     box.innerHTML = `${ps.length ? `<div class="stage">${ps.map((p) => `<div class="vp${p.muted ? " muted" : ""}" data-vp="${esc(p.id)}"><img data-pp="${esc(p.id)}" alt="">${p.muted ? micOff : ""}<b class="${p.id === hostId ? "host" : ""}" data-pn="${esc(p.id)}"></b></div>`).join("")}</div>` : ""}
@@ -2719,6 +2813,9 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       $("#r-lang").innerHTML = ROOM_LANGS.map((l) => `<option value="${l}">${esc(rm("l_" + l))}</option>`).join("");
       if (state.roomCat !== "all") $("#r-cat").value = state.roomCat;
       $("#r-lang").value = state.roomLang !== "all" ? state.roomLang : lang;
+      $("#rTypeWrap").hidden = !voice; $("#rfType").textContent = lvv("type");
+      $("#r-type").innerHTML = ["chat", "live"].map((k) => `<option value="${k}">${esc(lvv("t_" + k))}</option>`).join("");
+      $("#r-type").value = state.roomCat === "live" ? "live" : "chat";
       openSheet("#roomSheet", "#r-title");
       return;
     }
@@ -2770,9 +2867,11 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (e.target.closest("[data-vjoin]")) joinVoice();
     else if (e.target.closest("[data-vmute]")) toggleMute();
     else if (e.target.closest("[data-vleave]")) leaveVoice();
+    else if (e.target.closest("[data-vflip]")) flipCamera();
   });
+  $("#liveSound").addEventListener("click", () => { const v = $("#liveVideo"); v.muted = false; v.play().catch(() => {}); $("#liveSound").hidden = true; });
   addEventListener("pagehide", () => leaveVoice());
-  if (/[?&]emu\b/.test(location.search)) window.__voiceStates = () => Object.values(vs.pcs).map((pc) => pc.connectionState);
+  if (/[?&]emu\b/.test(location.search)) window.__voiceStates = () => Object.values(vs.pcs).map((pc) => pc.connectionState), window.__liveVideo = () => { const v = $("#liveVideo"); return { tracks: v.srcObject ? v.srcObject.getTracks().map((t) => t.kind) : [], w: v.videoWidth }; };
   $("#chatBar").addEventListener("click", (e) => {
     const x = chatRide.room; if (!x) return;
     if (e.target.closest("[data-room-join]")) { setMine("rooms", x.id, !roomMembers(x.id).includes(state.me)).then(() => openRoom(x)); }
@@ -2784,7 +2883,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (title.length < 4) { err.textContent = rm("errName"); $("#r-title").focus(); return; }
     const btn = $("#roomBtn"); btn.disabled = true;
     try {
-      const ref = await db.collection("rooms").add({ title, category: $("#r-cat").value, lang: $("#r-lang").value, hostId: state.me, createdAt: new Date().toISOString() });
+      const ref = await db.collection("rooms").add({ title, category: $("#r-cat").value, lang: $("#r-lang").value, type: voice && $("#r-type").value === "live" ? "live" : "chat", hostId: state.me, createdAt: new Date().toISOString() });
       await setMine("rooms", ref.id, true);
       $("#roomForm").reset(); closeSheets();
       state.roomCat = "all"; state.roomLang = "all";
@@ -3090,6 +3189,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     }, () => {});
     db.collection("rooms").onSnapshot((s) => {
       state.rooms = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (chatRide.room) { const x = state.rooms.find((r) => r.id === chatRide.room.id); if (x) chatRide.room = x; }
       if (state.mode === "live" && state.tab === "rooms") renderRooms();
     }, () => {});
   })();
