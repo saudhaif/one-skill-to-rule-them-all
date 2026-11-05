@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+
+    // Name and photo shown next to sign-ups and in the ranking.
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /rides/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
+    // One document per member: { rides: { <rideId>: true|false } }.
+    match /joins/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Live positions during a ride, visible only to members who joined it.
+    function joined(rideId) {
+      return get(/databases/$(database)/documents/joins/$(request.auth.uid)).data.rides[rideId] == true;
+    }
+    match /live/{rideId}/pos/{uid} {
+      allow read: if signedIn() && joined(rideId);
+      allow write: if signedIn() && request.auth.uid == uid && (request.method == 'delete' || joined(rideId));
+    }
+
+    // Ride chat: one document per member holding their own messages per ride.
+    match /chatmsgs/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Chat rooms: anyone signed in opens one; only its host changes or deletes it.
+    match /rooms/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.hostId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.hostId == request.auth.uid;
+    }
+
+    // Voice rooms: who is in a room's voice, and the connection messages between two members.
+    match /voice/{roomId}/peers/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+    // Hearts and roses in a live room: each member keeps their own tally.
+    match /voice/{roomId}/hearts/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+    match /voice/{roomId}/sig/{id} {
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid;
+      allow read, delete: if signedIn() && (resource.data.to == request.auth.uid || resource.data.from == request.auth.uid);
+    }
+
+    // Short videos: anyone signed in posts their own; only the poster changes or deletes it.
+    match /clips/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /listings/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.sellerId == request.auth.uid;
+    }
+  }
+}
