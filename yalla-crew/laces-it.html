@@ -537,6 +537,45 @@ button.pp { cursor: pointer; }
 .voice .vacts { display: flex; gap: 8px; }
 .voice .vacts .btn { flex: 1; }
 .btn.mic { background: var(--ok); color: #fff; }
+/* Room screen, HelloTalk-style: stage, audience, chat pills, quick replies. */
+.sheet.roomview { --rbg: #2b2366; background: var(--rbg); color: #fff; max-height: 96vh; min-height: 80vh; align-content: start; }
+.roomview .h2 { color: #fff; }
+.roomview .h2 small { color: rgba(255, 255, 255, .7); }
+.roomview .close { background: rgba(255, 255, 255, .12); color: #fff; }
+.roomview .grab { background: rgba(255, 255, 255, .25); }
+.roomview .linkbtn { color: #c9c2ff; }
+.roomview .linkbtn.danger { color: #ff9b9b; }
+.roomview .voice { background: none; padding: 0; }
+.roomview .sub { color: rgba(255, 255, 255, .7); }
+.stage { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 8px; }
+.stage .vp { width: auto; position: relative; }
+.stage .vp img { width: 64px; height: 64px; max-width: 100%; aspect-ratio: 1; }
+.stage .vp .mic-off { position: absolute; top: 20px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0, 0, 0, .55); display: grid; place-items: center; }
+.stage .vp .mic-off svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.stage .vp b { font-size: 12px; color: #fff; }
+.stage .vp .host { color: #ffd166; }
+.audience { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.audience::-webkit-scrollbar { display: none; }
+.audience .au { flex: none; width: 50px; display: grid; justify-items: center; gap: 3px; font-size: 11px; color: rgba(255, 255, 255, .85); text-align: center; }
+.audience .au img, .audience .au i { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .15); }
+.audience .au i { display: grid; place-items: center; font: 800 13px var(--logo); font-style: normal; }
+.audience .au b { font-weight: 500; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roomview .chatlog { max-height: 38vh; }
+.roomview .cmsg, .roomview .cmsg.me { grid-template-columns: 32px minmax(0, 1fr); }
+.roomview .cmsg.me img { display: block; }
+.roomview .cmsg .bub, .roomview .cmsg.me .bub { justify-self: start; background: rgba(0, 0, 0, .28); color: #fff; border-radius: 18px; padding: 8px 14px; }
+.roomview .cmsg .who, .roomview .cmsg.me .who { display: inline; color: #c9c2ff; margin-inline-end: 6px; }
+.roomview .cmsg .when { display: none; }
+.roomview .cmsg .trm { border: 0; background: none; color: #c9c2ff; font: 600 11px var(--font); padding: 0; margin-inline-start: 8px; cursor: pointer; }
+.notice-pin { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; }
+.notice-pin i { width: 32px; height: 32px; border-radius: 50%; background: #6c5ce7; display: grid; place-items: center; font-style: normal; }
+.notice-pin div { background: rgba(0, 0, 0, .28); border-radius: 18px; padding: 8px 14px; font-size: 13px; line-height: 1.5; }
+.notice-pin b { display: inline-block; background: #6c5ce7; border-radius: 6px; padding: 0 6px; margin-inline-end: 6px; font-size: 11px; }
+.quick { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.quick::-webkit-scrollbar { display: none; }
+.quick button { flex: none; border: 0; border-radius: 999px; padding: 8px 14px; min-height: 40px; background: rgba(255, 255, 255, .12); color: #fff; font: 600 13px var(--font); cursor: pointer; }
+.roomview .ask-row input { background: rgba(0, 0, 0, .3); border-color: transparent; color: #fff; border-radius: 999px; }
+.roomview .ask-row input::placeholder { color: rgba(255, 255, 255, .55); }
 .coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
@@ -749,7 +788,9 @@ button.pp { cursor: pointer; }
       <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
       <div class="chatbar" id="chatBar"></div>
       <div class="voice" id="voiceBox" hidden></div>
+      <div class="audience" id="audience" hidden></div>
       <div class="chatlog" id="chatLog" aria-live="polite"></div>
+      <div class="quick" id="quick" hidden></div>
       <form class="ask-row" id="chatForm"><input id="chatIn" maxlength="500" autocomplete="off"><button class="btn" type="submit" id="chatSend"></button></form>
     </div>
   </div>
@@ -1823,12 +1864,47 @@ Their upcoming rides: ${next}.`;
     const id = chatRide.id; if (!id) return;
     const list = rideMsgs(id), who = await people([...new Set(list.map((m) => m.uid))]);
     const box = $("#chatLog");
-    box.innerHTML = list.length ? list.map((m) => `<div class="cmsg${m.uid === state.me ? " me" : ""}"><img src="${esc(who[m.uid].photo)}" alt=""><div class="bub"><span class="who">${esc(who[m.uid].name)}</span>${esc(m.t)}<span class="when">${esc(fmtDate.format(new Date(m.at)))} · ${esc(fmtTime.format(new Date(m.at)))}</span></div></div>`).join("")
-      : `<p class="sub">${esc(so("chatEmpty"))}</p>`;
+    const inRoom = !!chatRide.room;
+    const notice = inRoom ? `<div class="notice-pin"><i aria-hidden="true">📣</i><div><b>${esc(rv("notice"))}</b>${esc(rv("rules"))}</div></div>` : "";
+    box.innerHTML = notice + (list.length ? list.map((m, i) => {
+      const key = id + "|" + m.at + "|" + m.uid, tr = rvTr[key + lang];
+      return `<div class="cmsg${m.uid === state.me ? " me" : ""}"><img src="${esc(who[m.uid].photo)}" alt=""><div class="bub"><span class="who">${esc(who[m.uid].name)}${inRoom ? ":" : ""}</span>${esc(tr || m.t)}${inRoom && sample && m.uid !== state.me ? `<button type="button" class="trm" data-trm="${i}">${esc(tr ? ai("orig") : ai("tr"))}</button>` : ""}<span class="when">${esc(fmtDate.format(new Date(m.at)))} · ${esc(fmtTime.format(new Date(m.at)))}</span></div></div>`;
+    }).join("") : `<p class="sub">${esc(so("chatEmpty"))}</p>`);
     box.scrollTop = box.scrollHeight;
+  }
+  // Room screen extras.
+  const RV = {
+    ar: { notice: "تنبيه", rules: "هذي غرفة لكرو Laces It. خلّك محترم، والتزم بموضوع الغرفة ولغتها، وابتعد عن السياسة والدين والإساءة. شكراً لأنك تخلي المكان آمن للكل.", quick: ["هلا بالجميع!", "وش الموضوع؟", "أنا جديد هنا 👋", "مين طالع بكرة؟"], aud: "المستمعين", others: "غيرهم" },
+    en: { notice: "Notice", rules: "This is a Laces It crew room. Be respectful, keep to the room's topic and language, and avoid politics, religion and abuse. Thanks for keeping it safe for everyone.", quick: ["Hey, everyone!", "What's the topic?", "I'm new here 👋", "Who's riding tomorrow?"], aud: "Listeners", others: "Others" },
+    fil: { notice: "Paalala", rules: "Ito ay room ng Laces It crew. Maging magalang, sundin ang paksa at wika ng room, at iwasan ang pulitika, relihiyon at pang-aabuso. Salamat sa pagpapanatiling ligtas nito.", quick: ["Hi, sa lahat!", "Ano ang topic?", "Bago ako dito 👋", "Sino ang sasakay bukas?"], aud: "Nakikinig", others: "Iba pa" },
+    hi: { notice: "सूचना", rules: "यह Laces It क्रू का रूम है। सम्मान रखें, रूम के विषय और भाषा पर रहें, और राजनीति, धर्म और अपशब्दों से बचें। सबके लिए सुरक्षित रखने के लिए धन्यवाद।", quick: ["सबको नमस्ते!", "विषय क्या है?", "मैं यहाँ नया हूँ 👋", "कल कौन राइड कर रहा है?"], aud: "सुनने वाले", others: "और" }
+  };
+  const rv = (k) => (RV[lang] || RV.en)[k] ?? RV.en[k];
+  const rvTr = {};
+  function paintRoomExtras() {
+    const x = chatRide.room;
+    $("#chatSheet .sheet").classList.toggle("roomview", !!x);
+    $("#quick").hidden = !x || !(state.mode === "live" && state.canWrite && state.me);
+    $("#audience").hidden = !x;
+    if (!x) return;
+    $("#quick").innerHTML = rv("quick").map((q) => `<button type="button">${esc(q)}</button>`).join("");
+    const speakers = new Set(voice ? livePeers().map((p) => p.id) : []);
+    const msgs = rideMsgs("rm_" + x.id);
+    const aud = [...new Set([...roomMembers(x.id), ...msgs.map((m) => m.uid)])].filter((id) => !speakers.has(id));
+    $("#audience").innerHTML = aud.length ? aud.slice(0, 7).map((id) => `<div class="au"><img data-pp="${esc(id)}" alt=""><b data-pn="${esc(id)}"></b></div>`).join("") + (aud.length > 7 ? `<div class="au"><i>${aud.length - 7}</i><b>${esc(rv("others"))}</b></div>` : "") : "";
+    fillPeopleMarks();
+  }
+  async function translateMsg(i) {
+    const id = chatRide.id, m = rideMsgs(id)[i]; if (!m || !sample) return;
+    const key = id + "|" + m.at + "|" + m.uid;
+    if (rvTr[key + lang]) { delete rvTr[key + lang]; paintChatLog(); return; }
+    try { const { text } = await sample(`Translate this chat message into ${t("aiLang")}. Reply with only the translation.\n\n${m.t}`, { modelTier: "quick" }); rvTr[key + lang] = text.trim(); }
+    catch (e) { flash(aiErr(e) || t("aiFail")); }
+    paintChatLog();
   }
   function openChat(r) {
     chatRide.id = r.id; chatRide.room = null; $("#chatBar").innerHTML = "";
+    paintRoomExtras();
     leaveVoice(); unwatchVoice(); paintVoice();
     $("#chatT").textContent = so("chat") + " · " + txt(r, "title");
     $("#chatIn").placeholder = so("chatPh"); $("#chatSend").textContent = so("send");
@@ -2084,7 +2160,7 @@ Their upcoming rides: ${next}.`;
     vs.unsubWatch = db.collection("voice/" + roomId + "/peers").onSnapshot((s) => {
       vs.peers = s.docs.map((d) => ({ id: d.id, ...d.data() }));
       if (vs.room === roomId) syncPeers();
-      paintVoice();
+      paintVoice(); paintRoomExtras();
     }, () => {});
   }
   function unwatchVoice() { vs.unsubWatch?.(); vs.unsubWatch = null; vs.watch = null; vs.peers = []; }
@@ -2194,8 +2270,9 @@ Their upcoming rides: ${next}.`;
     const box = $("#voiceBox"); if (!box) return;
     if (!voice || !vs.watch || state.mode !== "live" || !state.me) { box.hidden = true; return; }
     box.hidden = false;
-    const ps = livePeers(), inVoice = vs.room === vs.watch;
-    box.innerHTML = `${ps.length ? `<div class="vrow">${ps.map((p) => `<div class="vp${p.muted ? " muted" : ""}" data-vp="${esc(p.id)}"><img data-pp="${esc(p.id)}" alt=""><b data-pn="${esc(p.id)}"></b></div>`).join("")}</div>` : ""}
+    const ps = livePeers(), inVoice = vs.room === vs.watch, hostId = chatRide.room?.hostId;
+    const micOff = `<span class="mic-off" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 9v2a3 3 0 0 0 5.1 2.1M15 10V5a3 3 0 0 0-5.7-1.3M5 11a7 7 0 0 0 11.5 5.4M19 11a7 7 0 0 1-.6 2.8M12 18v3M3 3l18 18"/></svg></span>`;
+    box.innerHTML = `${ps.length ? `<div class="stage">${ps.map((p) => `<div class="vp${p.muted ? " muted" : ""}" data-vp="${esc(p.id)}"><img data-pp="${esc(p.id)}" alt="">${p.muted ? micOff : ""}<b class="${p.id === hostId ? "host" : ""}" data-pn="${esc(p.id)}"></b></div>`).join("")}</div>` : ""}
       <p class="sub">${esc(inVoice && ps.length <= 1 ? vc("alone") : vc("talking", { n: ps.length }))}</p>
       ${inVoice ? `<div class="vacts"><button type="button" class="btn ${vs.muted ? "soft" : "mic"}" data-vmute>${esc(vc(vs.muted ? "unmute" : "mute"))}</button><button type="button" class="btn stop" data-vleave>${esc(vc("leave"))}</button></div>`
         : `<button type="button" class="btn block mic" data-vjoin>${esc(vc("join"))}</button>`}`;
@@ -2210,7 +2287,7 @@ Their upcoming rides: ${next}.`;
     $("#chatBar").innerHTML = state.mode === "live" && state.me ? `<button type="button" class="linkbtn" data-room-join>${esc(joined ? rm("leave") : rm("join"))}</button>${host ? `<button type="button" class="linkbtn danger" data-room-del>${esc(rm("del"))}</button>` : ""}` : "";
     paintChatLog(); openSheet("#chatSheet", "#chatIn");
     if (vs.room && vs.room !== x.id) leaveVoice();
-    watchVoice(x.id); paintVoice();
+    watchVoice(x.id); paintVoice(); paintRoomExtras();
   }
   let heroKey = "";
   function renderHero() {
@@ -2666,6 +2743,8 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     const b = e.target.closest("[data-room]"); if (!b) return;
     const x = (state.mode === "live" ? state.rooms : EXAMPLE_ROOMS).find((r) => r.id === b.dataset.room); if (x) openRoom(x);
   });
+  $("#quick").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; $("#chatIn").value = b.textContent; sendChat(); });
+  $("#chatLog").addEventListener("click", (e) => { const b = e.target.closest("[data-trm]"); if (b) translateMsg(+b.dataset.trm); });
   $("#voiceBox").addEventListener("click", (e) => {
     if (e.target.closest("[data-vjoin]")) joinVoice();
     else if (e.target.closest("[data-vmute]")) toggleMute();
@@ -2984,7 +3063,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     }, () => {});
     db.collection("chatmsgs").onSnapshot((s) => {
       state.msgs = s.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (!$("#chatSheet").hidden) paintChatLog();
+      if (!$("#chatSheet").hidden) { paintChatLog(); if (chatRide.room) paintRoomExtras(); }
       if (state.mode === "live" && state.tab === "rides") renderRides();
       if (state.mode === "live" && state.tab === "rooms") renderRooms();
     }, () => {});
