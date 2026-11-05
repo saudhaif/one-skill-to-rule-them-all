@@ -43,6 +43,16 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.hostId == request.auth.uid;
     }
 
+    // Voice rooms: who is in a room's voice, and the connection messages between two members.
+    match /voice/{roomId}/peers/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+    match /voice/{roomId}/sig/{id} {
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid;
+      allow read, delete: if signedIn() && (resource.data.to == request.auth.uid || resource.data.from == request.auth.uid);
+    }
+
     match /listings/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;

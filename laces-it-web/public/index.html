@@ -534,6 +534,17 @@ button.pp { cursor: pointer; }
 .rc-rides { --rc: #1f5f53; } .rc-training { --rc: #2a2560; } .rc-gear { --rc: #4a2a6b; } .rc-nutrition { --rc: #6b3a1f; }
 .rc-events { --rc: #7a1f3d; } .rc-beginners { --rc: #1f4a7a; } .rc-general { --rc: #333a4d; }
 .chatbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* Voice in rooms. */
+.voice { display: grid; gap: 10px; padding: 12px; border-radius: 16px; background: var(--bg); }
+.voice .vrow { display: flex; gap: 10px; flex-wrap: wrap; }
+.voice .vp { display: grid; justify-items: center; gap: 3px; width: 58px; text-align: center; }
+.voice .vp img { width: 48px; height: 48px; border-radius: 50%; background: var(--line); box-shadow: 0 0 0 3px transparent; transition: box-shadow .15s; }
+.voice .vp.speaking img { box-shadow: 0 0 0 3px var(--ok); }
+.voice .vp.muted img { opacity: .55; }
+.voice .vp b { font-size: 11px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.voice .vacts { display: flex; gap: 8px; }
+.voice .vacts .btn { flex: 1; }
+.btn.mic { background: var(--ok); color: #fff; }
 .coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
@@ -745,6 +756,7 @@ button.pp { cursor: pointer; }
       <div class="grab"></div>
       <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
       <div class="chatbar" id="chatBar"></div>
+      <div class="voice" id="voiceBox" hidden></div>
       <div class="chatlog" id="chatLog" aria-live="polite"></div>
       <form class="ask-row" id="chatForm"><input id="chatIn" maxlength="500" autocomplete="off"><button class="btn" type="submit" id="chatSend"></button></form>
     </div>
@@ -1072,7 +1084,7 @@ button.pp { cursor: pointer; }
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" ? "rooms" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
-  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, writeChain = Promise.resolve();
+  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
 
   function haversine(a, b) {
@@ -1838,6 +1850,7 @@ Their upcoming rides: ${next}.`;
   }
   function openChat(r) {
     chatRide.id = r.id; chatRide.room = null; $("#chatBar").innerHTML = "";
+    leaveVoice(); unwatchVoice(); paintVoice();
     $("#chatT").textContent = so("chat") + " · " + txt(r, "title");
     $("#chatIn").placeholder = so("chatPh"); $("#chatSend").textContent = so("send");
     $("#chatForm").hidden = !(state.canWrite && state.me);
@@ -2074,6 +2087,141 @@ Their upcoming rides: ${next}.`;
     const who = await people(ids);
     for (const e of els) { const w = who[e.dataset.pp || e.dataset.pn]; if (e.dataset.pp) e.src = w.photo; else e.textContent = w.name; }
   }
+  // ---------- Voice in rooms (standalone app: WebRTC between members, signalled through the database) ----------
+  const VC = {
+    ar: { join: "انضم للصوت", talking: "{n} في الصوت الحين", mute: "اكتم المايك", unmute: "شغّل المايك", leave: "اطلع من الصوت", micDenied: "ما سمحت للتطبيق يستخدم المايك.", fail: "ما قدرنا نشغّل الصوت.", alone: "أنت أول واحد في الصوت. يوصلك الباقين أول ما يدخلون." },
+    en: { join: "Join voice", talking: "{n} in voice now", mute: "Mute", unmute: "Unmute", leave: "Leave voice", micDenied: "Microphone access is off.", fail: "Couldn't start voice.", alone: "You're the first in voice. Others connect as they join." },
+    fil: { join: "Sumali sa voice", talking: "{n} nasa voice ngayon", mute: "I-mute", unmute: "I-unmute", leave: "Umalis sa voice", micDenied: "Naka-off ang mic access.", fail: "Hindi masimulan ang voice.", alone: "Ikaw ang una sa voice. Kokonekta ang iba pagpasok nila." },
+    hi: { join: "वॉइस में जुड़ें", talking: "अभी वॉइस में {n}", mute: "म्यूट करें", unmute: "अनम्यूट करें", leave: "वॉइस छोड़ें", micDenied: "माइक की अनुमति बंद है।", fail: "वॉइस शुरू नहीं हुआ।", alone: "आप वॉइस में पहले हैं। बाकी लोग आते ही जुड़ेंगे।" }
+  };
+  const vc = (k, v) => { let x = (VC[lang] || VC.en)[k] ?? VC.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const vs = { room: null, watch: null, peers: [], pcs: {}, stream: null, muted: false, unsub: [], beat: null, audios: {}, ctx: null, meters: {}, raf: 0 };
+  const livePeers = () => vs.peers.filter((p) => Date.now() - Date.parse(p.at) < 60000);
+  // Who is in a room's voice, watched while the room is open (also when not joined).
+  function watchVoice(roomId) {
+    if (!voice || !db || vs.watch === roomId) return;
+    unwatchVoice();
+    vs.watch = roomId;
+    vs.unsubWatch = db.collection("voice/" + roomId + "/peers").onSnapshot((s) => {
+      vs.peers = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (vs.room === roomId) syncPeers();
+      paintVoice();
+    }, () => {});
+  }
+  function unwatchVoice() { vs.unsubWatch?.(); vs.unsubWatch = null; vs.watch = null; vs.peers = []; }
+  const sig = (roomId) => db.collection("voice/" + roomId + "/sig");
+  async function joinVoice() {
+    const roomId = vs.watch; if (!voice || !roomId || vs.room) return;
+    try { vs.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+    catch (e) { flash(vc(e?.name === "NotAllowedError" ? "micDenied" : "fail")); return; }
+    vs.room = roomId; vs.muted = false;
+    try {
+      await db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: false });
+      vs.beat = setInterval(() => { db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: vs.muted }).catch(() => {}); }, 15000);
+      vs.unsub.push(sig(roomId).where("to", "==", state.me).onSnapshot((s) => { for (const c of s.docChanges()) if (c.type === "added") onSig(c.doc.id, c.doc.data()); }, () => {}));
+      meter(state.me, vs.stream);
+      syncPeers();
+    } catch { flash(vc("fail")); leaveVoice(); }
+    paintVoice();
+  }
+  function leaveVoice() {
+    const roomId = vs.room; if (!roomId) return;
+    clearInterval(vs.beat); vs.unsub.forEach((u) => u()); vs.unsub = [];
+    for (const id of Object.keys(vs.pcs)) dropPeer(id);
+    vs.stream?.getTracks().forEach((t) => t.stop()); vs.stream = null;
+    cancelAnimationFrame(vs.raf); vs.raf = 0; vs.meters = {}; vs.ctx?.close().catch(() => {}); vs.ctx = null;
+    db?.doc("voice/" + roomId + "/peers/" + state.me).delete().catch(() => {});
+    vs.room = null;
+    paintVoice();
+  }
+  function syncPeers() {
+    const here = new Set(livePeers().map((p) => p.id).filter((id) => id !== state.me));
+    for (const id of Object.keys(vs.pcs)) if (!here.has(id)) dropPeer(id);
+    for (const id of here) if (!vs.pcs[id]) { const pc = makePc(id); if (state.me < id) offer(id, pc); }
+  }
+  function makePc(id) {
+    const pc = new RTCPeerConnection({ iceServers: voice.iceServers }); pc.q = [];
+    vs.stream.getTracks().forEach((t) => pc.addTrack(t, vs.stream));
+    pc.onicecandidate = (e) => { if (e.candidate) send(id, { type: "cand", cand: JSON.stringify(e.candidate.toJSON()) }); };
+    pc.ontrack = (e) => {
+      let a = vs.audios[id];
+      if (!a) { a = vs.audios[id] = document.createElement("audio"); a.autoplay = true; a.playsInline = true; document.body.appendChild(a); }
+      a.srcObject = e.streams[0]; a.play().catch(() => {});
+      meter(id, e.streams[0]);
+    };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === "failed") { dropPeer(id); if (state.me < id && livePeers().some((p) => p.id === id)) offer(id, makePc(id)); } paintVoice(); };
+    vs.pcs[id] = pc;
+    return pc;
+  }
+  function dropPeer(id) {
+    vs.pcs[id]?.close(); delete vs.pcs[id];
+    if (vs.audios[id]) { vs.audios[id].srcObject = null; vs.audios[id].remove(); delete vs.audios[id]; }
+    delete vs.meters[id];
+  }
+  async function offer(id, pc) {
+    const o = await pc.createOffer(); await pc.setLocalDescription(o);
+    send(id, { type: "offer", sdp: o.sdp });
+  }
+  function send(to, body) { if (vs.room) sig(vs.room).add({ from: state.me, to, at: new Date().toISOString(), ...body }).catch(() => {}); }
+  async function onSig(docId, m) {
+    if (!vs.room) return;
+    sig(vs.room).doc(docId).delete().catch(() => {});
+    if (Date.now() - Date.parse(m.at) > 120000) return;
+    let pc = vs.pcs[m.from];
+    try {
+      if (m.type === "offer") {
+        if (pc && pc.signalingState !== "stable") { dropPeer(m.from); pc = null; }
+        pc = pc || makePc(m.from);
+        await pc.setRemoteDescription({ type: "offer", sdp: m.sdp });
+        const a = await pc.createAnswer(); await pc.setLocalDescription(a);
+        send(m.from, { type: "answer", sdp: a.sdp });
+        for (const c of pc.q.splice(0)) await pc.addIceCandidate(c).catch(() => {});
+      } else if (m.type === "answer" && pc) {
+        await pc.setRemoteDescription({ type: "answer", sdp: m.sdp });
+        for (const c of pc.q.splice(0)) await pc.addIceCandidate(c).catch(() => {});
+      } else if (m.type === "cand") {
+        pc = pc || makePc(m.from);
+        const c = JSON.parse(m.cand);
+        if (pc.remoteDescription) await pc.addIceCandidate(c).catch(() => {}); else pc.q.push(c);
+      }
+    } catch {}
+  }
+  // Speaking rings: a small level meter per voice.
+  function meter(id, stream) {
+    try {
+      vs.ctx = vs.ctx || new AudioContext(); vs.ctx.resume?.().catch(() => {});
+      const an = vs.ctx.createAnalyser(); an.fftSize = 512;
+      vs.ctx.createMediaStreamSource(stream).connect(an);
+      vs.meters[id] = { an, buf: new Uint8Array(an.fftSize) };
+      if (!vs.raf) tick();
+    } catch {}
+  }
+  function tick() {
+    for (const [id, m] of Object.entries(vs.meters)) {
+      m.an.getByteTimeDomainData(m.buf);
+      let sum = 0; for (const v of m.buf) sum += (v - 128) * (v - 128);
+      const on = Math.sqrt(sum / m.buf.length) > 6 && !(id === state.me && vs.muted);
+      document.querySelectorAll(`[data-vp="${CSS.escape(id)}"]`).forEach((el) => el.classList.toggle("speaking", on));
+    }
+    vs.raf = requestAnimationFrame(tick);
+  }
+  function toggleMute() {
+    vs.muted = !vs.muted;
+    vs.stream?.getAudioTracks().forEach((t) => { t.enabled = !vs.muted; });
+    if (vs.room) db.doc("voice/" + vs.room + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: vs.muted }).catch(() => {});
+    paintVoice();
+  }
+  function paintVoice() {
+    const box = $("#voiceBox"); if (!box) return;
+    if (!voice || !vs.watch || state.mode !== "live" || !state.me) { box.hidden = true; return; }
+    box.hidden = false;
+    const ps = livePeers(), inVoice = vs.room === vs.watch;
+    box.innerHTML = `${ps.length ? `<div class="vrow">${ps.map((p) => `<div class="vp${p.muted ? " muted" : ""}" data-vp="${esc(p.id)}"><img data-pp="${esc(p.id)}" alt=""><b data-pn="${esc(p.id)}"></b></div>`).join("")}</div>` : ""}
+      <p class="sub">${esc(inVoice && ps.length <= 1 ? vc("alone") : vc("talking", { n: ps.length }))}</p>
+      ${inVoice ? `<div class="vacts"><button type="button" class="btn ${vs.muted ? "soft" : "mic"}" data-vmute>${esc(vc(vs.muted ? "unmute" : "mute"))}</button><button type="button" class="btn stop" data-vleave>${esc(vc("leave"))}</button></div>`
+        : `<button type="button" class="btn block mic" data-vjoin>${esc(vc("join"))}</button>`}`;
+    fillPeopleMarks();
+  }
   function openRoom(x) {
     chatRide.id = "rm_" + x.id; chatRide.room = x;
     const joined = roomMembers(x.id).includes(state.me), host = x.hostId && x.hostId === state.me;
@@ -2082,6 +2230,8 @@ Their upcoming rides: ${next}.`;
     $("#chatForm").hidden = !(state.mode === "live" && state.canWrite && state.me);
     $("#chatBar").innerHTML = state.mode === "live" && state.me ? `<button type="button" class="linkbtn" data-room-join>${esc(joined ? rm("leave") : rm("join"))}</button>${host ? `<button type="button" class="linkbtn danger" data-room-del>${esc(rm("del"))}</button>` : ""}` : "";
     paintChatLog(); openSheet("#chatSheet", "#chatIn");
+    if (vs.room && vs.room !== x.id) leaveVoice();
+    watchVoice(x.id); paintVoice();
   }
   let heroKey = "";
   function renderHero() {
@@ -2433,6 +2583,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     setTimeout(() => $(focusSel)?.focus(), 50);
   }
   function closeSheets() {
+    if (!$("#chatSheet").hidden) { leaveVoice(); unwatchVoice(); }
     for (const s of document.querySelectorAll(".sheet-bg")) s.hidden = true;
     document.body.style.overflow = "";
     $("#formErr").textContent = ""; $("#sellErr").textContent = "";
@@ -2536,6 +2687,13 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     const b = e.target.closest("[data-room]"); if (!b) return;
     const x = (state.mode === "live" ? state.rooms : EXAMPLE_ROOMS).find((r) => r.id === b.dataset.room); if (x) openRoom(x);
   });
+  $("#voiceBox").addEventListener("click", (e) => {
+    if (e.target.closest("[data-vjoin]")) joinVoice();
+    else if (e.target.closest("[data-vmute]")) toggleMute();
+    else if (e.target.closest("[data-vleave]")) leaveVoice();
+  });
+  addEventListener("pagehide", () => leaveVoice());
+  if (/[?&]emu\b/.test(location.search)) window.__voiceStates = () => Object.values(vs.pcs).map((pc) => pc.connectionState);
   $("#chatBar").addEventListener("click", (e) => {
     const x = chatRide.room; if (!x) return;
     if (e.target.closest("[data-room-join]")) { setMine("rooms", x.id, !roomMembers(x.id).includes(state.me)).then(() => openRoom(x)); }
@@ -2823,7 +2981,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample, assets, downloads, geo, weather] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather"].map((n) => claude.use(n)));
+    [db, user, sample, assets, downloads, geo, weather, voice] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather", "voice"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;

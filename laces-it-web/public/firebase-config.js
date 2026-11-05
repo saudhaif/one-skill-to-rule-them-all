@@ -20,3 +20,10 @@ export const sdk = "https://www.gstatic.com/firebasejs/10.12.2";
 
 // Local testing against the Firebase emulators (firebase emulators:start).
 export const emulators = location.hostname === "localhost" && new URLSearchParams(location.search).has("emu");
+
+// Voice rooms connect members directly (WebRTC). STUN finds each phone's public address;
+// add a TURN server here (for example from Cloudflare Calls or Metered) so members on
+// strict mobile networks can still hear each other.
+export const iceServers = [
+  { urls: "stun:stun.l.google.com:19302" }
+];
