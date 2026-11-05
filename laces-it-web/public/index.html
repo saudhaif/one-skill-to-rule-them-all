@@ -202,7 +202,7 @@ select.chip { border-radius: 999px; padding-block: 8px; padding-inline-start: 18
 
 /* Bottom bar + FAB */
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 6; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tabbar .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+.tabbar .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
 .tabbar button { border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 3px; padding: 9px 4px 8px; font: 600 12px var(--font); cursor: pointer; }
 .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar button[aria-current="page"] { color: var(--accent-text); }
@@ -514,6 +514,26 @@ button.pp { cursor: pointer; }
 .mywx .hr i { width: 22px; height: 4px; border-radius: 2px; }
 .mywx .facts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
 .mywx .facts b { color: var(--ink); }
+/* Chat rooms by category. */
+.rooms { display: grid; gap: 12px; }
+.room { display: grid; gap: 10px; padding: 16px; border-radius: 22px; border: 0; text-align: start; color: #fff; cursor: pointer; font: inherit; background: var(--rc, #2a2560); position: relative; overflow: hidden; }
+.room::after { content: ""; position: absolute; inset: auto -30px -40px auto; width: 140px; height: 140px; border-radius: 50%; background: rgba(255, 255, 255, .08); pointer-events: none; }
+.room .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.room .tags span { font: 700 12px var(--font); padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .28); }
+.room h3 { margin: 0; font: 800 20px/1.25 var(--font); display: flex; align-items: center; gap: 8px; overflow-wrap: anywhere; }
+.room h3 .eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 16px; }
+.room h3 .eq i { width: 3px; background: #fff; border-radius: 2px; }
+.room .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.room .host { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.room .host img { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .2); flex: none; }
+.room .host b { color: #fff; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room .crowd { display: flex; align-items: center; }
+.room .crowd img, .room .crowd .n { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--rc, #2a2560); margin-inline-start: -10px; background: rgba(255, 255, 255, .2); }
+.room .crowd .n { display: grid; place-items: center; font: 800 12px var(--logo); background: rgba(0, 0, 0, .45); }
+.room .last { margin: 0; font-size: 13px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc-rides { --rc: #1f5f53; } .rc-training { --rc: #2a2560; } .rc-gear { --rc: #4a2a6b; } .rc-nutrition { --rc: #6b3a1f; }
+.rc-events { --rc: #7a1f3d; } .rc-beginners { --rc: #1f4a7a; } .rc-general { --rc: #333a4d; }
+.chatbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .coach { white-space: pre-wrap; font-size: 14px; background: var(--bg); border-radius: 12px; padding: 12px; overflow-wrap: anywhere; }
 </style>
 
@@ -556,6 +576,12 @@ button.pp { cursor: pointer; }
       <input id="itemPhoto" class="vh" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
     </section>
 
+    <section class="screen" id="tab-rooms" hidden>
+      <div class="chips" id="roomCats"></div>
+      <div class="chips" id="roomLangs"></div>
+      <div class="rooms" id="roomList" aria-live="polite"></div>
+    </section>
+
     <section class="screen" id="tab-me" hidden>
       <div class="card me-card" id="meCard"></div>
       <div class="card season" id="season" hidden></div>
@@ -588,6 +614,10 @@ button.pp { cursor: pointer; }
       <button type="button" data-tab="board">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg>
         <span data-i18n="tabBoard"></span>
+      </button>
+      <button type="button" data-tab="rooms">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>
+        <span id="tabRoomsT"></span>
       </button>
       <button type="button" data-tab="me">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
@@ -695,11 +725,26 @@ button.pp { cursor: pointer; }
     </div>
   </div>
 
+  <!-- New room -->
+  <div class="sheet-bg" id="roomSheet" hidden>
+    <form class="sheet pad" id="roomForm" novalidate>
+      <div class="grab"></div>
+      <header><h2 class="h2" id="roomFormT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="fields">
+        <label><span id="rfName"></span><input id="r-title" maxlength="60" required></label>
+        <div class="two"><label><span id="rfCat"></span><select id="r-cat"></select></label><label><span id="rfLang"></span><select id="r-lang"></select></label></div>
+      </div>
+      <p class="err" id="roomErr" role="alert"></p>
+      <button class="btn block" type="submit" id="roomBtn"></button>
+    </form>
+  </div>
+
   <!-- Ride chat -->
   <div class="sheet-bg" id="chatSheet" hidden>
     <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="chatT">
       <div class="grab"></div>
       <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="chatbar" id="chatBar"></div>
       <div class="chatlog" id="chatLog" aria-live="polite"></div>
       <form class="ask-row" id="chatForm"><input id="chatIn" maxlength="500" autocomplete="off"><button class="btn" type="submit" id="chatSend"></button></form>
     </div>
@@ -1022,9 +1067,9 @@ button.pp { cursor: pointer; }
   const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
 
   const state = {
-    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], me: null, canWrite: true,
+    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], roomCat: "all", roomLang: "all", me: null, canWrite: true,
     sport: "all", emirate: "all", day: "all", mine: false, ai: {}, open: {}, gpx: null,
-    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : "rides",
+    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" ? "rooms" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
   let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, writeChain = Promise.resolve();
@@ -1142,8 +1187,8 @@ button.pp { cursor: pointer; }
     else if (!state.canWrite && state.tab !== "board") html = esc(t("readOnly"));
     el.innerHTML = html; el.hidden = !html;
     const fab = $("#fab");
-    fab.hidden = !(state.mode === "live" && state.canWrite && (state.tab === "rides" || state.tab === "market"));
-    fab.setAttribute("aria-label", t(state.tab === "market" ? "sellA" : "newRideA"));
+    fab.hidden = !(state.mode === "live" && state.canWrite && (state.tab === "rides" || state.tab === "market" || state.tab === "rooms"));
+    fab.setAttribute("aria-label", state.tab === "rooms" ? rm("newA") : t(state.tab === "market" ? "sellA" : "newRideA"));
   }
 
   const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1792,7 +1837,7 @@ Their upcoming rides: ${next}.`;
     box.scrollTop = box.scrollHeight;
   }
   function openChat(r) {
-    chatRide.id = r.id;
+    chatRide.id = r.id; chatRide.room = null; $("#chatBar").innerHTML = "";
     $("#chatT").textContent = so("chat") + " · " + txt(r, "title");
     $("#chatIn").placeholder = so("chatPh"); $("#chatSend").textContent = so("send");
     $("#chatForm").hidden = !(state.canWrite && state.me);
@@ -1804,7 +1849,10 @@ Their upcoming rides: ${next}.`;
     const list = [...(mine?.rides?.[id] || []), { t: text.slice(0, 500), at: new Date().toISOString() }].slice(-40);
     $("#chatIn").value = ""; $("#chatSend").disabled = true;
     const ref = db.doc("chatmsgs/" + state.me);
-    try { await queueWrite(() => mine ? ref.update({ rides: { [id]: list } }) : ref.set({ rides: { [id]: list } })); }
+    try {
+      await queueWrite(() => mine ? ref.update({ rides: { [id]: list } }) : ref.set({ rides: { [id]: list } }));
+      if (chatRide.room && !roomMembers(chatRide.room.id).includes(state.me)) setMine("rooms", chatRide.room.id, true);
+    }
     catch (e) { flash(writeErr(e)); $("#chatIn").value = text; }
     finally { $("#chatSend").disabled = false; }
   }
@@ -1967,6 +2015,73 @@ Their upcoming rides: ${next}.`;
       ${best ? `<p class="best" style="margin:0;font-size:13px;font-weight:700;color:var(--accent-text)">${esc(mw("best", { d: mw(isToday ? "today" : "tomorrow"), t: fmtTime.format(bt), f: Math.round(best.f) }))}</p>` : ""}
       <p class="src" style="margin:0;font-size:11px;color:var(--muted)">${esc(wxT("src"))}</p>`;
     el.querySelector(".score").className = "score " + v.key;
+  }
+  // ---------- Chat rooms (HelloTalk-style), by category and language ----------
+  const ROOM_CATS = ["rides", "training", "gear", "nutrition", "events", "beginners", "general"];
+  const ROOM_LANGS = ["ar", "en", "fil", "hi", "mix"];
+  const RM = {
+    ar: { tab: "الغرف", all: "الكل", allLang: "كل اللغات", c_rides: "طلعات", c_training: "تدريب", c_gear: "عدّة وصيانة", c_nutrition: "تغذية", c_events: "سباقات وفعاليات", c_beginners: "مبتدئين", c_general: "سوالف عامة",
+      l_ar: "عربي", l_en: "English", l_fil: "Filipino", l_hi: "हिन्दी", l_mix: "AR⇄EN", newT: "غرفة جديدة", name: "اسم الغرفة", namePh: "مثال: صيانة السيكل في البيت", cat: "التصنيف", lang: "اللغة", create: "افتح الغرفة",
+      empty: "<strong>ما فيه غرف بهالتصنيف.</strong> اضغط + وافتح أول غرفة.", host: "المضيف", join: "انضم", leave: "اطلع من الغرفة", del: "احذف الغرفة", errName: "اكتب اسم للغرفة (4 أحرف على الأقل).", newA: "غرفة جديدة",
+      ex1: "طلعات الفجر في دبي", ex2: "Training talk: zone 2", ex3: "مبتدئين: أول سيكل" },
+    en: { tab: "Rooms", all: "All", allLang: "All languages", c_rides: "Rides", c_training: "Training", c_gear: "Gear & repair", c_nutrition: "Nutrition", c_events: "Races & events", c_beginners: "Beginners", c_general: "General chat",
+      l_ar: "عربي", l_en: "English", l_fil: "Filipino", l_hi: "हिन्दी", l_mix: "AR⇄EN", newT: "New room", name: "Room name", namePh: "e.g. Fixing your bike at home", cat: "Category", lang: "Language", create: "Open the room",
+      empty: "<strong>No rooms in this category yet.</strong> Tap + to open the first one.", host: "Host", join: "Join", leave: "Leave room", del: "Delete room", errName: "Give the room a name (at least 4 characters).", newA: "New room",
+      ex1: "Dawn rides in Dubai", ex2: "Training talk: zone 2", ex3: "Beginners: my first bike" },
+    fil: { tab: "Rooms", all: "Lahat", allLang: "Lahat ng wika", c_rides: "Ride", c_training: "Training", c_gear: "Gamit at ayos", c_nutrition: "Nutrisyon", c_events: "Karera at event", c_beginners: "Baguhan", c_general: "Kuwentuhan",
+      l_ar: "عربي", l_en: "English", l_fil: "Filipino", l_hi: "हिन्दी", l_mix: "AR⇄EN", newT: "Bagong room", name: "Pangalan ng room", namePh: "hal. Pag-aayos ng bike sa bahay", cat: "Kategorya", lang: "Wika", create: "Buksan ang room",
+      empty: "<strong>Wala pang room dito.</strong> Pindutin ang + para sa una.", host: "Host", join: "Sumali", leave: "Umalis sa room", del: "Burahin ang room", errName: "Lagyan ng pangalan (hindi bababa sa 4 na letra).", newA: "Bagong room",
+      ex1: "Dawn rides sa Dubai", ex2: "Training talk: zone 2", ex3: "Baguhan: unang bike" },
+    hi: { tab: "रूम्स", all: "सभी", allLang: "सभी भाषाएँ", c_rides: "राइड्स", c_training: "ट्रेनिंग", c_gear: "सामान और मरम्मत", c_nutrition: "न्यूट्रिशन", c_events: "रेस और इवेंट", c_beginners: "शुरुआती", c_general: "आम बातचीत",
+      l_ar: "عربي", l_en: "English", l_fil: "Filipino", l_hi: "हिन्दी", l_mix: "AR⇄EN", newT: "नया रूम", name: "रूम का नाम", namePh: "जैसे: घर पर साइकिल ठीक करना", cat: "श्रेणी", lang: "भाषा", create: "रूम खोलें",
+      empty: "<strong>इस श्रेणी में अभी कोई रूम नहीं।</strong> पहला रूम खोलने के लिए + दबाएँ।", host: "होस्ट", join: "जुड़ें", leave: "रूम छोड़ें", del: "रूम हटाएँ", errName: "रूम का नाम लिखें (कम से कम 4 अक्षर)।", newA: "नया रूम",
+      ex1: "दुबई में सुबह की राइड", ex2: "Training talk: zone 2", ex3: "शुरुआती: मेरी पहली साइकिल" }
+  };
+  const rm = (k) => (RM[lang] || RM.en)[k] ?? RM.en[k];
+  const EXAMPLE_ROOMS = [
+    { id: "exr1", example: true, titleKey: "ex1", category: "rides", lang: "ar" },
+    { id: "exr2", example: true, titleKey: "ex2", category: "training", lang: "en" },
+    { id: "exr3", example: true, titleKey: "ex3", category: "beginners", lang: "mix" }
+  ];
+  const roomTitle = (x) => x.titleKey ? rm(x.titleKey) : x.title;
+  const roomMembers = (id) => state.joins.filter((j) => j.rooms?.[id] === true).map((j) => j.id);
+  function renderRooms() {
+    $("#roomCats").innerHTML = ["all", ...ROOM_CATS].map((c) => `<button type="button" class="chip" data-rcat="${c}" aria-pressed="${state.roomCat === c}">${esc(c === "all" ? rm("all") : rm("c_" + c))}</button>`).join("");
+    $("#roomLangs").innerHTML = ["all", ...ROOM_LANGS].map((l) => `<button type="button" class="chip" data-rlang="${l}" aria-pressed="${state.roomLang === l}">${esc(l === "all" ? rm("allLang") : rm("l_" + l))}</button>`).join("");
+    let list = state.mode === "live" ? state.rooms : EXAMPLE_ROOMS;
+    if (state.roomCat !== "all") list = list.filter((x) => x.category === state.roomCat);
+    if (state.roomLang !== "all") list = list.filter((x) => x.lang === state.roomLang);
+    const activity = (x) => { const m = rideMsgs("rm_" + x.id); return m.length ? m[m.length - 1].at : x.createdAt || ""; };
+    list = list.slice().sort((a, b) => String(activity(b)).localeCompare(String(activity(a))));
+    $("#roomList").innerHTML = list.map((x) => {
+      const mem = roomMembers(x.id), msgs = rideMsgs("rm_" + x.id), last = msgs[msgs.length - 1];
+      const ids = [...new Set([...mem, ...msgs.map((m) => m.uid)])];
+      return `<button type="button" class="room rc-${esc(x.category)}" data-room="${esc(x.id)}">
+        <div class="tags"><span>${esc(rm("l_" + x.lang) || x.lang)}</span><span># ${esc(rm("c_" + x.category))}</span>${x.example ? `<span>${esc(t("example"))}</span>` : ""}</div>
+        <h3><span class="eq" aria-hidden="true"><i style="height:7px"></i><i style="height:12px"></i><i style="height:16px"></i></span>${esc(roomTitle(x))}</h3>
+        <div class="foot"><div class="host">${x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><b data-pn="${esc(x.hostId)}"></b>` : `<b>Laces It</b>`}</div>
+          <div class="crowd">${ids.slice(0, 4).map((id) => `<img data-pp="${esc(id)}" alt="">`).join("")}<span class="n">${ids.length}</span></div></div>
+        ${last ? `<p class="last"><span data-pn="${esc(last.uid)}"></span>: ${esc(last.t)}</p>` : ""}
+      </button>`;
+    }).join("") || (state.mode === "live" ? `<p class="notice">${rm("empty")}</p>` : "");
+    fillPeopleMarks();
+  }
+  // Photos and names for any element marked data-pp / data-pn.
+  async function fillPeopleMarks() {
+    const els = [...document.querySelectorAll("[data-pp],[data-pn]")];
+    const ids = [...new Set(els.map((e) => e.dataset.pp || e.dataset.pn))];
+    if (!ids.length) return;
+    const who = await people(ids);
+    for (const e of els) { const w = who[e.dataset.pp || e.dataset.pn]; if (e.dataset.pp) e.src = w.photo; else e.textContent = w.name; }
+  }
+  function openRoom(x) {
+    chatRide.id = "rm_" + x.id; chatRide.room = x;
+    const joined = roomMembers(x.id).includes(state.me), host = x.hostId && x.hostId === state.me;
+    $("#chatT").innerHTML = `${esc(roomTitle(x))}<br><small class="sub"># ${esc(rm("c_" + x.category))} · ${esc(rm("l_" + x.lang))}</small>`;
+    $("#chatIn").placeholder = so("chatPh"); $("#chatSend").textContent = so("send");
+    $("#chatForm").hidden = !(state.mode === "live" && state.canWrite && state.me);
+    $("#chatBar").innerHTML = state.mode === "live" && state.me ? `<button type="button" class="linkbtn" data-room-join>${esc(joined ? rm("leave") : rm("join"))}</button>${host ? `<button type="button" class="linkbtn danger" data-room-del>${esc(rm("del"))}</button>` : ""}` : "";
+    paintChatLog(); openSheet("#chatSheet", "#chatIn");
   }
   let heroKey = "";
   function renderHero() {
@@ -2149,7 +2264,7 @@ Their upcoming rides: ${next}.`;
     if (targetDone || state.mode !== "live") return;
     targetDone = true;
     const id = location.hash.slice(1);
-    if (!id || id === "market" || id === "ranking" || id === "me") return;
+    if (!id || id === "market" || id === "ranking" || id === "me" || id === "rooms") return;
     const el = document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`);
     if (!el) return;
     state.open[id] = true; renderRides();
@@ -2296,12 +2411,14 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     renderStatus();
     paintAsk();
     renderHero();
-    for (const id of ["rides", "market", "board", "me"]) $("#tab-" + id).hidden = state.tab !== id;
+    for (const id of ["rides", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
+    $("#hero").hidden = state.tab !== "rides";
+    $("#tabRoomsT").textContent = rm("tab");
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else renderBoard();
+    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else if (state.tab === "rooms") renderRooms(); else renderBoard();
     moveInd(!document.querySelector("#tabInd").style.width);
   }
 
@@ -2367,6 +2484,16 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   });
 
   $("#fab").addEventListener("click", () => {
+    if (state.tab === "rooms") {
+      $("#roomFormT").textContent = rm("newT"); $("#rfName").textContent = rm("name"); $("#r-title").placeholder = rm("namePh");
+      $("#rfCat").textContent = rm("cat"); $("#rfLang").textContent = rm("lang"); $("#roomBtn").textContent = rm("create"); $("#roomErr").textContent = "";
+      $("#r-cat").innerHTML = ROOM_CATS.map((c) => `<option value="${c}">${esc(rm("c_" + c))}</option>`).join("");
+      $("#r-lang").innerHTML = ROOM_LANGS.map((l) => `<option value="${l}">${esc(rm("l_" + l))}</option>`).join("");
+      if (state.roomCat !== "all") $("#r-cat").value = state.roomCat;
+      $("#r-lang").value = state.roomLang !== "all" ? state.roomLang : lang;
+      openSheet("#roomSheet", "#r-title");
+      return;
+    }
     if (state.tab === "market") {
       $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true; $("#pickHelp").hidden = true;
       diag("diagReady");
@@ -2403,6 +2530,30 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   $("#tslots").addEventListener("click", (e) => { const b = e.target.closest("[data-slot]"); if (!b) return; $("#f-time").value = b.dataset.slot; renderSlots(); });
   $("#f-time").addEventListener("input", () => renderSlots());
   $("#chatForm").addEventListener("submit", (e) => { e.preventDefault(); sendChat(); });
+  $("#roomCats").addEventListener("click", (e) => { const b = e.target.closest("[data-rcat]"); if (b) { state.roomCat = b.dataset.rcat; renderRooms(); } });
+  $("#roomLangs").addEventListener("click", (e) => { const b = e.target.closest("[data-rlang]"); if (b) { state.roomLang = b.dataset.rlang; renderRooms(); } });
+  $("#roomList").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-room]"); if (!b) return;
+    const x = (state.mode === "live" ? state.rooms : EXAMPLE_ROOMS).find((r) => r.id === b.dataset.room); if (x) openRoom(x);
+  });
+  $("#chatBar").addEventListener("click", (e) => {
+    const x = chatRide.room; if (!x) return;
+    if (e.target.closest("[data-room-join]")) { setMine("rooms", x.id, !roomMembers(x.id).includes(state.me)).then(() => openRoom(x)); }
+    if (e.target.closest("[data-room-del]")) confirmThen(e.target.closest("[data-room-del]"), async () => { await db.doc("rooms/" + x.id).delete(); closeSheets(); });
+  });
+  $("#roomForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = $("#r-title").value.trim(), err = $("#roomErr");
+    if (title.length < 4) { err.textContent = rm("errName"); $("#r-title").focus(); return; }
+    const btn = $("#roomBtn"); btn.disabled = true;
+    try {
+      const ref = await db.collection("rooms").add({ title, category: $("#r-cat").value, lang: $("#r-lang").value, hostId: state.me, createdAt: new Date().toISOString() });
+      await setMine("rooms", ref.id, true);
+      $("#roomForm").reset(); closeSheets();
+      state.roomCat = "all"; state.roomLang = "all";
+    } catch (ex) { err.textContent = writeErr(ex); }
+    finally { btn.disabled = false; }
+  });
   $("#tab-me").addEventListener("click", (e) => {
     const sp = e.target.closest("[data-sp]"); if (sp) sp.setAttribute("aria-pressed", sp.getAttribute("aria-pressed") !== "true");
     if (e.target.closest("#meSave")) saveProfile();
@@ -2698,6 +2849,11 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       state.msgs = s.docs.map((d) => ({ id: d.id, ...d.data() }));
       if (!$("#chatSheet").hidden) paintChatLog();
       if (state.mode === "live" && state.tab === "rides") renderRides();
+      if (state.mode === "live" && state.tab === "rooms") renderRooms();
+    }, () => {});
+    db.collection("rooms").onSnapshot((s) => {
+      state.rooms = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      if (state.mode === "live" && state.tab === "rooms") renderRooms();
     }, () => {});
   })();
 })();

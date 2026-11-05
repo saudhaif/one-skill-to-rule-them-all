@@ -36,6 +36,13 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid == uid;
     }
 
+    // Chat rooms: anyone signed in opens one; only its host changes or deletes it.
+    match /rooms/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.hostId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.hostId == request.auth.uid;
+    }
+
     match /listings/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;
