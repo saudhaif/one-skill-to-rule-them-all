@@ -210,8 +210,9 @@ function api(u, F, fs, S, st) {
   const assets = {
     upload: async (blob, opts = {}) => {
       const type = opts.type || blob.type || "image/jpeg";
-      const ext = { "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[type] || "jpg";
-      const r = S.ref(st, `photos/${u.uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`);
+      const ext = { "image/png": "png", "image/webp": "webp", "image/gif": "gif", "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" }[type] || (type.startsWith("video/") ? "mp4" : "jpg");
+      if (blob.size > 20 * 1024 * 1024) throw { code: "too_large", message: "over 20 MB" };
+      const r = S.ref(st, `${type.startsWith("video/") ? "clips" : "photos"}/${u.uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`);
       try {
         const res = await S.uploadBytes(r, blob, { contentType: type });
         const url = await S.getDownloadURL(r);
