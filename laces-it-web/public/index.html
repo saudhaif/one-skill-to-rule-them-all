@@ -557,6 +557,18 @@ button.pp { cursor: pointer; }
 .btn.live { background: #e5202e; color: #fff; }
 .roomview.liveview .chatlog { max-height: 26vh; }
 .room .tags span.live { background: #e5202e; }
+.rtype { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rtype .lab { font-size: 13px; font-weight: 600; }
+.rtype .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rtype label { position: relative; display: grid; gap: 4px; justify-items: center; text-align: center; padding: 14px 10px; border-radius: 16px; border: 2px solid var(--line); background: var(--card, var(--bg)); cursor: pointer; }
+.rtype input { position: absolute; opacity: 0; pointer-events: none; }
+.rtype .ic { font-size: 30px; line-height: 1; }
+.rtype b { font: 800 15px var(--font); }
+.rtype small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.rtype label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.rtype label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rtype label:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.rtype .note { margin: 0; font-size: 12px; color: var(--muted); }
 .btn.mic { background: var(--ok); color: #fff; }
 /* Room screen, HelloTalk-style: stage, audience, chat pills, quick replies. */
 .sheet.roomview { --rbg: #2b2366; background: var(--rbg); color: #fff; max-height: 96vh; min-height: 80vh; align-content: start; }
@@ -794,9 +806,9 @@ button.pp { cursor: pointer; }
       <div class="grab"></div>
       <header><h2 class="h2" id="roomFormT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
       <div class="fields">
+        <div class="rtype" id="rTypeWrap" role="radiogroup" aria-labelledby="rfType"><span class="lab" id="rfType"></span><div class="opts" id="rTypeOpts"></div><p class="note" id="rTypeNote" hidden></p></div>
         <label><span id="rfName"></span><input id="r-title" maxlength="60" required></label>
         <div class="two"><label><span id="rfCat"></span><select id="r-cat"></select></label><label><span id="rfLang"></span><select id="r-lang"></select></label></div>
-        <label id="rTypeWrap" hidden><span id="rfType"></span><select id="r-type"></select></label>
       </div>
       <p class="err" id="roomErr" role="alert"></p>
       <button class="btn block" type="submit" id="roomBtn"></button>
@@ -2163,7 +2175,7 @@ Their upcoming rides: ${next}.`;
       const mem = roomMembers(x.id), msgs = rideMsgs("rm_" + x.id), last = msgs[msgs.length - 1];
       const ids = [...new Set([...mem, ...msgs.map((m) => m.uid)])];
       return `<button type="button" class="room rc-${esc(x.category)}" data-room="${esc(x.id)}">
-        <div class="tags">${onAir(x) ? `<span class="live">${esc(lvv("live"))} · ${esc(lvv("viewers", { n: x.viewers || 0 }))}</span>` : isLiveRoom(x) ? `<span>${esc(lvv("t_live"))}</span>` : ""}<span>${esc(rm("l_" + x.lang) || x.lang)}</span><span># ${esc(rm("c_" + x.category))}</span>${x.example ? `<span>${esc(t("example"))}</span>` : ""}</div>
+        <div class="tags">${onAir(x) ? `<span class="live">${esc(lvv("live"))} · ${esc(lvv("viewers", { n: x.viewers || 0 }))}</span>` : isLiveRoom(x) ? `<span>🎥 ${esc(lvv("t_video"))}</span>` : voice && !x.example ? `<span>🎙️ ${esc(lvv("t_voice"))}</span>` : ""}<span>${esc(rm("l_" + x.lang) || x.lang)}</span><span># ${esc(rm("c_" + x.category))}</span>${x.example ? `<span>${esc(t("example"))}</span>` : ""}</div>
         <h3><span class="eq" aria-hidden="true"><i style="height:7px"></i><i style="height:12px"></i><i style="height:16px"></i></span>${esc(roomTitle(x))}</h3>
         <div class="foot"><div class="host">${x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><b data-pn="${esc(x.hostId)}"></b>` : `<b>Laces It</b>`}</div>
           <div class="crowd">${ids.slice(0, 4).map((id) => `<img data-pp="${esc(id)}" alt="">`).join("")}<span class="n">${ids.length}</span></div></div>
@@ -2188,10 +2200,10 @@ Their upcoming rides: ${next}.`;
     hi: { join: "वॉइस में जुड़ें", talking: "अभी वॉइस में {n}", mute: "म्यूट करें", unmute: "अनम्यूट करें", leave: "वॉइस छोड़ें", micDenied: "माइक की अनुमति बंद है।", fail: "वॉइस शुरू नहीं हुआ।", alone: "आप वॉइस में पहले हैं। बाकी लोग आते ही जुड़ेंगे।" }
   };
   const LVV = {
-    ar: { type: "نوع الغرفة", t_chat: "دردشة وصوت", t_live: "بث مباشر 🔴", chip: "🔴 بث مباشر", live: "LIVE", viewers: "👁 {n}", start: "ابدأ البث 🔴", end: "أنهِ البث", flip: "اقلب الكاميرا", watch: "شاهد البث", stop: "اطلع من البث", off: "البث متوقف. يبدأ أول ما يشغّله المضيف.", hostOff: "اضغط «ابدأ البث» وتشتغل الكاميرا والمايك. أعضاء الغرفة يشوفونك ويدردشون تحت.", wait: "يتصل بالبث…", camDenied: "ما سمحت للتطبيق يستخدم الكاميرا والمايك.", sound: "🔇 اضغط للصوت", watching: "{n} يشاهدون الحين" },
-    en: { type: "Room type", t_chat: "Chat & voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Go live 🔴", end: "End live", flip: "Flip camera", watch: "Watch live", stop: "Stop watching", off: "Not live right now. It starts when the host goes live.", hostOff: "Tap Go live to turn on your camera and mic. Room members watch you and chat below.", wait: "Connecting to the live…", camDenied: "Camera and microphone access is off.", sound: "🔇 Tap for sound", watching: "{n} watching now" },
-    fil: { type: "Uri ng room", t_chat: "Chat at voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Mag-live 🔴", end: "Tapusin ang live", flip: "Ibaligtad ang camera", watch: "Panoorin ang live", stop: "Huminto sa panonood", off: "Hindi pa live. Magsisimula kapag nag-live ang host.", hostOff: "Pindutin ang Mag-live para buksan ang camera at mic. Manonood at magcha-chat ang mga miyembro sa ibaba.", wait: "Kumokonekta sa live…", camDenied: "Naka-off ang access sa camera at mic.", sound: "🔇 Pindutin para sa tunog", watching: "{n} nanonood ngayon" },
-    hi: { type: "रूम का प्रकार", t_chat: "चैट और वॉइस", t_live: "लाइव वीडियो 🔴", chip: "🔴 लाइव", live: "LIVE", viewers: "👁 {n}", start: "लाइव जाएँ 🔴", end: "लाइव खत्म करें", flip: "कैमरा पलटें", watch: "लाइव देखें", stop: "देखना बंद करें", off: "अभी लाइव नहीं है। होस्ट के लाइव जाते ही शुरू होगा।", hostOff: "कैमरा और माइक चालू करने के लिए लाइव जाएँ दबाएँ। रूम के सदस्य आपको देखेंगे और नीचे चैट करेंगे।", wait: "लाइव से जुड़ रहे हैं…", camDenied: "कैमरा और माइक की अनुमति बंद है।", sound: "🔇 आवाज़ के लिए दबाएँ", watching: "अभी {n} देख रहे हैं" }
+    ar: { t_voice: "غرفة صوت", d_voice: "تتكلمون مع بعض بالمايك وتدردشون", t_video: "بث فيديو", d_video: "تبث بالكاميرا والأعضاء يشوفون ويدردشون", appOnly: "الصوت والفيديو يشتغلون في تطبيق الهاتف. هني الغرفة تكون دردشة كتابية.", type: "نوع الغرفة", t_chat: "دردشة وصوت", t_live: "بث مباشر 🔴", chip: "🔴 بث مباشر", live: "LIVE", viewers: "👁 {n}", start: "ابدأ البث 🔴", end: "أنهِ البث", flip: "اقلب الكاميرا", watch: "شاهد البث", stop: "اطلع من البث", off: "البث متوقف. يبدأ أول ما يشغّله المضيف.", hostOff: "اضغط «ابدأ البث» وتشتغل الكاميرا والمايك. أعضاء الغرفة يشوفونك ويدردشون تحت.", wait: "يتصل بالبث…", camDenied: "ما سمحت للتطبيق يستخدم الكاميرا والمايك.", sound: "🔇 اضغط للصوت", watching: "{n} يشاهدون الحين" },
+    en: { t_voice: "Voice room", d_voice: "Talk together on the mic and chat", t_video: "Video live", d_video: "You broadcast your camera; members watch and chat", appOnly: "Voice and video work in the phone app. Here the room is text chat.", type: "Room type", t_chat: "Chat & voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Go live 🔴", end: "End live", flip: "Flip camera", watch: "Watch live", stop: "Stop watching", off: "Not live right now. It starts when the host goes live.", hostOff: "Tap Go live to turn on your camera and mic. Room members watch you and chat below.", wait: "Connecting to the live…", camDenied: "Camera and microphone access is off.", sound: "🔇 Tap for sound", watching: "{n} watching now" },
+    fil: { t_voice: "Voice room", d_voice: "Mag-usap sa mic at mag-chat", t_video: "Video live", d_video: "Ikaw ang nagla-live sa camera; nanonood at nagcha-chat ang iba", appOnly: "Gumagana ang voice at video sa phone app. Dito, text chat ang room.", type: "Uri ng room", t_chat: "Chat at voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Mag-live 🔴", end: "Tapusin ang live", flip: "Ibaligtad ang camera", watch: "Panoorin ang live", stop: "Huminto sa panonood", off: "Hindi pa live. Magsisimula kapag nag-live ang host.", hostOff: "Pindutin ang Mag-live para buksan ang camera at mic. Manonood at magcha-chat ang mga miyembro sa ibaba.", wait: "Kumokonekta sa live…", camDenied: "Naka-off ang access sa camera at mic.", sound: "🔇 Pindutin para sa tunog", watching: "{n} nanonood ngayon" },
+    hi: { t_voice: "वॉइस रूम", d_voice: "माइक पर साथ बात करें और चैट करें", t_video: "वीडियो लाइव", d_video: "आप कैमरा से लाइव जाएँ; सदस्य देखें और चैट करें", appOnly: "वॉइस और वीडियो फ़ोन ऐप में चलते हैं। यहाँ रूम टेक्स्ट चैट है।", type: "रूम का प्रकार", t_chat: "चैट और वॉइस", t_live: "लाइव वीडियो 🔴", chip: "🔴 लाइव", live: "LIVE", viewers: "👁 {n}", start: "लाइव जाएँ 🔴", end: "लाइव खत्म करें", flip: "कैमरा पलटें", watch: "लाइव देखें", stop: "देखना बंद करें", off: "अभी लाइव नहीं है। होस्ट के लाइव जाते ही शुरू होगा।", hostOff: "कैमरा और माइक चालू करने के लिए लाइव जाएँ दबाएँ। रूम के सदस्य आपको देखेंगे और नीचे चैट करेंगे।", wait: "लाइव से जुड़ रहे हैं…", camDenied: "कैमरा और माइक की अनुमति बंद है।", sound: "🔇 आवाज़ के लिए दबाएँ", watching: "अभी {n} देख रहे हैं" }
   };
   const lvv = (k, v) => { let x = (LVV[lang] || LVV.en)[k] ?? LVV.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
   const isLiveRoom = (x) => x?.type === "live";
@@ -2813,9 +2825,11 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       $("#r-lang").innerHTML = ROOM_LANGS.map((l) => `<option value="${l}">${esc(rm("l_" + l))}</option>`).join("");
       if (state.roomCat !== "all") $("#r-cat").value = state.roomCat;
       $("#r-lang").value = state.roomLang !== "all" ? state.roomLang : lang;
-      $("#rTypeWrap").hidden = !voice; $("#rfType").textContent = lvv("type");
-      $("#r-type").innerHTML = ["chat", "live"].map((k) => `<option value="${k}">${esc(lvv("t_" + k))}</option>`).join("");
-      $("#r-type").value = state.roomCat === "live" ? "live" : "chat";
+      $("#rfType").textContent = lvv("type");
+      const pick = voice && state.roomCat === "live" ? "live" : "chat";
+      $("#rTypeOpts").innerHTML = [["chat", "voice", "🎙️"], ["live", "video", "🎥"]].map(([v, k, ic]) =>
+        `<label><input type="radio" name="r-type" value="${v}"${v === pick ? " checked" : ""}${!voice && v === "live" ? " disabled" : ""}><span class="ic" aria-hidden="true">${ic}</span><b>${esc(lvv("t_" + k))}</b><small>${esc(lvv("d_" + k))}</small></label>`).join("");
+      $("#rTypeNote").hidden = !!voice; $("#rTypeNote").textContent = lvv("appOnly");
       openSheet("#roomSheet", "#r-title");
       return;
     }
@@ -2883,7 +2897,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (title.length < 4) { err.textContent = rm("errName"); $("#r-title").focus(); return; }
     const btn = $("#roomBtn"); btn.disabled = true;
     try {
-      const ref = await db.collection("rooms").add({ title, category: $("#r-cat").value, lang: $("#r-lang").value, type: voice && $("#r-type").value === "live" ? "live" : "chat", hostId: state.me, createdAt: new Date().toISOString() });
+      const ref = await db.collection("rooms").add({ title, category: $("#r-cat").value, lang: $("#r-lang").value, type: voice && $("#roomForm").querySelector("[name=r-type]:checked")?.value === "live" ? "live" : "chat", hostId: state.me, createdAt: new Date().toISOString() });
       await setMine("rooms", ref.id, true);
       $("#roomForm").reset(); closeSheets();
       state.roomCat = "all"; state.roomLang = "all";
