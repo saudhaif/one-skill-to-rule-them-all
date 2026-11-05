@@ -48,6 +48,11 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if signedIn() && request.auth.uid == uid;
     }
+    // Hearts and roses in a live room: each member keeps their own tally.
+    match /voice/{roomId}/hearts/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
     match /voice/{roomId}/sig/{id} {
       allow create: if signedIn() && request.resource.data.from == request.auth.uid;
       allow read, delete: if signedIn() && (resource.data.to == request.auth.uid || resource.data.from == request.auth.uid);

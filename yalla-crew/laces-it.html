@@ -536,16 +536,56 @@ button.pp { cursor: pointer; }
 .voice .vp b { font-size: 11px; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .voice .vacts { display: flex; gap: 8px; }
 .voice .vacts .btn { flex: 1; }
-.livebox { position: relative; border-radius: 18px; overflow: hidden; background: #000; height: min(50vh, 440px); }
-.livebox video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.livebox.mirror video { transform: scaleX(-1); }
-.livebox .lbadge { position: absolute; top: 10px; inset-inline-start: 10px; display: flex; gap: 6px; align-items: center; font: 800 12px var(--font); color: #fff; }
-.livebox .lbadge b { background: #e5202e; padding: 3px 8px; border-radius: 6px; letter-spacing: .04em; }
-.livebox .lbadge span { background: rgba(0, 0, 0, .5); padding: 3px 8px; border-radius: 6px; }
-.livebox .lhost { position: absolute; top: 8px; inset-inline-end: 10px; display: flex; gap: 6px; align-items: center; color: #fff; font: 700 13px var(--font); background: rgba(0, 0, 0, .45); padding: 3px 10px 3px 3px; border-radius: 999px; }
-.livebox .lhost img { width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, .2); }
-.livebox .lidle { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: rgba(255, 255, 255, .8); font-size: 14px; }
-.livebox .lsound { position: absolute; bottom: 10px; inset-inline-start: 50%; transform: translateX(-50%); border: 0; border-radius: 999px; padding: 6px 14px; font: 700 13px var(--font); background: rgba(0, 0, 0, .6); color: #fff; cursor: pointer; }
+.sheet.roomview.liveview { --rbg: #07070b; min-height: 100vh; max-height: 100vh; border-radius: 0; }
+.ltop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lhost { display: flex; align-items: center; gap: 8px; min-width: 0; background: rgba(255, 255, 255, .1); border-radius: 999px; padding: 4px; padding-inline-end: 4px; }
+.lhost img { width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, .2); flex: none; }
+.lhost .hn { display: grid; min-width: 0; line-height: 1.2; }
+.lhost .hn b { font: 800 14px var(--font); color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 34vw; }
+.lhost .hn span { font-size: 12px; color: rgba(255, 255, 255, .8); }
+.lhost .hf { border: 0; border-radius: 999px; background: #ff3b5c; color: #fff; font: 800 13px var(--font); padding: 8px 12px; cursor: pointer; flex: none; }
+.lview { display: flex; align-items: center; gap: 6px; }
+.lview .on { font: 800 11px var(--font); letter-spacing: .05em; background: #e5202e; color: #fff; padding: 3px 7px; border-radius: 6px; }
+.lview .faces { display: flex; }
+.lview .faces img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #07070b; margin-inline-start: -8px; background: rgba(255, 255, 255, .2); }
+.lview .n { font: 800 13px var(--font); color: #fff; background: rgba(255, 255, 255, .12); padding: 6px 10px; border-radius: 999px; }
+.livebox { position: relative; border-radius: 14px; overflow: hidden; background: #000; height: min(50vh, 500px); }
+.lgrid { position: absolute; inset: 0; display: grid; gap: 2px; direction: ltr; }
+.liveview .notice-pin { display: none; }
+.livebox.battle .lgrid { top: 30px; }
+.lgrid.n1 { grid-template: 1fr / 1fr; }
+.lgrid.n2 { grid-template: 1fr / 1fr 1fr; }
+.lgrid.n3, .lgrid.n4 { grid-template: 1fr 1fr / 1fr 1fr; }
+.lgrid.n3 .tile.lead { grid-row: span 2; }
+.tile { position: relative; overflow: hidden; background: #1b1b22; }
+.tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile.mirror video { transform: scaleX(-1); }
+.tile .hc, .tile .tn { position: absolute; bottom: 8px; display: flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, .45); color: #fff; border-radius: 999px; padding: 4px 9px; font: 800 13px var(--font); max-width: 60%; }
+.tile .hc { inset-inline-start: 8px; }
+.tile .tn { inset-inline-end: 8px; }
+.tile .tn b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.tile .tn button { border: 0; width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #ff3b5c; font: 900 15px/20px var(--font); padding: 0; cursor: pointer; flex: none; }
+.tile .crown { position: absolute; top: 8px; inset-inline-start: 8px; font: 800 11px var(--font); background: rgba(0, 0, 0, .5); color: #ffd36b; padding: 3px 8px; border-radius: 6px; }
+.livebox.battle .tile.ta { box-shadow: inset 0 0 0 3px #ff4f8b; }
+.livebox.battle .tile.tb { box-shadow: inset 0 0 0 3px #36b0ff; }
+.lscore { position: absolute; top: 0; left: 0; right: 0; height: 30px; display: flex; z-index: 2; font: 800 16px/30px var(--logo, var(--font)); color: #fff; direction: ltr; }
+.lscore .a { background: linear-gradient(90deg, #ff4f8b, #ff9cc0); padding-left: 10px; transition: flex-basis .4s; }
+.lscore .b { background: linear-gradient(90deg, #7fe0ff, #36a2ff); text-align: right; padding-right: 10px; transition: flex-basis .4s; }
+.lscore .mid { position: absolute; left: 50%; top: 32px; transform: translateX(-50%); background: rgba(0, 0, 0, .6); border-radius: 999px; padding: 2px 12px; font-size: 13px; line-height: 22px; white-space: nowrap; }
+.lidle { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: rgba(255, 255, 255, .8); font-size: 14px; }
+.lfloat { position: absolute; inset: 0 0 0 auto; width: 70px; pointer-events: none; overflow: hidden; }
+.lfloat i { position: absolute; bottom: 10px; right: 18px; font-style: normal; font-size: 30px; animation: floatup 2.2s ease-out forwards; }
+@keyframes floatup { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 15% { opacity: 1; transform: translate(0, -30px) scale(1.1); } 100% { transform: translate(var(--dx, -10px), -300px) scale(.9); opacity: 0; } }
+.lsound { position: absolute; z-index: 3; bottom: 10px; left: 50%; transform: translateX(-50%); border: 0; border-radius: 999px; padding: 6px 14px; font: 700 13px var(--font); background: rgba(0, 0, 0, .65); color: #fff; cursor: pointer; }
+.levents { display: grid; gap: 6px; justify-items: start; }
+.levents:empty { display: none; }
+.levents span { font: 700 13px var(--font); color: #fff; background: rgba(255, 255, 255, .12); padding: 5px 12px; border-radius: 999px; animation: evin .3s ease-out; }
+@keyframes evin { from { opacity: 0; transform: translateY(6px); } }
+.lacts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lacts .rx { border: 0; width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, .12); font-size: 24px; cursor: pointer; flex: none; }
+.lacts .rx:active { transform: scale(.9); }
+.lacts .btn { flex: 1; min-width: 110px; }
+.lacts .sp { flex: 1; }
 .btn.live { background: #e5202e; color: #fff; }
 .roomview.liveview .chatlog { max-height: 26vh; }
 .room .tags span.live { background: #e5202e; }
@@ -881,7 +921,9 @@ button.pp { cursor: pointer; }
       <div class="grab"></div>
       <header><h2 class="h2" id="chatT"></h2><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
       <div class="chatbar" id="chatBar"></div>
-      <div class="livebox" id="liveBox" hidden><video id="liveVideo" playsinline autoplay></video><div class="lidle" id="liveIdle"></div><div class="lbadge" id="liveBadge" hidden></div><div class="lhost" id="liveHost" hidden></div><button type="button" class="lsound" id="liveSound" hidden></button></div>
+      <div class="ltop" id="liveTop" hidden><div class="lhost" id="liveHost"></div><div class="lview" id="liveBadge"></div></div>
+      <div class="livebox" id="liveBox" hidden><div class="lscore" id="liveScore" hidden></div><div class="lgrid" id="liveGrid"></div><div class="lidle" id="liveIdle"></div><div class="lfloat" id="liveFloat" aria-hidden="true"></div><button type="button" class="lsound" id="liveSound" hidden></button></div>
+      <div class="levents" id="liveEvents" aria-live="polite"></div>
       <div class="voice" id="voiceBox" hidden></div>
       <div class="audience" id="audience" hidden></div>
       <div class="chatlog" id="chatLog" aria-live="polite"></div>
@@ -2247,51 +2289,84 @@ Their upcoming rides: ${next}.`;
     hi: { join: "वॉइस में जुड़ें", talking: "अभी वॉइस में {n}", mute: "म्यूट करें", unmute: "अनम्यूट करें", leave: "वॉइस छोड़ें", micDenied: "माइक की अनुमति बंद है।", fail: "वॉइस शुरू नहीं हुआ।", alone: "आप वॉइस में पहले हैं। बाकी लोग आते ही जुड़ेंगे।" }
   };
   const LVV = {
-    ar: { t_voice: "غرفة صوت", d_voice: "تتكلمون مع بعض بالمايك وتدردشون", t_video: "بث فيديو", d_video: "تبث بالكاميرا والأعضاء يشوفون ويدردشون", appOnly: "الصوت والفيديو يشتغلون في تطبيق الهاتف. هني الغرفة تكون دردشة كتابية.", type: "نوع الغرفة", t_chat: "دردشة وصوت", t_live: "بث مباشر 🔴", chip: "🔴 بث مباشر", live: "LIVE", viewers: "👁 {n}", start: "ابدأ البث 🔴", end: "أنهِ البث", flip: "اقلب الكاميرا", watch: "شاهد البث", stop: "اطلع من البث", off: "البث متوقف. يبدأ أول ما يشغّله المضيف.", hostOff: "اضغط «ابدأ البث» وتشتغل الكاميرا والمايك. أعضاء الغرفة يشوفونك ويدردشون تحت.", wait: "يتصل بالبث…", camDenied: "ما سمحت للتطبيق يستخدم الكاميرا والمايك.", sound: "🔇 اضغط للصوت", watching: "{n} يشاهدون الحين" },
-    en: { t_voice: "Voice room", d_voice: "Talk together on the mic and chat", t_video: "Video live", d_video: "You broadcast your camera; members watch and chat", appOnly: "Voice and video work in the phone app. Here the room is text chat.", type: "Room type", t_chat: "Chat & voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Go live 🔴", end: "End live", flip: "Flip camera", watch: "Watch live", stop: "Stop watching", off: "Not live right now. It starts when the host goes live.", hostOff: "Tap Go live to turn on your camera and mic. Room members watch you and chat below.", wait: "Connecting to the live…", camDenied: "Camera and microphone access is off.", sound: "🔇 Tap for sound", watching: "{n} watching now" },
-    fil: { t_voice: "Voice room", d_voice: "Mag-usap sa mic at mag-chat", t_video: "Video live", d_video: "Ikaw ang nagla-live sa camera; nanonood at nagcha-chat ang iba", appOnly: "Gumagana ang voice at video sa phone app. Dito, text chat ang room.", type: "Uri ng room", t_chat: "Chat at voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Mag-live 🔴", end: "Tapusin ang live", flip: "Ibaligtad ang camera", watch: "Panoorin ang live", stop: "Huminto sa panonood", off: "Hindi pa live. Magsisimula kapag nag-live ang host.", hostOff: "Pindutin ang Mag-live para buksan ang camera at mic. Manonood at magcha-chat ang mga miyembro sa ibaba.", wait: "Kumokonekta sa live…", camDenied: "Naka-off ang access sa camera at mic.", sound: "🔇 Pindutin para sa tunog", watching: "{n} nanonood ngayon" },
-    hi: { t_voice: "वॉइस रूम", d_voice: "माइक पर साथ बात करें और चैट करें", t_video: "वीडियो लाइव", d_video: "आप कैमरा से लाइव जाएँ; सदस्य देखें और चैट करें", appOnly: "वॉइस और वीडियो फ़ोन ऐप में चलते हैं। यहाँ रूम टेक्स्ट चैट है।", type: "रूम का प्रकार", t_chat: "चैट और वॉइस", t_live: "लाइव वीडियो 🔴", chip: "🔴 लाइव", live: "LIVE", viewers: "👁 {n}", start: "लाइव जाएँ 🔴", end: "लाइव खत्म करें", flip: "कैमरा पलटें", watch: "लाइव देखें", stop: "देखना बंद करें", off: "अभी लाइव नहीं है। होस्ट के लाइव जाते ही शुरू होगा।", hostOff: "कैमरा और माइक चालू करने के लिए लाइव जाएँ दबाएँ। रूम के सदस्य आपको देखेंगे और नीचे चैट करेंगे।", wait: "लाइव से जुड़ रहे हैं…", camDenied: "कैमरा और माइक की अनुमति बंद है।", sound: "🔇 आवाज़ के लिए दबाएँ", watching: "अभी {n} देख रहे हैं" }
+    ar: { guest: "🎥 انضم بالكاميرا ({n}/4)", full: "المسرح مليان (4 أشخاص).", down: "انزل من المسرح", battle: "⚔️ تحدي", vs: "{a} ضد {b}", won: "🏆 فاز الفريق الوردي", wonB: "🏆 فاز الفريق الأزرق", draw: "تعادل 🤝", hearts: "قلب", rose: "وردة", joined: "{name} دخل 👋", liveFollow: "+ تابع", hostT: "المضيف", t_voice: "غرفة صوت", d_voice: "تتكلمون مع بعض بالمايك وتدردشون", t_video: "بث فيديو", d_video: "تبث بالكاميرا والأعضاء يشوفون ويدردشون", appOnly: "الصوت والفيديو يشتغلون في تطبيق الهاتف. هني الغرفة تكون دردشة كتابية.", type: "نوع الغرفة", t_chat: "دردشة وصوت", t_live: "بث مباشر 🔴", chip: "🔴 بث مباشر", live: "LIVE", viewers: "👁 {n}", start: "ابدأ البث 🔴", end: "أنهِ البث", flip: "اقلب الكاميرا", watch: "شاهد البث", stop: "اطلع من البث", off: "البث متوقف. يبدأ أول ما يشغّله المضيف.", hostOff: "اضغط «ابدأ البث» وتشتغل الكاميرا والمايك. أعضاء الغرفة يشوفونك ويدردشون تحت.", wait: "يتصل بالبث…", camDenied: "ما سمحت للتطبيق يستخدم الكاميرا والمايك.", sound: "🔇 اضغط للصوت", watching: "{n} يشاهدون الحين" },
+    en: { guest: "🎥 Join on camera ({n}/4)", full: "The stage is full (4 people).", down: "Leave the stage", battle: "⚔️ Battle", vs: "{a} vs {b}", won: "🏆 Pink team wins", wonB: "🏆 Blue team wins", draw: "It's a draw 🤝", hearts: "Heart", rose: "Rose", joined: "{name} joined 👋", liveFollow: "+ Follow", hostT: "Host", t_voice: "Voice room", d_voice: "Talk together on the mic and chat", t_video: "Video live", d_video: "You broadcast your camera; members watch and chat", appOnly: "Voice and video work in the phone app. Here the room is text chat.", type: "Room type", t_chat: "Chat & voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Go live 🔴", end: "End live", flip: "Flip camera", watch: "Watch live", stop: "Stop watching", off: "Not live right now. It starts when the host goes live.", hostOff: "Tap Go live to turn on your camera and mic. Room members watch you and chat below.", wait: "Connecting to the live…", camDenied: "Camera and microphone access is off.", sound: "🔇 Tap for sound", watching: "{n} watching now" },
+    fil: { guest: "🎥 Sumali sa camera ({n}/4)", full: "Puno na ang stage (4 tao).", down: "Umalis sa stage", battle: "⚔️ Laban", vs: "{a} vs {b}", won: "🏆 Panalo ang Pink", wonB: "🏆 Panalo ang Blue", draw: "Tabla 🤝", hearts: "Puso", rose: "Rosas", joined: "Pumasok si {name} 👋", liveFollow: "+ Sundan", hostT: "Host", t_voice: "Voice room", d_voice: "Mag-usap sa mic at mag-chat", t_video: "Video live", d_video: "Ikaw ang nagla-live sa camera; nanonood at nagcha-chat ang iba", appOnly: "Gumagana ang voice at video sa phone app. Dito, text chat ang room.", type: "Uri ng room", t_chat: "Chat at voice", t_live: "Live video 🔴", chip: "🔴 Live", live: "LIVE", viewers: "👁 {n}", start: "Mag-live 🔴", end: "Tapusin ang live", flip: "Ibaligtad ang camera", watch: "Panoorin ang live", stop: "Huminto sa panonood", off: "Hindi pa live. Magsisimula kapag nag-live ang host.", hostOff: "Pindutin ang Mag-live para buksan ang camera at mic. Manonood at magcha-chat ang mga miyembro sa ibaba.", wait: "Kumokonekta sa live…", camDenied: "Naka-off ang access sa camera at mic.", sound: "🔇 Pindutin para sa tunog", watching: "{n} nanonood ngayon" },
+    hi: { guest: "🎥 कैमरा पर जुड़ें ({n}/4)", full: "स्टेज भर गया (4 लोग)।", down: "स्टेज छोड़ें", battle: "⚔️ मुकाबला", vs: "{a} बनाम {b}", won: "🏆 गुलाबी टीम जीती", wonB: "🏆 नीली टीम जीती", draw: "बराबरी 🤝", hearts: "दिल", rose: "गुलाब", joined: "{name} आए 👋", liveFollow: "+ फ़ॉलो", hostT: "होस्ट", t_voice: "वॉइस रूम", d_voice: "माइक पर साथ बात करें और चैट करें", t_video: "वीडियो लाइव", d_video: "आप कैमरा से लाइव जाएँ; सदस्य देखें और चैट करें", appOnly: "वॉइस और वीडियो फ़ोन ऐप में चलते हैं। यहाँ रूम टेक्स्ट चैट है।", type: "रूम का प्रकार", t_chat: "चैट और वॉइस", t_live: "लाइव वीडियो 🔴", chip: "🔴 लाइव", live: "LIVE", viewers: "👁 {n}", start: "लाइव जाएँ 🔴", end: "लाइव खत्म करें", flip: "कैमरा पलटें", watch: "लाइव देखें", stop: "देखना बंद करें", off: "अभी लाइव नहीं है। होस्ट के लाइव जाते ही शुरू होगा।", hostOff: "कैमरा और माइक चालू करने के लिए लाइव जाएँ दबाएँ। रूम के सदस्य आपको देखेंगे और नीचे चैट करेंगे।", wait: "लाइव से जुड़ रहे हैं…", camDenied: "कैमरा और माइक की अनुमति बंद है।", sound: "🔇 आवाज़ के लिए दबाएँ", watching: "अभी {n} देख रहे हैं" }
   };
   const lvv = (k, v) => { let x = (LVV[lang] || LVV.en)[k] ?? LVV.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
   const isLiveRoom = (x) => x?.type === "live";
   const onAir = (x) => !!(isLiveRoom(x) && x.liveAt && Date.now() - Date.parse(x.liveAt) < 60000);
   const vc = (k, v) => { let x = (VC[lang] || VC.en)[k] ?? VC.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
-  const vs = { room: null, watch: null, peers: [], pcs: {}, stream: null, muted: false, unsub: [], beat: null, audios: {}, ctx: null, meters: {}, raf: 0, live: false, host: false, facing: "user" };
-  // In a live room the host sends video to every viewer and offers each connection; viewers only connect to the host.
-  const offerer = (id) => vs.live ? vs.host : state.me < id;
+  const vs = { room: null, watch: null, peers: [], pcs: {}, stream: null, muted: false, unsub: [], beat: null, beatFn: null, audios: {}, ctx: null, meters: {}, raf: 0,
+    live: false, host: false, role: null, facing: "user", remote: {}, hearts: [], mine: null, flushT: 0, seen: null, events: [], clock: 0 };
+  const STAGE_MAX = 4;
+  const onStage = (role) => role === "host" || role === "guest";
   const livePeers = () => vs.peers.filter((p) => Date.now() - Date.parse(p.at) < 60000);
+  const peerOf = (id) => vs.peers.find((p) => p.id === id);
+  // Who is on camera in a live room: the host first, then guests in the order they stepped up.
+  const stagePeers = () => livePeers().filter((p) => onStage(p.role)).sort((a, b) => (b.role === "host") - (a.role === "host") || String(a.since).localeCompare(String(b.since)));
+  // Live rooms: everyone on camera connects to everyone; viewers connect only to people on camera.
+  // Between two people on camera the lower id offers; otherwise the one on camera offers.
+  function offerer(id) {
+    if (!vs.live) return state.me < id;
+    const them = onStage(peerOf(id)?.role), me = onStage(vs.role);
+    return me && them ? state.me < id : me;
+  }
   // Who is in a room's voice, watched while the room is open (also when not joined).
   function watchVoice(roomId) {
     if (!voice || !db || vs.watch === roomId) return;
     unwatchVoice();
-    vs.watch = roomId;
+    vs.watch = roomId; vs.seen = null; vs.seenAt = Date.now();
     vs.unsubWatch = db.collection("voice/" + roomId + "/peers").onSnapshot((s) => {
       vs.peers = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      noteJoins();
       if (vs.room === roomId) syncPeers();
       paintVoice(); paintRoomExtras();
     }, () => {});
+    vs.unsubHearts = db.collection("voice/" + roomId + "/hearts").onSnapshot((s) => {
+      const before = Object.fromEntries(vs.hearts.map((h) => [h.id, h]));
+      vs.hearts = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      for (const h of vs.hearts) {
+        if (h.id === state.me) { if (!vs.mine) vs.mine = h; continue; }
+        const was = before[h.id];
+        if (!was) continue;
+        const dh = sumMap(h.all) - sumMap(was.all), dr = (h.roses || 0) - (was.roses || 0);
+        if (dr > 0) floatUp("🌹", Math.min(dr, 3));
+        if (dh - 5 * Math.max(dr, 0) > 0) floatUp("❤️", Math.min(dh - 5 * Math.max(dr, 0), 6));
+      }
+      paintLive();
+    }, () => {});
+    clearInterval(vs.clock); vs.clock = setInterval(() => { if (isLiveRoom(chatRide.room)) paintScore(); }, 1000);
   }
-  function unwatchVoice() { vs.unsubWatch?.(); vs.unsubWatch = null; vs.watch = null; vs.peers = []; }
+  function unwatchVoice() {
+    vs.unsubWatch?.(); vs.unsubWatch = null; vs.unsubHearts?.(); vs.unsubHearts = null; clearInterval(vs.clock);
+    vs.watch = null; vs.peers = []; vs.hearts = []; vs.mine = null; vs.events = []; vs.seen = null;
+    const ev = $("#liveEvents"); if (ev) ev.innerHTML = "";
+  }
   const sig = (roomId) => db.collection("voice/" + roomId + "/sig");
-  async function joinVoice() {
+  async function joinVoice(want) {
     const roomId = vs.watch; if (!voice || !roomId || vs.room) return;
     const x = chatRide.room;
-    vs.live = isLiveRoom(x); vs.host = vs.live && x.hostId === state.me;
+    vs.live = isLiveRoom(x);
+    const role = !vs.live ? "voice" : x.hostId === state.me ? "host" : want === "guest" ? "guest" : "viewer";
+    if (role === "guest" && stagePeers().length >= STAGE_MAX) { flash(lvv("full")); return; }
+    vs.role = role; vs.host = role === "host";
     const audio = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
-    if (!vs.live || vs.host) {
+    if (role !== "viewer") {
       try { vs.stream = await navigator.mediaDevices.getUserMedia(vs.live ? { audio, video: camera(vs.facing = "user") } : { audio }); }
-      catch (e) { flash(vs.live ? (e?.name === "NotAllowedError" ? lvv("camDenied") : vc("fail")) : vc(e?.name === "NotAllowedError" ? "micDenied" : "fail")); return; }
+      catch (e) { vs.role = null; vs.host = false; flash(vs.live ? (e?.name === "NotAllowedError" ? lvv("camDenied") : vc("fail")) : vc(e?.name === "NotAllowedError" ? "micDenied" : "fail")); return; }
     }
     vs.room = roomId; vs.muted = false;
-    const role = vs.live ? (vs.host ? "host" : "viewer") : "voice";
-    const beat = () => {
+    const since = new Date().toISOString();
+    vs.beatFn = () => {
       const now = new Date().toISOString();
-      if (vs.host) db.doc("rooms/" + roomId).update({ liveAt: now, viewers: livePeers().filter((p) => p.id !== state.me).length }).catch(() => {});
-      return db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: now, muted: vs.muted, role });
+      if (vs.host) db.doc("rooms/" + roomId).update({ liveAt: now, viewers: livePeers().filter((p) => !onStage(p.role)).length }).catch(() => {});
+      return db.doc("voice/" + roomId + "/peers/" + state.me).set({ at: now, muted: vs.muted, role, since });
     };
     try {
-      await beat();
-      vs.beat = setInterval(() => { beat().catch(() => {}); }, 15000);
+      await vs.beatFn();
+      vs.beat = setInterval(() => { vs.beatFn().catch(() => {}); }, 15000);
       vs.unsub.push(sig(roomId).where("to", "==", state.me).onSnapshot((s) => { for (const c of s.docChanges()) if (c.type === "added") onSig(c.doc.id, c.doc.data()); }, () => {}));
       if (vs.stream && !vs.live) meter(state.me, vs.stream);
       syncPeers();
@@ -2305,36 +2380,38 @@ Their upcoming rides: ${next}.`;
     vs.stream?.getTracks().forEach((t) => t.stop()); vs.stream = null;
     cancelAnimationFrame(vs.raf); vs.raf = 0; vs.meters = {}; vs.ctx?.close().catch(() => {}); vs.ctx = null;
     db?.doc("voice/" + roomId + "/peers/" + state.me).delete().catch(() => {});
-    if (vs.host) db?.doc("rooms/" + roomId).update({ liveAt: null, viewers: 0 }).catch(() => {});
-    const v = $("#liveVideo"); if (v) v.srcObject = null;
-    vs.room = null; vs.live = false; vs.host = false;
+    if (vs.host) db?.doc("rooms/" + roomId).update({ liveAt: null, viewers: 0, battle: null }).catch(() => {});
+    flushHearts(true);
+    vs.room = null; vs.live = false; vs.host = false; vs.role = null; vs.remote = {};
     paintVoice();
   }
+  // Step up to the camera or back down: leave and come back in the new role, so everyone reconnects.
+  async function switchRole(role) { leaveVoice(); await joinVoice(role); }
   function syncPeers() {
-    let ids = livePeers().map((p) => p.id).filter((id) => id !== state.me);
-    if (vs.live && !vs.host) ids = ids.filter((id) => id === chatRide.room?.hostId);
-    const here = new Set(ids);
-    for (const id of Object.keys(vs.pcs)) if (!here.has(id)) dropPeer(id);
-    for (const id of here) if (!vs.pcs[id]) { const pc = makePc(id); if (offerer(id)) offer(id, pc); }
+    let ps = livePeers().filter((p) => p.id !== state.me);
+    if (vs.live && !onStage(vs.role)) ps = ps.filter((p) => onStage(p.role));
+    const here = new Map(ps.map((p) => [p.id, p]));
+    for (const [id, pc] of Object.entries(vs.pcs)) if (!here.has(id) || (vs.live && pc.role !== here.get(id).role)) dropPeer(id);
+    for (const id of here.keys()) if (!vs.pcs[id]) { const pc = makePc(id); if (offerer(id)) offer(id, pc); }
   }
   function makePc(id) {
-    const pc = new RTCPeerConnection({ iceServers: voice.iceServers }); pc.q = [];
+    const pc = new RTCPeerConnection({ iceServers: voice.iceServers }); pc.q = []; pc.role = peerOf(id)?.role;
     vs.stream?.getTracks().forEach((t) => pc.addTrack(t, vs.stream));
     pc.onicecandidate = (e) => { if (e.candidate) send(id, { type: "cand", cand: JSON.stringify(e.candidate.toJSON()) }); };
     pc.ontrack = (e) => {
-      if (vs.live) { showLive(e.streams[0]); return; }
+      if (vs.live) { vs.remote[id] = e.streams[0]; paintLive(); return; }
       let a = vs.audios[id];
       if (!a) { a = vs.audios[id] = document.createElement("audio"); a.autoplay = true; a.playsInline = true; document.body.appendChild(a); }
       a.srcObject = e.streams[0]; a.play().catch(() => {});
       meter(id, e.streams[0]);
     };
-    pc.onconnectionstatechange = () => { if (pc.connectionState === "failed") { dropPeer(id); if (offerer(id) && livePeers().some((p) => p.id === id)) offer(id, makePc(id)); } paintVoice(); };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === "failed" && vs.pcs[id] === pc) { dropPeer(id); if (offerer(id) && livePeers().some((p) => p.id === id)) offer(id, makePc(id)); } paintVoice(); };
     vs.pcs[id] = pc;
     return pc;
   }
   function dropPeer(id) {
     vs.pcs[id]?.close(); delete vs.pcs[id];
-    if (vs.live && !vs.host) { $("#liveVideo").srcObject = null; $("#liveSound").hidden = true; }
+    if (vs.remote[id]) { delete vs.remote[id]; paintLive(); }
     if (vs.audios[id]) { vs.audios[id].srcObject = null; vs.audios[id].remove(); delete vs.audios[id]; }
     delete vs.meters[id];
   }
@@ -2386,15 +2463,8 @@ Their upcoming rides: ${next}.`;
     vs.raf = requestAnimationFrame(tick);
   }
   const camera = (facing) => ({ facingMode: facing, width: { ideal: 720 }, height: { ideal: 1280 }, frameRate: { ideal: 24 } });
-  // A viewer's video: plays with sound when the browser allows it, otherwise muted with a tap-for-sound button.
-  function showLive(stream) {
-    const v = $("#liveVideo"); if (v.srcObject === stream) return;
-    v.srcObject = stream; v.muted = false;
-    v.play().catch(() => { v.muted = true; v.play().catch(() => {}); $("#liveSound").hidden = false; });
-    paintVoice();
-  }
   async function flipCamera() {
-    if (!vs.host || !vs.stream) return;
+    if (!vs.live || !vs.stream) return;
     const facing = vs.facing === "user" ? "environment" : "user";
     try {
       const nv = (await navigator.mediaDevices.getUserMedia({ video: camera(facing) })).getVideoTracks()[0];
@@ -2403,29 +2473,117 @@ Their upcoming rides: ${next}.`;
       vs.facing = facing; paintVoice();
     } catch { flash(vc("fail")); }
   }
+  // ---------- Hearts, roses and battles in live rooms ----------
+  // Each member keeps their own tally in voice/<room>/hearts/<their id>: { all: {to: n}, b_<battle>: {to: n}, roses }.
+  const sumMap = (m) => Object.values(m || {}).reduce((a, n) => a + (+n || 0), 0);
+  const heartDocs = () => { const o = vs.hearts.filter((h) => h.id !== state.me); if (vs.mine) o.push(vs.mine); return o; };
+  const heartsTo = (id, key = "all") => heartDocs().reduce((a, h) => a + (+h[key]?.[id] || 0), 0);
+  const battleOf = (x) => x?.battle && x.battle.id ? x.battle : null;
+  function giveHearts(to, n, rose) {
+    if (!vs.watch || !state.me || !to) return;
+    const m = vs.mine = vs.mine ? structuredClone(vs.mine) : { all: {} };
+    delete m.id;
+    m.all = m.all || {}; m.all[to] = (m.all[to] || 0) + n;
+    const bt = battleOf(chatRide.room);
+    if (bt && Date.now() < Date.parse(bt.at) + bt.dur * 1000) { const k = "b_" + bt.id; m[k] = m[k] || {}; m[k][to] = (m[k][to] || 0) + n; }
+    if (rose) m.roses = (m.roses || 0) + 1;
+    floatUp(rose ? "🌹" : "❤️", rose ? 1 : n);
+    clearTimeout(vs.flushT); vs.flushT = setTimeout(() => flushHearts(), 1200);
+    paintLive();
+  }
+  function flushHearts(now) {
+    clearTimeout(vs.flushT);
+    const roomId = vs.watch, m = vs.mine; if (!roomId || !m || !db) return;
+    const { id, ...body } = m;
+    db.doc("voice/" + roomId + "/hearts/" + state.me).set(body).catch(() => {});
+  }
+  function floatUp(emoji, n) {
+    const box = $("#liveFloat"); if (!box || calm()) return;
+    for (let i = 0; i < n; i++) setTimeout(() => {
+      const el = document.createElement("i"); el.textContent = emoji;
+      el.style.setProperty("--dx", (Math.random() * 40 - 30) + "px"); el.style.right = (8 + Math.random() * 26) + "px";
+      box.appendChild(el); setTimeout(() => el.remove(), 2300);
+    }, i * 140);
+  }
+  async function noteJoins() {
+    const ps = livePeers(), ids = ps.map((p) => p.id);
+    // Only people who arrive after the room opened here are announced, not those already in it.
+    vs.seen = vs.seen || new Set();
+    const fresh = ps.filter((p) => !vs.seen.has(p.id) && p.id !== state.me && Date.parse(p.since || 0) > vs.seenAt).map((p) => p.id);
+    ids.forEach((id) => vs.seen.add(id));
+    if (!fresh.length || !isLiveRoom(chatRide.room)) return;
+    const who = await people(fresh);
+    for (const id of fresh) {
+      const ev = { t: lvv("joined", { name: who[id].name }), at: Date.now() };
+      vs.events = [...vs.events, ev].slice(-3);
+      setTimeout(() => { vs.events = vs.events.filter((e) => e !== ev); paintEvents(); }, 7000);
+    }
+    paintEvents();
+  }
+  function paintEvents() { const el = $("#liveEvents"); if (el) el.innerHTML = vs.events.map((e) => `<span>${esc(e.t)}</span>`).join(""); }
+  function startBattle() {
+    if (!vs.host || stagePeers().length < 2) return;
+    db.doc("rooms/" + vs.room).update({ battle: { id: Date.now().toString(36), at: new Date().toISOString(), dur: 180 } }).catch(() => flash(vc("fail")));
+  }
+  function teams() { const st = stagePeers(); return { a: st.filter((_, i) => i % 2 === 0).map((p) => p.id), b: st.filter((_, i) => i % 2 === 1).map((p) => p.id) }; }
+  function paintScore() {
+    const x = chatRide.room, el = $("#liveScore"), box = $("#liveBox"); if (!el || !x) return;
+    const bt = battleOf(x), end = bt ? Date.parse(bt.at) + bt.dur * 1000 : 0, left = end - Date.now();
+    const show = !!bt && stagePeers().length >= 2 && left > -20000;
+    el.hidden = !show; box.classList.toggle("battle", show);
+    if (!show) return;
+    const tm = teams(), key = "b_" + bt.id;
+    const A = tm.a.reduce((s, id) => s + heartsTo(id, key), 0), B = tm.b.reduce((s, id) => s + heartsTo(id, key), 0);
+    const pa = A + B ? Math.min(85, Math.max(15, Math.round(A / (A + B) * 100))) : 50;
+    const mid = left > 0 ? `⚔️ <bdi>${esc(lvv("vs", { a: tm.a.length, b: tm.b.length }))}</bdi> · <bdi dir="ltr">${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}</bdi>` : `<bdi>${esc(A === B ? lvv("draw") : A > B ? lvv("won") : lvv("wonB"))}</bdi>`;
+    el.innerHTML = `<div class="a" style="flex-basis:${pa}%">${A}</div><div class="b" style="flex-basis:${100 - pa}%">${B}</div><div class="mid">${mid}</div>`;
+    const ta = new Set(tm.a);
+    for (const t of document.querySelectorAll("#liveGrid .tile")) { t.classList.toggle("ta", ta.has(t.dataset.tile)); t.classList.toggle("tb", !ta.has(t.dataset.tile)); }
+  }
+  // The camera grid: one tile per person on camera. Tiles are kept between paints so video keeps playing.
   function paintLive() {
     const x = chatRide.room, box = $("#liveBox"), live = !!voice && isLiveRoom(x) && state.mode === "live" && !!state.me;
     $("#chatSheet .sheet").classList.toggle("liveview", live);
-    box.hidden = !live; if (!live) return;
-    const v = $("#liveVideo"), mine = vs.room === x.id;
-    if (mine && vs.host && v.srcObject !== vs.stream) { v.srcObject = vs.stream; v.muted = true; v.play().catch(() => {}); }
-    if (!mine && v.srcObject) v.srcObject = null;
-    const host = livePeers().some((p) => p.id === x.hostId), showing = !!v.srcObject;
-    box.classList.toggle("mirror", mine && vs.host && vs.facing === "user");
-    $("#liveIdle").hidden = showing;
-    $("#liveIdle").textContent = x.hostId === state.me ? lvv("hostOff") : mine && host ? lvv("wait") : lvv("off");
-    const viewers = livePeers().filter((p) => p.id !== x.hostId).length;
-    $("#liveBadge").hidden = !host;
-    $("#liveBadge").innerHTML = `<b>${esc(lvv("live"))}</b><span>${esc(lvv("viewers", { n: viewers }))}</span>`;
-    $("#liveHost").hidden = !x.hostId;
-    $("#liveHost").innerHTML = x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><b data-pn="${esc(x.hostId)}"></b>` : "";
-    if (!showing || !v.muted || (mine && vs.host)) $("#liveSound").hidden = true;
+    box.hidden = !live; $("#liveTop").hidden = !live; if (!live) { $("#liveGrid").innerHTML = ""; return; }
+    const mine = vs.room === x.id, st = stagePeers();
+    const shown = st.filter((p) => (p.id === state.me && mine && vs.stream) || vs.remote[p.id]);
+    const grid = $("#liveGrid"), have = new Map([...grid.children].map((el) => [el.dataset.tile, el]));
+    for (const [id, el] of have) if (!shown.some((p) => p.id === id)) { el.querySelector("video").srcObject = null; el.remove(); have.delete(id); }
+    let needSound = false;
+    shown.forEach((p, i) => {
+      let el = have.get(p.id);
+      if (!el) {
+        el = document.createElement("div"); el.className = "tile"; el.dataset.tile = p.id;
+        el.innerHTML = `<video playsinline autoplay></video>${p.role === "host" ? `<span class="crown">👑 ${esc(lvv("hostT"))}</span>` : ""}<span class="hc"></span><span class="tn"><b data-pn="${esc(p.id)}"></b><button type="button" data-lfollow="${esc(p.id)}" aria-label="${esc(cl("follow"))}">+</button></span>`;
+        grid.appendChild(el);
+      }
+      el.style.order = i; el.classList.toggle("lead", i === 0);
+      const v = el.querySelector("video"), src = p.id === state.me ? vs.stream : vs.remote[p.id];
+      if (v.srcObject !== src) {
+        v.srcObject = src; v.muted = p.id === state.me;
+        v.play().catch(() => { v.muted = true; v.play().catch(() => {}); $("#liveSound").hidden = false; });
+      }
+      if (p.id !== state.me && v.muted) needSound = true;
+      el.classList.toggle("mirror", p.id === state.me && vs.facing === "user");
+      el.querySelector(".hc").textContent = "❤ " + kfmt(heartsTo(p.id));
+      el.querySelector("[data-lfollow]").hidden = p.id === state.me || iFollow(p.id);
+    });
+    grid.className = "lgrid n" + Math.max(1, shown.length);
+    if (!needSound) $("#liveSound").hidden = true;
     $("#liveSound").textContent = lvv("sound");
+    const hostOn = st.some((p) => p.role === "host");
+    $("#liveIdle").hidden = shown.length > 0;
+    $("#liveIdle").textContent = x.hostId === state.me ? lvv("hostOff") : hostOn ? lvv(mine ? "wait" : "watch") : lvv("off");
+    // Top bar: the host with their hearts and a follow button; viewers' faces and count.
+    const viewers = livePeers().filter((p) => !onStage(p.role));
+    $("#liveHost").innerHTML = x.hostId ? `<img data-pp="${esc(x.hostId)}" alt=""><span class="hn"><b data-pn="${esc(x.hostId)}"></b><span>❤ ${esc(kfmt(heartsTo(x.hostId)))}</span></span>${x.hostId !== state.me && !iFollow(x.hostId) ? `<button type="button" class="hf" data-lfollow="${esc(x.hostId)}">${esc(lvv("liveFollow"))}</button>` : ""}` : "";
+    $("#liveBadge").innerHTML = `${hostOn ? `<span class="on">${esc(lvv("live"))}</span>` : ""}<span class="faces">${viewers.slice(0, 2).map((p) => `<img data-pp="${esc(p.id)}" alt="">`).join("")}</span><span class="n">👁 ${viewers.length}</span>`;
+    paintScore(); fillPeopleMarks();
   }
   function toggleMute() {
     vs.muted = !vs.muted;
     vs.stream?.getAudioTracks().forEach((t) => { t.enabled = !vs.muted; });
-    if (vs.room) db.doc("voice/" + vs.room + "/peers/" + state.me).set({ at: new Date().toISOString(), muted: vs.muted }).catch(() => {});
+    if (vs.room) vs.beatFn?.().catch(() => {});
     paintVoice();
   }
   function paintVoice() {
@@ -2434,14 +2592,17 @@ Their upcoming rides: ${next}.`;
     box.hidden = false;
     if (isLiveRoom(chatRide.room)) {
       paintLive();
-      const mine = vs.room === vs.watch, amHost = chatRide.room.hostId === state.me;
-      const n = livePeers().filter((p) => p.id !== chatRide.room.hostId).length;
-      box.innerHTML = `${n ? `<p class="sub">${esc(lvv("watching", { n }))}</p>` : ""}` + (amHost
-        ? (mine ? `<div class="vacts"><button type="button" class="btn ${vs.muted ? "soft" : "mic"}" data-vmute>${esc(vc(vs.muted ? "unmute" : "mute"))}</button><button type="button" class="btn soft" data-vflip>${esc(lvv("flip"))}</button><button type="button" class="btn stop" data-vleave>${esc(lvv("end"))}</button></div>`
-          : `<button type="button" class="btn block live" data-vjoin>${esc(lvv("start"))}</button>`)
-        : (mine ? `<button type="button" class="btn block stop" data-vleave>${esc(lvv("stop"))}</button>`
-          : `<button type="button" class="btn block live" data-vjoin>${esc(lvv("watch"))}</button>`));
-      fillPeopleMarks();
+      const x = chatRide.room, mine = vs.room === vs.watch, amHost = x.hostId === state.me, st = stagePeers(), hostOn = st.some((p) => p.role === "host");
+      const rx = mine && hostOn ? `<button type="button" class="rx" data-lheart aria-label="${esc(lvv("hearts"))}">❤️</button><button type="button" class="rx" data-lrose aria-label="${esc(lvv("rose"))}">🌹</button>` : "";
+      const mic = `<button type="button" class="btn ${vs.muted ? "soft" : "mic"}" data-vmute>${esc(vc(vs.muted ? "unmute" : "mute"))}</button><button type="button" class="btn soft" data-vflip>${esc(lvv("flip"))}</button>`;
+      const bt = battleOf(x), fighting = bt && Date.now() < Date.parse(bt.at) + bt.dur * 1000;
+      let ctl;
+      if (amHost) ctl = mine ? `${mic}${st.length >= 2 && !fighting ? `<button type="button" class="btn live" data-lbattle>${esc(lvv("battle"))}</button>` : ""}<button type="button" class="btn stop" data-vleave>${esc(lvv("end"))}</button>`
+        : `<button type="button" class="btn block live" data-vjoin>${esc(lvv("start"))}</button>`;
+      else if (!mine) ctl = hostOn ? `<button type="button" class="btn block live" data-vjoin>${esc(lvv("watch"))}</button>` : "";
+      else if (vs.role === "guest") ctl = `${mic}<button type="button" class="btn stop" data-ldown>${esc(lvv("down"))}</button>`;
+      else ctl = `${hostOn && st.length < STAGE_MAX ? `<button type="button" class="btn soft" data-lguest>${esc(lvv("guest", { n: st.length }))}</button>` : ""}<button type="button" class="btn stop" data-vleave>${esc(lvv("stop"))}</button>`;
+      box.innerHTML = `<div class="lacts">${rx}${ctl}</div>`;
       return;
     }
     const ps = livePeers(), inVoice = vs.room === vs.watch, hostId = chatRide.room?.hostId;
@@ -2462,6 +2623,7 @@ Their upcoming rides: ${next}.`;
     paintChatLog(); openSheet("#chatSheet", "#chatIn");
     if (vs.room && vs.room !== x.id) leaveVoice();
     watchVoice(x.id); paintVoice(); paintRoomExtras();
+    if (voice && isLiveRoom(x) && onAir(x) && x.hostId !== state.me && state.me && !vs.room) joinVoice();
   }
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
@@ -3132,10 +3294,23 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     else if (e.target.closest("[data-vmute]")) toggleMute();
     else if (e.target.closest("[data-vleave]")) leaveVoice();
     else if (e.target.closest("[data-vflip]")) flipCamera();
+    else if (e.target.closest("[data-lheart]")) giveHearts(chatRide.room?.hostId, 1);
+    else if (e.target.closest("[data-lrose]")) giveHearts(chatRide.room?.hostId, 5, true);
+    else if (e.target.closest("[data-lguest]")) switchRole("guest");
+    else if (e.target.closest("[data-ldown]")) switchRole("viewer");
+    else if (e.target.closest("[data-lbattle]")) startBattle();
   });
-  $("#liveSound").addEventListener("click", () => { const v = $("#liveVideo"); v.muted = false; v.play().catch(() => {}); $("#liveSound").hidden = true; });
+  // Double tap a camera tile to send that person a heart; + follows them.
+  let tileTap = 0;
+  for (const sel of ["#liveGrid", "#liveHost"]) $(sel).addEventListener("click", (e) => {
+    const f = e.target.closest("[data-lfollow]");
+    if (f) { setMine("follows", f.dataset.lfollow, true).then(() => paintLive()); return; }
+    const tile = e.target.closest(".tile"); if (!tile || vs.room !== vs.watch) return;
+    const now = Date.now(); if (now - tileTap < 320) { giveHearts(tile.dataset.tile, 1); tileTap = 0; } else tileTap = now;
+  });
+  $("#liveSound").addEventListener("click", () => { for (const t of document.querySelectorAll("#liveGrid .tile")) { if (t.dataset.tile === state.me) continue; const v = t.querySelector("video"); v.muted = false; v.play().catch(() => {}); } $("#liveSound").hidden = true; });
   addEventListener("pagehide", () => leaveVoice());
-  if (/[?&]emu\b/.test(location.search)) window.__voiceStates = () => Object.values(vs.pcs).map((pc) => pc.connectionState), window.__liveVideo = () => { const v = $("#liveVideo"); return { tracks: v.srcObject ? v.srcObject.getTracks().map((t) => t.kind) : [], w: v.videoWidth }; };
+  if (/[?&]emu\b/.test(location.search)) window.__voiceStates = () => Object.values(vs.pcs).map((pc) => pc.connectionState), window.__liveVideo = () => [...document.querySelectorAll("#liveGrid .tile")].map((t) => { const v = t.querySelector("video"); return { id: t.dataset.tile, tracks: v.srcObject ? v.srcObject.getTracks().map((k) => k.kind) : [], w: v.videoWidth }; });
   $("#chatBar").addEventListener("click", (e) => {
     const x = chatRide.room; if (!x) return;
     if (e.target.closest("[data-room-join]")) { setMine("rooms", x.id, !roomMembers(x.id).includes(state.me)).then(() => openRoom(x)); }
@@ -3458,7 +3633,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     }, () => {});
     db.collection("rooms").onSnapshot((s) => {
       state.rooms = s.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (chatRide.room) { const x = state.rooms.find((r) => r.id === chatRide.room.id); if (x) chatRide.room = x; }
+      if (chatRide.room) { const x = state.rooms.find((r) => r.id === chatRide.room.id); if (x) { chatRide.room = x; if (isLiveRoom(x) && !$("#chatSheet").hidden) paintVoice(); } }
       if (state.mode === "live" && state.tab === "rooms") renderRooms();
     }, () => {});
   })();
