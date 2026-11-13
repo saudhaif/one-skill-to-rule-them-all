@@ -30,6 +30,8 @@ export type Profile = { id: string; nick?: string; name?: string; photo?: string
 type State = {
   lang: Lang;
   user: User | null;
+  /** Browsing example rides without an account (when Firebase isn't set up, e.g. in Expo Go). */
+  demo: boolean;
   authReady: boolean;
   rides: Ride[];
   joins: Joins[];
@@ -41,6 +43,7 @@ type State = {
 export const useApp = create<State>((set, get) => ({
   lang: deviceLang(),
   user: null,
+  demo: false,
   authReady: !firebaseReady,
   rides: [],
   joins: [],
@@ -81,10 +84,36 @@ function listen() {
   return () => offs.forEach((off) => off());
 }
 
-export const signOut = () => fbSignOut(auth);
+export const signOut = () => {
+  if (useApp.getState().demo) { useApp.setState({ demo: false, rides: [], joins: [] }); return Promise.resolve(); }
+  return fbSignOut(auth);
+};
+
+// The member's id: the signed-in account, or "demo" while browsing the examples.
+export const meId = (s: Pick<State, 'user' | 'demo'>) => s.user?.uid ?? (s.demo ? 'demo' : null);
+
+// Example rides at real UAE spots, for trying the app without an account.
+const loop = (lat: number, lon: number, dLat: number, dLon: number, n = 40): LatLon[] =>
+  Array.from({ length: n + 1 }, (_, i) => { const a = (i / n) * Math.PI * 2; return [+(lat + dLat * Math.sin(a)).toFixed(5), +(lon + dLon * (1 - Math.cos(a))).toFixed(5)]; });
+const inDays = (d: number, h: number, m = 0) => { const x = new Date(); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(h - 4, m, 0, 0); return x.toISOString(); };
+export function startDemo() {
+  const rides: Ride[] = [
+    { id: 'ex-qudra', title: 'طلعة الفجر – حلبة القدرة', sport: 'bike', emirate: 'DXB', level: 'int', startAt: inDays(1, 5, 30), distanceKm: 50, meetPoint: 'مواقف حلبة القدرة للدراجات', route: loop(24.835, 55.375, 0.055, 0.08) },
+    { id: 'ex-jais', title: 'تحدي جبل جيس', sport: 'bike', emirate: 'RAK', level: 'adv', startAt: inDays(3, 5), distanceKm: 32, meetPoint: 'أسفل طريق جبل جيس', route: loop(25.94, 56.08, 0.03, 0.05) },
+    { id: 'ex-corniche', title: 'جري الكورنيش', sport: 'run', emirate: 'AUH', level: 'beg', startAt: inDays(2, 6), distanceKm: 8, meetPoint: 'كورنيش أبوظبي – بوابة 3', route: loop(24.475, 54.335, 0.008, 0.014) },
+    { id: 'ex-kite', title: 'جري كايت بيتش', sport: 'run', emirate: 'DXB', level: 'int', startAt: inDays(5, 18), distanceKm: 10, meetPoint: 'كايت بيتش – جميرا', route: loop(25.162, 55.2, 0.01, 0.012) },
+  ];
+  useApp.setState({ demo: true, rides, joins: [{ id: 'm1', rides: { 'ex-qudra': true, 'ex-jais': true } }, { id: 'm2', rides: { 'ex-qudra': true } }] });
+}
 
 // Sign up for a ride, or cancel: one document per member, joins/<uid> = { rides: { <rideId>: true|false } }.
 export async function setJoined(rideId: string, on: boolean) {
+  if (useApp.getState().demo) {
+    const joins = useApp.getState().joins.filter((j) => j.id !== 'demo');
+    const mine = useApp.getState().joins.find((j) => j.id === 'demo');
+    useApp.setState({ joins: [...joins, { id: 'demo', rides: { ...mine?.rides, [rideId]: on } }] });
+    return;
+  }
   const uid = auth.currentUser?.uid; if (!uid) return;
   await setDoc(doc(db, 'joins', uid), encode({ rides: { [rideId]: on } }) as object, { merge: true });
 }

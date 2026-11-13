@@ -33,6 +33,7 @@ const ar = {
   phase2: 'هذا القسم يجي في المرحلة الثانية من تطبيق الهاتف. لين ذاك الحين تقدر تستخدمه من نسخة الويب.',
   language: 'اللغة', signOut: 'تسجيل الخروج', you: 'أنت', member: 'عضو',
   close: 'إغلاق', zoomIn: 'قرّب', zoomOut: 'بعّد', fit: 'كل النقاط', locate: 'موقعي',
+  tryDemo: 'جرّب بأمثلة (بدون حساب)',
   terms: 'الشروط والأحكام', privacy: 'سياسة الخصوصية', errSave: 'ما انحفظ. تأكد من الاتصال وجرّب مرة ثانية.',
 };
 type Dict = typeof ar;
@@ -58,6 +59,7 @@ const en: Dict = {
   phase2: 'This section comes in phase two of the phone app. Until then, use it in the web version.',
   language: 'Language', signOut: 'Sign out', you: 'You', member: 'Member',
   close: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fit: 'All points', locate: 'My location',
+  tryDemo: 'Try it with examples (no account)',
   terms: 'Terms and conditions', privacy: 'Privacy policy', errSave: "Couldn't save. Check your connection and try again.",
 };
 
@@ -72,6 +74,7 @@ const fil: Dict = {
   noRides: 'Walang paparating na ride.', all: 'Lahat', run: 'Takbo', week: 'Ngayong linggo', mine: 'Naka-sign up',
   signed: '{n} naka-sign up', join: 'Isali ako', leave: 'Kanselahin', joined: 'Naka-sign up ✓', directions: 'Direksyon',
   meet: 'Tagpuan', start: 'Simula', distance: 'Layo', level: 'Antas', lvl_beg: 'Baguhan', lvl_int: 'Katamtaman', lvl_adv: 'Bihasa',
+  tryDemo: 'Subukan gamit ang mga halimbawa',
   phase2: 'Darating ito sa ikalawang yugto ng phone app. Gamitin muna ang web version.',
   language: 'Wika', signOut: 'Mag-sign out', you: 'Ikaw', member: 'Miyembro', close: 'Isara',
 };
@@ -88,6 +91,7 @@ const hi: Dict = {
   signed: '{n} साइन अप', join: 'मुझे जोड़ें', leave: 'साइन अप रद्द करें', joined: 'साइन अप ✓', directions: 'रास्ता',
   meet: 'मिलने की जगह', start: 'शुरुआत', distance: 'दूरी', level: 'स्तर', lvl_beg: 'शुरुआती', lvl_int: 'मध्यम', lvl_adv: 'उन्नत',
   em_AUH: 'अबू धाबी', em_DXB: 'दुबई', em_SHJ: 'शारजाह', em_AJM: 'अजमान', em_UAQ: 'उम्म अल क़ुवैन', em_RAK: 'रास अल ख़ैमा', em_FUJ: 'फ़ुजैरा',
+  tryDemo: 'उदाहरणों के साथ आज़माएँ',
   phase2: 'यह हिस्सा फ़ोन ऐप के दूसरे चरण में आएगा। तब तक वेब वर्ज़न इस्तेमाल करें।',
   language: 'भाषा', signOut: 'साइन आउट', you: 'आप', member: 'सदस्य', close: 'बंद करें',
 };

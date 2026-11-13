@@ -12,7 +12,7 @@ import { startSync, useApp } from '@/lib/store';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { user, authReady, lang } = useApp();
+  const { user, demo, authReady, lang } = useApp();
   useEffect(() => startSync(), []);
   useEffect(() => { if (authReady) SplashScreen.hideAsync(); }, [authReady]);
 
@@ -23,12 +23,12 @@ export default function RootLayout() {
         <View style={{ flex: 1, direction: isRTL(lang) ? 'rtl' : 'ltr' }}>
           <StatusBar style="auto" />
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={!!user}>
+            <Stack.Protected guard={!!user || demo}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="map" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
               <Stack.Screen name="ride/[id]" options={{ presentation: 'modal' }} />
             </Stack.Protected>
-            <Stack.Protected guard={!user}>
+            <Stack.Protected guard={!user && !demo}>
               <Stack.Screen name="sign-in" />
             </Stack.Protected>
           </Stack>

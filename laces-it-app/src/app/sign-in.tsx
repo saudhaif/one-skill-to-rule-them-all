@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { auth, firebaseReady } from '@/lib/firebase';
 import { LANG_NAMES, LANGS } from '@/lib/i18n';
-import { useApp } from '@/lib/store';
+import { startDemo, useApp } from '@/lib/store';
 import { C } from '@/lib/theme';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -53,6 +53,11 @@ export default function SignIn() {
       </View>
       <View style={s.btns}>
         {!firebaseReady && <Text style={s.err}>{t('notConfigured')}</Text>}
+        {!firebaseReady && (
+          <Pressable accessibilityRole="button" onPress={startDemo} style={[s.btn, s.btnDark]}>
+            <Text style={[s.btnT, { color: '#fff' }]}>{t('tryDemo')}</Text>
+          </Pressable>
+        )}
         <Pressable
           accessibilityRole="button"
           disabled={!request || busy || !firebaseReady}

@@ -10,15 +10,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconBike, IconClose, IconFit, IconLocate, IconRun } from '@/components/icons';
 import { LOCALES } from '@/lib/i18n';
 import { regionFor, spots, upcoming, type Filter, type Spot } from '@/lib/spots';
-import { rideTitle, riders, useApp } from '@/lib/store';
+import { meId, rideTitle, riders, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
 
 export default function MeetingMap() {
-  const { t, lang, rides, joins, user } = useApp();
+  const { t, lang, rides, joins } = useApp();
+  const me = useApp(meId);
   const [filter, setFilter] = useState<Filter>('all');
   const [sel, setSel] = useState<Spot | null>(null);
   const map = useRef<MapView>(null);
-  const mine = (id: string) => !!user && riders(joins, id).includes(user.uid);
+  const mine = (id: string) => !!me && riders(joins, id).includes(me);
   const sp = useMemo(() => spots(upcoming(rides, filter, mine)), [rides, joins, filter]); // eslint-disable-line react-hooks/exhaustive-deps
   const region = useMemo(() => regionFor(sp.map((x) => [x.lat, x.lon])), [sp]);
   const f = fmt(LOCALES[lang]);

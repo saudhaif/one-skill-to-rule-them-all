@@ -3,13 +3,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { IconBike, IconRun } from '@/components/icons';
 import { LOCALES } from '@/lib/i18n';
-import { rideTitle, riders, useApp, type Ride } from '@/lib/store';
+import { meId, rideTitle, riders, useApp, type Ride } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
 
 export function RideCard({ r }: { r: Ride }) {
-  const { t, lang, joins, user } = useApp();
+  const { t, lang, joins } = useApp();
+  const me = useApp(meId);
   const f = fmt(LOCALES[lang]), start = new Date(r.startAt);
-  const ids = riders(joins, r.id), mine = !!user && ids.includes(user.uid);
+  const ids = riders(joins, r.id), mine = !!me && ids.includes(me);
   const Icon = r.sport === 'run' ? IconRun : IconBike;
   return (
     <Pressable accessibilityRole="button" onPress={() => router.push(`/ride/${r.id}`)} style={({ pressed }) => [s.card, pressed && { opacity: 0.85 }]}>

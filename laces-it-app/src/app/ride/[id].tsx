@@ -7,18 +7,19 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import { IconClose } from '@/components/icons';
 import { LOCALES } from '@/lib/i18n';
 import { meetingPoint, regionFor } from '@/lib/spots';
-import { rideTitle, riders, setJoined, useApp } from '@/lib/store';
+import { meId, rideTitle, riders, setJoined, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
 
 export default function RideScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t, lang, rides, joins, user } = useApp();
+  const { t, lang, rides, joins } = useApp();
+  const me = useApp(meId);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const r = rides.find((x) => x.id === id);
   if (!r) return <View style={s.wrap} />;
   const f = fmt(LOCALES[lang]), start = new Date(r.startAt), [lat, lon] = meetingPoint(r);
-  const ids = riders(joins, r.id), joined = !!user && ids.includes(user.uid);
+  const ids = riders(joins, r.id), joined = !!me && ids.includes(me);
   const route = (r.route ?? []).map(([a, b]) => ({ latitude: a, longitude: b }));
   const toggle = async () => {
     setBusy(true); setErr('');
