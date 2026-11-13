@@ -335,6 +335,16 @@ textarea { min-height: 80px; resize: vertical; }
 .hero .facts b { font-size: 38px; }
 .hero .facts span { font-size: 13px; }
 .hero button { flex: none; margin-top: 0; }
+/* Compact next-ride card: the same size as the map preview above it. */
+.hero { min-height: 0; height: 118px; border-radius: 18px; padding: 12px 14px; gap: 2px; justify-content: center; padding-inline-end: calc(34% + 8px); box-shadow: 0 4px 14px rgba(0, 0, 0, .14); }
+.hero svg.art { top: 6px; bottom: 6px; height: auto; width: 34%; left: auto; right: auto; inset-inline-end: 4px; }
+.hero .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero h2 { font-size: 19px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
+.hero .foot-row { margin-top: 2px; gap: 8px; align-items: center; }
+.hero .facts { gap: 6px; flex-wrap: nowrap; align-items: baseline; min-width: 0; }
+.hero .facts b { font-size: 22px; flex: none; }
+.hero .facts span { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.hero button { min-height: 34px; padding: 6px 14px; font-size: 13px; border-radius: 17px; }
 .stats { padding: 10px 4px; }
 .stat b { font-size: 24px; }
 .ride { gap: 10px; }
