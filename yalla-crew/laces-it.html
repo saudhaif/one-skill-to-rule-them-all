@@ -328,6 +328,22 @@ textarea { min-height: 80px; resize: vertical; }
 .hero .facts span { font-size: 13px; }
 .hero button { flex: none; margin-top: 0; }
 /* Compact next-ride card: the same size as the map preview above it. */
+/* The route's contour rings: brighter, with a pulse that ripples outward; the route glows and its start pings. */
+.hero .echo { stroke: #fff; stroke-width: 1.5; opacity: .22; }
+.hero .line { filter: drop-shadow(0 0 4px rgba(255, 255, 255, .85)) drop-shadow(0 0 10px rgba(255, 255, 255, .45)); }
+.hero .ping { fill: #fff; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.minimap .mm-pins i::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid currentColor; color: var(--accent); opacity: 0; }
+.minimap .mm-pins i.run::after { color: #12b886; }
+.spot .bub::before { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 3px solid #fff; opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero .echo { animation: yc-ripple 3s ease-in-out infinite; animation-delay: calc(var(--i) * .2s); }
+  @keyframes yc-ripple { 0%, 100% { opacity: .16; stroke-width: 1.2; } 30% { opacity: .9; stroke-width: 2.4; } 60% { opacity: .25; } }
+  .hero .ping { animation: yc-ping 2s 1.6s ease-out infinite; }
+  @keyframes yc-ping { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(4.5); opacity: 0; } }
+  .minimap .mm-pins i::after, .spot .bub::before { animation: yc-radar 2.2s ease-out infinite; }
+  .minimap .mm-pins i:nth-child(2n)::after, .spot:nth-child(2n) .bub::before { animation-delay: 1.1s; }
+  @keyframes yc-radar { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(2.8); opacity: 0; } }
+}
 .hero { min-height: 0; height: 118px; border-radius: 18px; padding: 12px 14px; gap: 2px; justify-content: center; padding-inline-end: calc(34% + 8px); box-shadow: 0 4px 14px rgba(0, 0, 0, .14); }
 .hero svg.art { top: 6px; bottom: 6px; height: auto; width: 34%; left: auto; right: auto; inset-inline-end: 4px; }
 .hero .eyebrow { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3155,8 +3171,8 @@ Their upcoming rides: ${next}.`;
       const w = (Math.max(...xs) - x0) * sc, h = (Math.max(...ys) - y0) * sc;
       const q = pts.map((p) => [200 - w / 2 + (p[0] - x0) * sc, 125 - h / 2 + (p[1] - y0) * sc]);
       const d = q.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
-      const echoes = [1.22, 1.5, 1.84, 2.26, 2.8, 3.5].map((k) => `<path class="echo" d="${d}" transform="translate(200 125) scale(${k}) translate(-200 -125)"/>`).join("");
-      art = `<svg class="art" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${echoes}<path class="line" pathLength="1" d="${d}"/><circle class="dot" cx="${q[0][0].toFixed(1)}" cy="${q[0][1].toFixed(1)}" r="7"/><circle class="rider" r="5"><animateMotion dur="9s" begin="1.6s" repeatCount="indefinite" path="${d}"/></circle></svg>`;
+      const echoes = [1.22, 1.5, 1.84, 2.26, 2.8, 3.5].map((k, i) => `<path class="echo" style="--i:${i}" d="${d}" transform="translate(200 125) scale(${k}) translate(-200 -125)"/>`).join("");
+      art = `<svg class="art" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${echoes}<path class="line" pathLength="1" d="${d}"/><circle class="ping" cx="${q[0][0].toFixed(1)}" cy="${q[0][1].toFixed(1)}" r="7"/><circle class="dot" cx="${q[0][0].toFixed(1)}" cy="${q[0][1].toFixed(1)}" r="7"/><circle class="rider" r="5"><animateMotion dur="9s" begin="1.6s" repeatCount="indefinite" path="${d}"/></circle></svg>`;
     }
     el.innerHTML = `${art}<p class="eyebrow">${esc(HERO[lang])} · ${esc(soon)}${isRamadan(start) ? " · " + esc(f("ramadan", { t: fmtTime.format(sunTimes(start, ...where(r)).set) })) : ""}</p><h2>${esc(txt(r, "title"))}</h2>
       <div class="foot-row"><p class="facts"><b>${esc(r.distanceKm)}</b><span>${esc(t("km"))} · ${esc(fmtTime.format(start))} · ${esc(t("em_" + r.emirate))}</span></p>
