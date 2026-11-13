@@ -609,6 +609,65 @@ button.pp { cursor: pointer; }
 .rtype label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rtype label:has(input:disabled) { opacity: .5; cursor: not-allowed; }
 .rtype .note { margin: 0; font-size: 12px; color: var(--muted); }
+/* Meeting-points map: full-screen satellite view */
+.mmwrap { margin: 0 max(12px, env(safe-area-inset-left, 0px)) 12px; }
+.minimap { position: relative; display: block; width: 100%; height: 118px; border: 0; padding: 0; border-radius: 18px; overflow: hidden; cursor: pointer; background: #0d2233; color: #fff; font: inherit; text-align: start; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.minimap .mm-tiles, .minimap .mm-pins { position: absolute; inset: 0; }
+.minimap .mm-tiles img { position: absolute; width: 256px; height: 256px; max-width: none; }
+.minimap .mm-tiles svg { width: 100%; height: 100%; display: block; }
+.minimap .mm-pins i { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; transform: translate(-50%, -50%); box-shadow: 0 0 0 4px rgba(255, 90, 54, .3); }
+.minimap .mm-pins i.run { background: #12b886; box-shadow: 0 0 0 4px rgba(18, 184, 134, .3); }
+.minimap .mm-lab { position: absolute; inset: auto 0 0 0; padding: 22px 14px 10px; display: grid; background: linear-gradient(transparent, rgba(5, 12, 20, .8)); }
+.minimap .mm-lab b { font: 800 15px var(--font); }
+.minimap .mm-lab small { font-size: 12px; opacity: .85; }
+.minimap .mm-exp { position: absolute; top: 8px; inset-inline-end: 8px; width: 34px; height: 34px; border-radius: 50%; background: rgba(10, 16, 24, .7); display: grid; place-items: center; }
+.minimap .mm-exp svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.smap { position: fixed; inset: 0; z-index: 8; background: #0b1622; color: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.smap .view { position: absolute; inset: 0; cursor: grab; }
+.smap .view.drag { cursor: grabbing; }
+.smap .tiles, .smap .pins { position: absolute; inset: 0; }
+.smap .tiles img { position: absolute; width: 256px; height: 256px; max-width: none; pointer-events: none; }
+.smap .tiles svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.smap .mtop { position: absolute; top: 0; left: 0; right: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 26px; display: grid; gap: 10px; background: linear-gradient(rgba(5, 12, 20, .75), transparent); z-index: 3; pointer-events: none; }
+.smap .mtop > * { pointer-events: auto; }
+.smap .mhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.smap .mclose, .smap .mctl button { width: 48px; height: 48px; border-radius: 50%; border: 0; background: rgba(20, 28, 38, .85); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+.smap .mclose svg, .smap .mctl svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.smap .marea { text-align: end; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.smap .marea b { display: block; font: 800 30px/1.1 var(--font); }
+.smap .marea span { font: 700 15px var(--font); opacity: .9; }
+.smap .mchips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.smap .mchips::-webkit-scrollbar { display: none; }
+.smap .mchips button { flex: none; border: 0; border-radius: 999px; padding: 9px 14px; font: 700 14px var(--font); color: #fff; background: rgba(20, 28, 38, .82); cursor: pointer; display: flex; gap: 6px; align-items: center; }
+.smap .mchips button[aria-pressed="true"] { background: var(--accent); }
+.smap .mctl { position: absolute; inset-inline-end: 14px; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px; z-index: 3; }
+.smap .mattr { position: absolute; inset-inline-start: 8px; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); font-size: 10px; color: rgba(255, 255, 255, .75); z-index: 3; text-shadow: 0 1px 2px #000; }
+.spot { position: absolute; transform: translate(-50%, -100%); border: 0; background: none; padding: 0; display: grid; justify-items: center; gap: 2px; cursor: pointer; color: #fff; font: inherit; }
+.spot .bub { position: relative; width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: var(--accent); display: grid; place-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, .45); }
+.spot.run .bub { background: #12b886; }
+.spot.mine .bub { box-shadow: 0 0 0 4px rgba(255, 210, 74, .9), 0 3px 12px rgba(0, 0, 0, .45); }
+.spot .bub svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.spot .bub::after { content: ""; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.spot .cnt { position: absolute; top: -6px; inset-inline-end: -8px; min-width: 22px; height: 22px; border-radius: 999px; background: #111a24; border: 2px solid #fff; font: 800 12px/18px var(--font); padding: 0 5px; }
+.spot .faces { display: flex; margin-top: 6px; }
+.spot .faces img { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; margin-inline-start: -7px; background: #333; }
+.spot .faces img:first-child { margin-inline-start: 0; }
+.spot .lab { display: grid; justify-items: center; line-height: 1.15; max-width: 170px; text-align: center; font: 800 15px var(--font); color: #fff; -webkit-text-stroke: 3px rgba(8, 16, 26, .85); paint-order: stroke fill; }
+.spot .lab small { font: 700 12px var(--font); color: #ffd9cc; }
+.spot.sel .bub { transform: scale(1.12); }
+.medot { position: absolute; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 4px; pointer-events: none; }
+.medot img { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; background: #333; box-shadow: 0 0 0 6px rgba(66, 165, 255, .35); }
+.medot span { font: 800 13px var(--font); background: rgba(10, 16, 24, .85); padding: 3px 9px; border-radius: 8px; }
+.smap .mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 4; background: var(--card); color: var(--ink); border-radius: 22px; padding: 14px; display: grid; gap: 10px; max-height: 48vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.smap .mcard header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.smap .mcard h3 { margin: 0; font: 800 17px var(--font); }
+.smap .mcard .x { border: 0; background: var(--bg); color: var(--ink); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; flex: none; }
+.smap .mride { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 10px; border-radius: 14px; background: var(--bg); }
+.smap .mride b { font: 800 15px var(--font); }
+.smap .mride span { font-size: 13px; color: var(--muted); grid-column: 1; }
+.smap .mride .btn { grid-row: 1 / span 2; grid-column: 2; padding: 8px 14px; }
+.smap .mgo { display: flex; gap: 8px; }
+.smap .mgo a, .smap .mgo button { flex: 1; text-align: center; text-decoration: none; }
 /* Clips: full-screen vertical video feed */
 .clips { position: fixed; inset: 0; z-index: 6; background: #000; color: #fff; }
 .clips .feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
@@ -709,6 +768,9 @@ button.pp { cursor: pointer; }
     </select>
     </div>
   </div>
+  <div class="mmwrap" id="mmWrap">
+    <button type="button" class="minimap" id="mapOpen"><span class="mm-tiles" id="mmTiles" aria-hidden="true"></span><span class="mm-pins" id="mmPins" aria-hidden="true"></span><span class="mm-lab"><b id="mapOpenT"></b><small id="mapOpenS"></small></span><span class="mm-exp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></span></button>
+  </div>
   <section class="hero" id="hero"></section>
 
   <main class="pad">
@@ -756,6 +818,22 @@ button.pp { cursor: pointer; }
       <p class="notice" id="boardEmpty" data-i18n="boardEmpty" hidden></p>
     </section>
   </main>
+
+  <section class="smap" id="smap" hidden role="dialog" aria-modal="true" aria-labelledby="smapArea">
+    <div class="view" id="smapView"><div class="tiles" id="smapTiles"></div><div class="pins" id="smapPins"></div></div>
+    <div class="mtop">
+      <div class="mhead"><button type="button" class="mclose" id="smapClose"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="marea"><b id="smapArea"></b><span id="smapWx"></span></div></div>
+      <div class="mchips" id="smapChips" role="group"></div>
+    </div>
+    <div class="mctl">
+      <button type="button" data-mz="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button type="button" data-mz="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      <button type="button" data-mfit><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button type="button" data-mme hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg></button>
+    </div>
+    <div class="mcard" id="smapCard" hidden></div>
+    <p class="mattr" id="smapAttr"></p>
+  </section>
 
   <section class="clips" id="tab-clips" hidden>
     <div class="ctop"><button type="button" class="cbtn livebtn" id="clipLive" hidden>LIVE</button><div class="ctabs" id="clipTabs" role="group"></div><div class="end"><button type="button" class="cbtn" id="clipSnd"></button><button type="button" class="cbtn add" id="clipAdd"></button></div></div>
@@ -2648,6 +2726,223 @@ Their upcoming rides: ${next}.`;
     watchVoice(x.id); paintVoice(); paintRoomExtras();
     if (voice && isLiveRoom(x) && onAir(x) && x.hostId !== state.me && state.me && !vs.room) joinVoice();
   }
+  // ---------- Meeting points on a satellite map ----------
+  // Every upcoming ride's meeting point (the start of its route), grouped by place, on satellite imagery
+  // from Esri. Where the imagery can't load (as inside Claude), a drawn map of the Emirates is used instead.
+  const MP = {
+    ar: { open: "خريطة التجمعات", openS: "{n} نقطة تجمّع على الخريطة الجوية", openS0: "شوف أماكن تجمّع الطلعات على الخريطة الجوية", all: "الكل", mine: "مسجّل فيها", week: "هالأسبوع", rides: "{n} طلعات", one: "طلعة وحدة", next: "الجاية: {t}", signed: "{n} مسجّلين", details: "التفاصيل", dir: "الاتجاهات", me: "أنا الحين", none: "ما فيه طلعات بهالفلتر.", attr: "صور الأقمار الصناعية © Esri، Maxar", drawn: "خريطة مبسّطة. الصور الجوية تطلع في تطبيق الهاتف.", zin: "قرّب", zout: "بعّد", fit: "كل النقاط", locate: "موقعي", close: "اقفل الخريطة" },
+    en: { open: "Meeting points map", openS: "{n} meeting points on the satellite map", openS0: "See where rides meet on the satellite map", all: "All", mine: "Signed up", week: "This week", rides: "{n} rides", one: "1 ride", next: "Next: {t}", signed: "{n} signed up", details: "Details", dir: "Directions", me: "Me now", none: "No rides match this filter.", attr: "Imagery © Esri, Maxar", drawn: "Simple map. Satellite imagery shows in the phone app.", zin: "Zoom in", zout: "Zoom out", fit: "All points", locate: "My location", close: "Close map" },
+    fil: { open: "Mapa ng tagpuan", openS: "{n} tagpuan sa satellite map", openS0: "Tingnan kung saan nagkikita ang mga ride", all: "Lahat", mine: "Naka-sign up", week: "Ngayong linggo", rides: "{n} ride", one: "1 ride", next: "Susunod: {t}", signed: "{n} naka-sign up", details: "Detalye", dir: "Direksyon", me: "Ako ngayon", none: "Walang ride na tugma.", attr: "Imagery © Esri, Maxar", drawn: "Simpleng mapa. Nasa phone app ang satellite imagery.", zin: "Lumapit", zout: "Lumayo", fit: "Lahat ng tagpuan", locate: "Lokasyon ko", close: "Isara ang mapa" },
+    hi: { open: "मिलने की जगहों का नक्शा", openS: "सैटेलाइट नक्शे पर {n} मिलने की जगहें", openS0: "देखें राइड्स कहाँ मिलती हैं", all: "सभी", mine: "साइन अप", week: "इस हफ़्ते", rides: "{n} राइड्स", one: "1 राइड", next: "अगली: {t}", signed: "{n} साइन अप", details: "विवरण", dir: "रास्ता", me: "मैं अभी", none: "इस फ़िल्टर में कोई राइड नहीं।", attr: "इमेजरी © Esri, Maxar", drawn: "सरल नक्शा। सैटेलाइट तस्वीरें फ़ोन ऐप में दिखती हैं।", zin: "पास", zout: "दूर", fit: "सभी जगहें", locate: "मेरी जगह", close: "नक्शा बंद करें" }
+  };
+  const mp = (k, v) => { let x = (MP[lang] || MP.en)[k] ?? MP.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const MAP_SAT = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/";
+  const MAP_LABELS = "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/";
+  // A rough outline of the Emirates for the drawn fallback map: [lat, lon].
+  const UAE_SHAPE = [[24.27, 51.58], [24.02, 51.9], [24.12, 52.73], [24.1, 53.44], [24.22, 53.9], [24.47, 54.37], [24.85, 54.75], [24.98, 55.03], [25.08, 55.14], [25.17, 55.22], [25.28, 55.32], [25.35, 55.38], [25.41, 55.44], [25.57, 55.55], [25.79, 55.95], [26.02, 56.08], [26.07, 56.08], [25.62, 56.27], [25.12, 56.34], [24.98, 56.36], [24.8, 56.12], [24.6, 55.95], [24.2, 55.77], [23.6, 55.5], [22.7, 55.2], [22.65, 52.5], [24.0, 51.6]];
+  const map = { z: 9, cx: 0, cy: 0, sat: null, satOk: 0, satFail: 0, tiles: new Map(), filter: "all", sel: null, me: null, raf: 0, ptrs: new Map(), drag: null, pinch: null, moved: false };
+  const wx = (lon, z) => (lon + 180) / 360 * 256 * 2 ** z;
+  const wy = (lat, z) => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * 256 * 2 ** z; };
+  const unx = (x, z) => x / (256 * 2 ** z) * 360 - 180;
+  const uny = (y, z) => { const n = Math.PI - 2 * Math.PI * y / (256 * 2 ** z); return 180 / Math.PI * Math.atan(Math.sinh(n)); };
+  const ICON_BIKE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9l3 7M13 5.5h3"/></svg>';
+  const ICON_RUN = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="14.5" cy="4.5" r="2"/><path d="M8 21l3-6 3 2v5M6 11l3-3 4 1 2 3 3 1M11 15l2-6"/></svg>';
+  function mapRides(filter = map.filter) {
+    const now = Date.now(), all = state.mode === "live" ? state.rides : EXAMPLES;
+    return all.filter((r) => Date.parse(r.startAt) >= now - 3 * 36e5)
+      .filter((r) => filter === "all" || (filter === "mine" ? riders(r.id).includes(state.me) : filter === "week" ? Date.parse(r.startAt) < now + 7 * 864e5 : sportOf(r) === filter))
+      .sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+  }
+  // Rides that start within about 150 m of each other share one spot.
+  function mapSpots(filter) {
+    const spots = [];
+    for (const r of mapRides(filter)) {
+      const [la, lo] = where(r);
+      let s = spots.find((x) => Math.abs(x.lat - la) < 0.0015 && Math.abs(x.lon - lo) < 0.0015);
+      if (!s) spots.push(s = { key: la.toFixed(4) + "," + lo.toFixed(4), lat: la, lon: lo, rides: [] });
+      s.rides.push(r);
+    }
+    return spots;
+  }
+  function renderMapBtn() {
+    const n = new Set((state.mode === "live" ? state.rides : EXAMPLES).filter((r) => Date.parse(r.startAt) >= Date.now() - 3 * 36e5).map((r) => where(r).map((v) => v.toFixed(3)).join())).size;
+    $("#mapOpenT").textContent = mp("open"); $("#mapOpenS").textContent = n ? mp("openS", { n }) : mp("openS0");
+    $("#mapOpen").setAttribute("aria-label", mp("open"));
+    renderMiniMap();
+  }
+  function mapSize() { const v = $("#smapView"); return [v.clientWidth || innerWidth, v.clientHeight || innerHeight]; }
+  // The zoom and centre that show every point inside a w×h box (less the padding).
+  function fitView(pts, w, h, padX, padY, maxZ) {
+    let z = 15;
+    for (; z > 6; z--) {
+      const xs = pts.map((p) => wx(p[1], z)), ys = pts.map((p) => wy(p[0], z));
+      if (Math.max(...xs) - Math.min(...xs) < w - padX && Math.max(...ys) - Math.min(...ys) < h - padY) break;
+    }
+    z = Math.min(z, maxZ);
+    const xs = pts.map((p) => wx(p[1], z)), ys = pts.map((p) => wy(p[0], z));
+    return { z, cx: (Math.max(...xs) + Math.min(...xs)) / 2, cy: (Math.max(...ys) + Math.min(...ys)) / 2 };
+  }
+  function mapFit() {
+    const sp = mapSpots(), pts = sp.length ? sp.map((s) => [s.lat, s.lon]) : [[24.2, 54.3], [25.6, 56.2]];
+    if (map.me) pts.push(map.me);
+    const [w, h] = mapSize(), v = fitView(pts, w, h, 120, 330, 13);
+    map.z = v.z; map.cx = v.cx; map.cy = v.cy - 40;
+    drawMap();
+  }
+  // The small preview at the top of the rides tab: satellite tiles and a dot per meeting point.
+  let miniKey = "";
+  function renderMiniMap() {
+    const el = $("#mapOpen"), w = el.clientWidth, h = el.clientHeight; if (!w) return;
+    const sp = mapSpots("all"), pts = sp.length ? sp.map((x) => [x.lat, x.lon]) : [[24.2, 54.3], [25.6, 56.2]];
+    const v = fitView(pts, w, h, 60, 70, 12), x0 = v.cx - w / 2, y0 = v.cy - h / 2 + 12;
+    const key = [w, v.z, Math.round(v.cx), Math.round(v.cy), map.sat, sp.map((x) => x.key + x.rides.length).join()].join("|");
+    if (key === miniKey) return; miniKey = key;
+    const tiles = $("#mmTiles");
+    if (map.sat === false) {
+      const pt = ([la, lo]) => `${(wx(lo, v.z) - x0).toFixed(1)},${(wy(la, v.z) - y0).toFixed(1)}`;
+      tiles.innerHTML = `<svg><rect width="100%" height="100%" fill="#0d2233"/><polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="#b89a6a" stroke="#e8d3a8" stroke-width="1.5"/></svg>`;
+    } else {
+      let html = "";
+      for (let ty = Math.floor(y0 / 256); ty <= Math.floor((y0 + h) / 256); ty++) for (let tx = Math.floor(x0 / 256); tx <= Math.floor((x0 + w) / 256); tx++)
+        html += `<img alt="" src="${MAP_SAT}${v.z}/${ty}/${tx}" style="transform:translate(${Math.round(tx * 256 - x0)}px,${Math.round(ty * 256 - y0)}px)">`;
+      tiles.innerHTML = html;
+      for (const img of tiles.querySelectorAll("img")) {
+        img.onload = () => { map.satOk++; map.sat = true; };
+        img.onerror = () => { map.satFail++; if (!map.satOk && map.satFail >= 2 && map.sat !== false) { map.sat = false; miniKey = ""; renderMiniMap(); } };
+      }
+    }
+    $("#mmPins").innerHTML = sp.map((x) => `<i class="${x.rides.every((r) => sportOf(r) === "run") ? "run" : ""}" style="left:${(wx(x.lon, v.z) - x0).toFixed(1)}px;top:${(wy(x.lat, v.z) - y0).toFixed(1)}px"></i>`).join("");
+  }
+  function zoomAt(dz, sx, sy) {
+    const nz = Math.max(6, Math.min(17, map.z + dz)); if (nz === map.z) return;
+    const [w, h] = mapSize(); sx ??= w / 2; sy ??= h / 2;
+    const k = 2 ** (nz - map.z), px = map.cx + sx - w / 2, py = map.cy + sy - h / 2;
+    map.cx = px * k - (sx - w / 2); map.cy = py * k - (sy - h / 2); map.z = nz;
+    drawMap();
+  }
+  function drawMap() { if (!map.raf) map.raf = requestAnimationFrame(() => { map.raf = 0; paintMap(); }); }
+  function paintMap() {
+    if ($("#smap").hidden) return;
+    const [w, h] = mapSize(), z = map.z, x0 = map.cx - w / 2, y0 = map.cy - h / 2, box = $("#smapTiles");
+    if (map.sat !== false) {
+      box.querySelector("svg")?.remove();
+      const keep = new Set(), n = 2 ** z;
+      for (let ty = Math.floor(y0 / 256); ty <= Math.floor((y0 + h) / 256); ty++) {
+        if (ty < 0 || ty >= n) continue;
+        for (let tx = Math.floor(x0 / 256); tx <= Math.floor((x0 + w) / 256); tx++) {
+          const wxx = ((tx % n) + n) % n;
+          for (const [layer, base] of [["i", MAP_SAT], ["l", MAP_LABELS]]) {
+            const key = layer + z + "/" + ty + "/" + tx; keep.add(key);
+            let img = map.tiles.get(key);
+            if (!img) {
+              img = new Image(); img.alt = ""; img.decoding = "async"; img.style.zIndex = layer === "l" ? 1 : 0;
+              if (layer === "i") { img.onload = () => { map.satOk++; if (!map.sat) { map.sat = true; paintAttr(); } }; img.onerror = () => { map.satFail++; if (!map.satOk && map.satFail >= 3) { map.sat = false; for (const t of map.tiles.values()) t.remove(); map.tiles.clear(); paintAttr(); drawMap(); } }; }
+              else img.onerror = () => img.remove();
+              img.src = base + z + "/" + ty + "/" + wxx;
+              map.tiles.set(key, img); box.appendChild(img);
+            }
+            img.style.transform = `translate(${Math.round(tx * 256 - x0)}px, ${Math.round(ty * 256 - y0)}px)`;
+          }
+        }
+      }
+      for (const [k, img] of map.tiles) if (!keep.has(k)) { img.remove(); map.tiles.delete(k); }
+    }
+    if (map.sat === false) {
+      // Drawn fallback: sea, the outline of the Emirates and the emirates' names.
+      const pt = ([la, lo]) => `${(wx(lo, z) - x0).toFixed(1)},${(wy(la, z) - y0).toFixed(1)}`;
+      const names = Object.entries(EM_LL).map(([c, ll]) => { const [x, y] = pt(ll).split(","); return `<text x="${x}" y="${y}" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="${z > 9 ? 22 : 15}" font-weight="800" font-family="sans-serif">${esc(t("em_" + c))}</text>`; }).join("");
+      box.innerHTML = `<svg aria-hidden="true"><defs><pattern id="mgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.05)"/></pattern></defs><rect width="100%" height="100%" fill="#0d2233"/><rect width="100%" height="100%" fill="url(#mgrid)"/><polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="#b89a6a" stroke="#e8d3a8" stroke-width="2"/>${names}</svg>`;
+    }
+    // Spots and me.
+    const sp = mapSpots(), pins = $("#smapPins"), now = Date.now();
+    pins.innerHTML = sp.map((s) => {
+      const x = wx(s.lon, z) - x0, y = wy(s.lat, z) - y0; if (x < -120 || y < -40 || x > w + 120 || y > h + 160) return "";
+      const r = s.rides[0], ids = [...new Set(s.rides.flatMap((q) => riders(q.id)))], mine = s.rides.some((q) => riders(q.id).includes(state.me));
+      const sport = s.rides.every((q) => sportOf(q) === "run") ? "run" : "bike";
+      return `<button type="button" class="spot ${sport}${mine ? " mine" : ""}${map.sel === s.key ? " sel" : ""}" data-spot="${esc(s.key)}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">
+        <span class="bub">${sport === "run" ? ICON_RUN : ICON_BIKE}${s.rides.length > 1 ? `<span class="cnt">${s.rides.length}</span>` : ""}</span>
+        ${ids.length ? `<span class="faces">${ids.slice(0, 3).map((id) => `<img data-pp="${esc(id)}" alt="">`).join("")}</span>` : ""}
+        ${z >= 8 ? `<span class="lab">${esc(txt(r, "meet") ?? r.meetPoint ?? t("em_" + r.emirate))}<small>${esc(fmtDate.format(new Date(r.startAt)))} · ${esc(fmtTime.format(new Date(r.startAt)))}</small></span>` : ""}
+      </button>`;
+    }).join("") + (map.me ? `<div class="medot" style="left:${(wx(map.me[1], z) - x0).toFixed(1)}px;top:${(wy(map.me[0], z) - y0).toFixed(1)}px"><img data-pp="${esc(state.me || "")}" alt=""><span>${esc(mp("me"))}</span></div>` : "");
+    fillPeopleMarks();
+    // Area name: the nearest emirate to the middle of the view, with the temperature where known.
+    const cl = [uny(map.cy, z), unx(map.cx, z)];
+    const near = Object.entries(EM_LL).sort((a, b) => Math.hypot(a[1][0] - cl[0], a[1][1] - cl[1]) - Math.hypot(b[1][0] - cl[0], b[1][1] - cl[1]))[0][0];
+    $("#smapArea").textContent = t("em_" + near);
+    const cur = myWx.state === "ok" ? myWx.hours.find((q) => q.t.slice(0, 13) === hourKey(new Date())) : null;
+    $("#smapWx").textContent = cur?.temp != null ? `☀ ${Math.round(cur.temp)}°C` : "";
+  }
+  function paintAttr() { $("#smapAttr").textContent = map.sat === false ? mp("drawn") : mp("attr"); }
+  function paintMapChips() {
+    const ks = ["all", "bike", "run", "week", ...(state.me && state.mode === "live" ? ["mine"] : [])];
+    $("#smapChips").innerHTML = ks.map((k) => `<button type="button" data-mf="${k}" aria-pressed="${map.filter === k}">${k === "bike" ? ICON_BIKE.replace("<svg", '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"') + esc(t("bike")) : k === "run" ? ICON_RUN.replace("<svg", '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"') + esc(t("run")) : esc(mp(k))}</button>`).join("");
+  }
+  function openSpot(key) {
+    const s = mapSpots().find((x) => x.key === key), card = $("#smapCard");
+    map.sel = s ? key : null; drawMap();
+    if (!s) { card.hidden = true; return; }
+    const r0 = s.rides[0];
+    card.innerHTML = `<header><h3>${esc(txt(r0, "meet") ?? r0.meetPoint ?? t("em_" + r0.emirate))}</h3><button type="button" class="x" data-mx aria-label="${esc(t("cancel"))}">✕</button></header>
+      ${s.rides.map((r) => `<div class="mride"><b>${esc(txt(r, "title"))}</b><span>${esc(fmtDate.format(new Date(r.startAt)))} · ${esc(fmtTime.format(new Date(r.startAt)))} · ${esc(r.distanceKm)} ${esc(t("km"))} · ${esc(mp("signed", { n: riders(r.id).length }))}</span><button type="button" class="btn" data-mride="${esc(r.id)}">${esc(mp("details"))}</button></div>`).join("")}
+      <div class="mgo"><a class="btn soft" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}" target="_blank" rel="noopener">${esc(mp("dir"))}</a></div>`;
+    card.hidden = false;
+  }
+  function openMap() {
+    const el = $("#smap"); el.hidden = false; document.body.style.overflow = "hidden";
+    pauseClips?.();
+    $("#smapClose").setAttribute("aria-label", mp("close"));
+    for (const [sel, k] of [['[data-mz="1"]', "zin"], ['[data-mz="-1"]', "zout"], ["[data-mfit]", "fit"], ["[data-mme]", "locate"]]) $("#smap " + sel).setAttribute("aria-label", mp(k));
+    $("#smap [data-mme]").hidden = !(geo && navigator.geolocation);
+    map.sel = null; $("#smapCard").hidden = true;
+    paintMapChips(); paintAttr(); mapFit();
+    $("#smapClose").focus();
+  }
+  function closeMap() { $("#smap").hidden = true; document.body.style.overflow = ""; $("#mapOpen").focus(); }
+  $("#mapOpen").addEventListener("click", openMap);
+  $("#smapClose").addEventListener("click", closeMap);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#smap").hidden) closeMap(); });
+  $("#smapChips").addEventListener("click", (e) => { const b = e.target.closest("[data-mf]"); if (!b) return; map.filter = b.dataset.mf; map.sel = null; $("#smapCard").hidden = true; paintMapChips(); mapFit(); });
+  $("#smap").addEventListener("click", (e) => {
+    const z = e.target.closest("[data-mz]"); if (z) { zoomAt(+z.dataset.mz); return; }
+    if (e.target.closest("[data-mfit]")) { mapFit(); return; }
+    if (e.target.closest("[data-mme]")) {
+      navigator.geolocation.getCurrentPosition((p) => { map.me = [p.coords.latitude, p.coords.longitude]; map.z = Math.max(map.z, 12); map.cx = wx(map.me[1], map.z); map.cy = wy(map.me[0], map.z); drawMap(); }, () => {}, { maximumAge: 6e4, timeout: 15000 });
+      return;
+    }
+    if (e.target.closest("[data-mx]")) { map.sel = null; $("#smapCard").hidden = true; drawMap(); return; }
+    const rb = e.target.closest("[data-mride]");
+    if (rb) { const id = rb.dataset.mride; closeMap(); state.tab = "rides"; state.open[id] = true; state.day = "all"; render(); document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "center" }); return; }
+    const sp = e.target.closest("[data-spot]");
+    if (sp && !map.moved) openSpot(sp.dataset.spot);
+  });
+  // Drag to move, pinch or wheel to zoom, double tap to zoom in.
+  const view = $("#smapView");
+  view.addEventListener("pointerdown", (e) => {
+    map.ptrs.set(e.pointerId, [e.clientX, e.clientY]); map.moved = false;
+    if (map.ptrs.size === 1) map.drag = { x: e.clientX, y: e.clientY, cx: map.cx, cy: map.cy };
+    if (map.ptrs.size === 2) { const [a, b] = [...map.ptrs.values()]; map.pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+  });
+  view.addEventListener("pointermove", (e) => {
+    if (!map.ptrs.has(e.pointerId)) return;
+    map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (map.ptrs.size === 2 && map.pinch) {
+      const [a, b] = [...map.ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = view.getBoundingClientRect();
+      if (d / map.pinch > 1.5 || d / map.pinch < 0.66) { zoomAt(d > map.pinch ? 1 : -1, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top); map.pinch = d; }
+      map.moved = true; return;
+    }
+    if (!map.drag) return;
+    const dx = e.clientX - map.drag.x, dy = e.clientY - map.drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 6) { map.moved = true; view.classList.add("drag"); try { view.setPointerCapture(e.pointerId); } catch {} }
+    if (map.moved) { map.cx = map.drag.cx - dx; map.cy = map.drag.cy - dy; drawMap(); }
+  });
+  const ptrEnd = (e) => { map.ptrs.delete(e.pointerId); if (map.ptrs.size < 2) map.pinch = null; if (!map.ptrs.size) { map.drag = null; view.classList.remove("drag"); setTimeout(() => { map.moved = false; }, 0); } };
+  view.addEventListener("pointerup", ptrEnd); view.addEventListener("pointercancel", ptrEnd);
+  let wheelT = 0;
+  view.addEventListener("wheel", (e) => { e.preventDefault(); const now = Date.now(); if (now - wheelT < 220) return; wheelT = now; const r = view.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1 : -1, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  view.addEventListener("dblclick", (e) => { if (e.target.closest("[data-spot]")) return; const r = view.getBoundingClientRect(); zoomAt(1, e.clientX - r.left, e.clientY - r.top); });
+  addEventListener("resize", () => { drawMap(); if (state.tab === "rides") renderMiniMap(); });
+
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
     ar: { tab: "لقطات", fy: "لك", fol: "تتابعهم", add: "لقطة جديدة", pick: "اختر فيديو", pickS: "لين 60 ثانية و 20 ميجا", cap: "الوصف", capPh: "وش صار في الطلعة؟ #فجر #القدرة", sport: "الرياضة", post: "انشر اللقطة", posting: "يرفع الفيديو…",
@@ -3182,13 +3477,13 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     renderHero();
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
     $("#tabClipsT").textContent = cl("tab");
-    $("#hero").hidden = state.tab !== "rides";
+    $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides";
     $("#tabRoomsT").textContent = rm("tab");
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (state.tab === "rides") renderRides(); else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
+    if (state.tab === "rides") { renderRides(); renderMapBtn(); } else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
     if (state.tab !== "clips") pauseClips(); else resumeClip();
     moveInd(!document.querySelector("#tabInd").style.width);
   }
