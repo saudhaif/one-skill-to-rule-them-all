@@ -146,7 +146,13 @@ function api(u, F, fs, S, st) {
     return "unavailable";
   };
   const fail = (e) => { throw { code: code(e), message: String(e?.message || e) }; };
-  const wrapDoc = (d) => ({ id: d.id, exists: d.exists(), data: () => d.data(), metadata: d.metadata });
+  // Firestore can't store an array inside an array (a GPX route is a list of [lat, lon] pairs), so such
+  // inner arrays are kept as { _a: [...] } and turned back into arrays on the way out.
+  const enc = (v, inArr) => Array.isArray(v) ? (inArr ? { _a: v.map((x) => enc(x, true)) } : v.map((x) => enc(x, true)))
+    : v && typeof v === "object" && !(v instanceof Date) && Object.getPrototypeOf(v) === Object.prototype ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, enc(x, false)])) : v;
+  const dec = (v) => Array.isArray(v) ? v.map(dec)
+    : v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype ? (Object.keys(v).length === 1 && Array.isArray(v._a) ? v._a.map(dec) : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, dec(x)]))) : v;
+  const wrapDoc = (d) => ({ id: d.id, exists: d.exists(), data: () => { const x = d.data(); return x === undefined ? x : dec(x); }, metadata: d.metadata });
   const wrapQuery = (s) => ({ docs: s.docs.map(wrapDoc), size: s.size, empty: s.empty, metadata: s.metadata, docChanges: () => s.docChanges().map((c) => ({ type: c.type, doc: wrapDoc(c.doc), oldIndex: c.oldIndex, newIndex: c.newIndex })) });
 
   function docRef(path) {
@@ -154,9 +160,9 @@ function api(u, F, fs, S, st) {
     return {
       id: r.id, path,
       get: () => F.getDoc(r).then(wrapDoc, fail),
-      set: (data) => F.setDoc(r, data).catch(fail),
+      set: (data) => F.setDoc(r, enc(data)).catch(fail),
       // Merges nested maps, as the Claude store's update does.
-      update: (data) => F.setDoc(r, data, { merge: true }).catch(fail),
+      update: (data) => F.setDoc(r, enc(data), { merge: true }).catch(fail),
       delete: () => F.deleteDoc(r).catch(fail),
       onSnapshot: (next, onErr) => F.onSnapshot(r, (s) => next(wrapDoc(s)), (e) => onErr?.({ code: code(e), message: e.message })),
       collection: (sub) => collection(path + "/" + sub)
@@ -176,7 +182,7 @@ function api(u, F, fs, S, st) {
     return {
       ...query(col, []), path,
       doc: (id) => docRef(id ? path + "/" + id : F.doc(col).path),
-      add: (data) => F.addDoc(col, data).then((r) => docRef(r.path), fail)
+      add: (data) => F.addDoc(col, enc(data)).then((r) => docRef(r.path), fail)
     };
   }
   const db = { doc: docRef, collection };
