@@ -652,7 +652,8 @@ button.pp { cursor: pointer; }
 .smap .view { position: absolute; inset: 0; cursor: grab; }
 .smap .view.drag { cursor: grabbing; }
 .smap .tiles, .smap .pins { position: absolute; inset: 0; }
-.smap .tiles img { position: absolute; width: 256px; height: 256px; max-width: none; pointer-events: none; }
+.smap .tiles img { position: absolute; left: 0; top: 0; width: 256px; height: 256px; max-width: none; pointer-events: none; }
+.smap .tiles.drawn::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .smap .tiles svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .smap .mtop { position: absolute; top: 0; left: 0; right: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 26px; display: grid; gap: 10px; background: linear-gradient(rgba(5, 12, 20, .75), transparent); z-index: 3; pointer-events: none; }
 .smap .mtop > * { pointer-events: auto; }
@@ -2766,6 +2767,8 @@ Their upcoming rides: ${next}.`;
   const MAP_LABELS = "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/";
   // A rough outline of the Emirates for the drawn fallback map: [lat, lon].
   const UAE_SHAPE = [[24.27, 51.58], [24.02, 51.9], [24.12, 52.73], [24.1, 53.44], [24.22, 53.9], [24.47, 54.37], [24.85, 54.75], [24.98, 55.03], [25.08, 55.14], [25.17, 55.22], [25.28, 55.32], [25.35, 55.38], [25.41, 55.44], [25.57, 55.55], [25.79, 55.95], [26.02, 56.08], [26.07, 56.08], [25.62, 56.27], [25.12, 56.34], [24.98, 56.36], [24.8, 56.12], [24.6, 55.95], [24.2, 55.77], [23.6, 55.5], [22.7, 55.2], [22.65, 52.5], [24.0, 51.6]];
+  // The Hajar mountains along the east, for the drawn map: [lat, lon].
+  const HAJAR = [[26.05, 56.08], [25.62, 56.25], [25.12, 56.3], [24.98, 56.3], [24.8, 56.1], [24.55, 55.95], [24.25, 55.88], [24.45, 55.82], [24.95, 55.92], [25.45, 55.98], [25.85, 55.99]];
   const map = { z: 9, cx: 0, cy: 0, sat: null, satOk: 0, satFail: 0, tiles: new Map(), filter: "all", sel: null, me: null, raf: 0, ptrs: new Map(), drag: null, pinch: null, moved: false };
   const wx = (lon, z) => (lon + 180) / 360 * 256 * 2 ** z;
   const wy = (lat, z) => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * 256 * 2 ** z; };
@@ -2840,44 +2843,74 @@ Their upcoming rides: ${next}.`;
     $("#mmPins").innerHTML = sp.map((x) => `<i class="${x.rides.every((r) => sportOf(r) === "run") ? "run" : ""}" style="left:${(wx(x.lon, v.z) - x0).toFixed(1)}px;top:${(wy(x.lat, v.z) - y0).toFixed(1)}px"></i>`).join("");
   }
   function zoomAt(dz, sx, sy) {
-    const nz = Math.max(6, Math.min(17, map.z + dz)); if (nz === map.z) return;
+    const nz = Math.max(6, Math.min(18, map.z + dz)); if (nz === map.z) return;
     const [w, h] = mapSize(); sx ??= w / 2; sy ??= h / 2;
     const k = 2 ** (nz - map.z), px = map.cx + sx - w / 2, py = map.cy + sy - h / 2;
     map.cx = px * k - (sx - w / 2); map.cy = py * k - (sy - h / 2); map.z = nz;
     drawMap();
+  }
+  // Zoom smoothly by dz levels around a point on screen (buttons, double tap).
+  function zoomAnim(dz, sx, sy) {
+    const from = map.z, to = Math.max(6, Math.min(18, Math.round(from + dz))), t0 = performance.now();
+    if (calm()) { zoomAt(to - from, sx, sy); return; }
+    const step = (now) => { const k = Math.min(1, (now - t0) / 260), e = 1 - (1 - k) ** 3; zoomAt(from + (to - from) * e - map.z, sx, sy); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
   }
   function drawMap() { if (!map.raf) map.raf = requestAnimationFrame(() => { map.raf = 0; paintMap(); }); }
   function paintMap() {
     if ($("#smap").hidden) return;
     const [w, h] = mapSize(), z = map.z, x0 = map.cx - w / 2, y0 = map.cy - h / 2, box = $("#smapTiles");
     if (map.sat !== false) {
-      box.querySelector("svg")?.remove();
-      const keep = new Set(), n = 2 ** z;
-      for (let ty = Math.floor(y0 / 256); ty <= Math.floor((y0 + h) / 256); ty++) {
+      box.querySelector("svg")?.remove(); box.classList.remove("drawn");
+      // Fractional zoom: tiles come from the nearest whole level and are scaled to fit.
+      const tz = Math.max(0, Math.min(18, Math.round(z))), ts = 256 * 2 ** (z - tz), n = 2 ** tz, keep = new Set();
+      for (let ty = Math.floor(y0 / ts); ty <= Math.floor((y0 + h) / ts); ty++) {
         if (ty < 0 || ty >= n) continue;
-        for (let tx = Math.floor(x0 / 256); tx <= Math.floor((x0 + w) / 256); tx++) {
+        for (let tx = Math.floor(x0 / ts); tx <= Math.floor((x0 + w) / ts); tx++) {
           const wxx = ((tx % n) + n) % n;
           for (const [layer, base] of [["i", MAP_SAT], ["l", MAP_LABELS]]) {
-            const key = layer + z + "/" + ty + "/" + tx; keep.add(key);
+            const key = layer + tz + "/" + ty + "/" + tx; keep.add(key);
             let img = map.tiles.get(key);
             if (!img) {
-              img = new Image(); img.alt = ""; img.decoding = "async"; img.style.zIndex = layer === "l" ? 1 : 0;
+              img = new Image(); img.alt = ""; img.decoding = "async"; img.style.zIndex = layer === "l" ? 2 : 1;
               if (layer === "i") { img.onload = () => { map.satOk++; if (!map.sat) { map.sat = true; paintAttr(); } }; img.onerror = () => { map.satFail++; if (!map.satOk && map.satFail >= 3) { map.sat = false; for (const t of map.tiles.values()) t.remove(); map.tiles.clear(); paintAttr(); drawMap(); } }; }
               else img.onerror = () => img.remove();
-              img.src = base + z + "/" + ty + "/" + wxx;
+              img.src = base + tz + "/" + ty + "/" + wxx;
               map.tiles.set(key, img); box.appendChild(img);
             }
-            img.style.transform = `translate(${Math.round(tx * 256 - x0)}px, ${Math.round(ty * 256 - y0)}px)`;
+            const l = Math.floor(tx * ts - x0), tp = Math.floor(ty * ts - y0), sz = Math.ceil(ts) + 1;
+            img.style.transform = `translate(${l}px, ${tp}px)`; img.style.width = img.style.height = sz + "px";
           }
         }
       }
-      for (const [k, img] of map.tiles) if (!keep.has(k)) { img.remove(); map.tiles.delete(k); }
+      // Tiles from another level stay underneath until the new ones have loaded, so zooming doesn't flash.
+      for (const [k, img] of map.tiles) if (!keep.has(k)) {
+        const lv = +k.slice(1).split("/")[0];
+        if (lv === tz || Math.abs(lv - tz) > 1) { img.remove(); map.tiles.delete(k); continue; }
+        const [, ty, tx] = k.slice(1).split("/").map(Number), s2 = 256 * 2 ** (z - lv);
+        img.style.zIndex = 0; img.style.transform = `translate(${Math.floor(tx * s2 - x0)}px, ${Math.floor(ty * s2 - y0)}px)`; img.style.width = img.style.height = Math.ceil(s2) + 1 + "px";
+      }
+      if ([...keep].filter((k) => k[0] === "i").every((k) => map.tiles.get(k)?.complete)) for (const [k, img] of map.tiles) if (!keep.has(k)) { img.remove(); map.tiles.delete(k); }
     }
     if (map.sat === false) {
-      // Drawn fallback: sea, the outline of the Emirates and the emirates' names.
-      const pt = ([la, lo]) => `${(wx(lo, z) - x0).toFixed(1)},${(wy(la, z) - y0).toFixed(1)}`;
-      const names = Object.entries(EM_LL).map(([c, ll]) => { const [x, y] = pt(ll).split(","); return `<text x="${x}" y="${y}" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="${z > 9 ? 22 : 15}" font-weight="800" font-family="sans-serif">${esc(t("em_" + c))}</text>`; }).join("");
-      box.innerHTML = `<svg aria-hidden="true"><defs><pattern id="mgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.05)"/></pattern></defs><rect width="100%" height="100%" fill="#0d2233"/><rect width="100%" height="100%" fill="url(#mgrid)"/><polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="#b89a6a" stroke="#e8d3a8" stroke-width="2"/>${names}</svg>`;
+      // Drawn fallback, made to read like an aerial view: deep sea, desert, the Hajar mountains,
+      // the cities as built-up patches, and the emirates' names.
+      box.classList.add("drawn");
+      const P = ([la, lo]) => [wx(lo, z) - x0, wy(la, z) - y0], pt = (ll) => P(ll).map((v) => v.toFixed(1)).join(",");
+      const mpp = 156543 * Math.cos(25 * Math.PI / 180) / 2 ** z, km = (k) => k * 1000 / mpp;
+      const cities = [[25.2, 55.28, 14, 30], [24.45, 54.4, 10, 20], [25.33, 55.42, 7, 30], [25.4, 55.47, 4, 0], [25.56, 55.56, 3, 0], [25.78, 55.95, 5, 0], [25.12, 56.33, 4, 0], [24.21, 55.75, 8, 0]];
+      const names = Object.entries(EM_LL).map(([c, ll]) => { const [x, y] = P(ll); return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="${z > 10 ? 22 : z > 8 ? 17 : 13}">${esc(t("em_" + c))}</text>`; }).join("");
+      box.innerHTML = `<svg aria-hidden="true"><defs>
+        <radialGradient id="msea" cx="30%" cy="20%" r="90%"><stop offset="0" stop-color="#1b4d63"/><stop offset=".6" stop-color="#0f3247"/><stop offset="1" stop-color="#081d2b"/></radialGradient>
+        <linearGradient id="mland" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9bf8c"/><stop offset=".5" stop-color="#c9a46c"/><stop offset="1" stop-color="#b48a52"/></linearGradient>
+        <linearGradient id="mhill" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6a4a"/><stop offset="1" stop-color="#5e4632"/></linearGradient>
+        <filter id="mblur"><feGaussianBlur stdDeviation="${Math.max(2, km(1.5)).toFixed(1)}"/></filter></defs>
+        <rect width="100%" height="100%" fill="url(#msea)"/>
+        <polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="none" stroke="#7fd3e6" stroke-opacity=".35" stroke-width="${Math.max(6, km(2)).toFixed(1)}" filter="url(#mblur)"/>
+        <polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="url(#mland)" stroke="#efe0bd" stroke-width="1.5"/>
+        <polygon points="${HAJAR.map(pt).join(" ")}" fill="url(#mhill)" opacity=".85" filter="url(#mblur)"/>
+        ${cities.map(([la, lo, r, rot]) => { const [x, y] = P([la, lo]); return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${km(r).toFixed(1)}" ry="${km(r * .55).toFixed(1)}" transform="rotate(${-rot} ${x.toFixed(1)} ${y.toFixed(1)})" fill="#8c8a86" opacity=".55" filter="url(#mblur)"/>`; }).join("")}
+        <g fill="#fff" fill-opacity=".85" font-weight="800" font-family="sans-serif" stroke="rgba(0,0,0,.45)" stroke-width="3" paint-order="stroke">${names}</g></svg>`;
     }
     // Spots and me.
     const sp = mapSpots(), pins = $("#smapPins"), now = Date.now();
@@ -2930,7 +2963,7 @@ Their upcoming rides: ${next}.`;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#smap").hidden) closeMap(); });
   $("#smapChips").addEventListener("click", (e) => { const b = e.target.closest("[data-mf]"); if (!b) return; map.filter = b.dataset.mf; map.sel = null; $("#smapCard").hidden = true; paintMapChips(); mapFit(); });
   $("#smap").addEventListener("click", (e) => {
-    const z = e.target.closest("[data-mz]"); if (z) { zoomAt(+z.dataset.mz); return; }
+    const z = e.target.closest("[data-mz]"); if (z) { zoomAnim(+z.dataset.mz); return; }
     if (e.target.closest("[data-mfit]")) { mapFit(); return; }
     if (e.target.closest("[data-mme]")) {
       navigator.geolocation.getCurrentPosition((p) => { map.me = [p.coords.latitude, p.coords.longitude]; map.z = Math.max(map.z, 12); map.cx = wx(map.me[1], map.z); map.cy = wy(map.me[0], map.z); drawMap(); }, () => {}, { maximumAge: 6e4, timeout: 15000 });
@@ -2944,29 +2977,42 @@ Their upcoming rides: ${next}.`;
   });
   // Drag to move, pinch or wheel to zoom, double tap to zoom in.
   const view = $("#smapView");
+  const vpos = (x, y) => { const r = view.getBoundingClientRect(); return [x - r.left, y - r.top]; };
+  function startPinch() {
+    const [a, b] = [...map.ptrs.values()], [w, h] = mapSize(), m = vpos((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+    // The world point under the fingers' midpoint, kept under it while the fingers move.
+    map.pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z: map.z, px: map.cx + m[0] - w / 2, py: map.cy + m[1] - h / 2 };
+  }
   view.addEventListener("pointerdown", (e) => {
-    map.ptrs.set(e.pointerId, [e.clientX, e.clientY]); map.moved = false;
-    if (map.ptrs.size === 1) map.drag = { x: e.clientX, y: e.clientY, cx: map.cx, cy: map.cy };
-    if (map.ptrs.size === 2) { const [a, b] = [...map.ptrs.values()]; map.pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    try { view.setPointerCapture(e.pointerId); } catch {}
+    if (map.ptrs.size === 1) { map.moved = false; map.drag = { x: e.clientX, y: e.clientY, cx: map.cx, cy: map.cy }; }
+    if (map.ptrs.size === 2) { startPinch(); map.drag = null; }
   });
   view.addEventListener("pointermove", (e) => {
     if (!map.ptrs.has(e.pointerId)) return;
     map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
-    if (map.ptrs.size === 2 && map.pinch) {
-      const [a, b] = [...map.ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = view.getBoundingClientRect();
-      if (d / map.pinch > 1.5 || d / map.pinch < 0.66) { zoomAt(d > map.pinch ? 1 : -1, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top); map.pinch = d; }
-      map.moved = true; return;
+    if (map.ptrs.size >= 2 && map.pinch) {
+      const [a, b] = [...map.ptrs.values()], [w, h] = mapSize(), m = vpos((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+      const pz = map.pinch, nz = Math.max(6, Math.min(18, pz.z + Math.log2(Math.hypot(a[0] - b[0], a[1] - b[1]) / pz.d))), k = 2 ** (nz - pz.z);
+      map.z = nz; map.cx = pz.px * k - (m[0] - w / 2); map.cy = pz.py * k - (m[1] - h / 2);
+      map.moved = true; drawMap(); return;
     }
     if (!map.drag) return;
     const dx = e.clientX - map.drag.x, dy = e.clientY - map.drag.y;
-    if (Math.abs(dx) + Math.abs(dy) > 6) { map.moved = true; view.classList.add("drag"); try { view.setPointerCapture(e.pointerId); } catch {} }
+    if (Math.abs(dx) + Math.abs(dy) > 6) { map.moved = true; view.classList.add("drag"); }
     if (map.moved) { map.cx = map.drag.cx - dx; map.cy = map.drag.cy - dy; drawMap(); }
   });
-  const ptrEnd = (e) => { map.ptrs.delete(e.pointerId); if (map.ptrs.size < 2) map.pinch = null; if (!map.ptrs.size) { map.drag = null; view.classList.remove("drag"); setTimeout(() => { map.moved = false; }, 0); } };
+  const ptrEnd = (e) => {
+    map.ptrs.delete(e.pointerId);
+    if (map.ptrs.size < 2) map.pinch = null;
+    // One finger left after a pinch: carry on dragging from where it is, without a jump.
+    if (map.ptrs.size === 1) { const [p0] = [...map.ptrs.values()]; map.drag = { x: p0[0], y: p0[1], cx: map.cx, cy: map.cy }; }
+    if (!map.ptrs.size) { map.drag = null; view.classList.remove("drag"); setTimeout(() => { map.moved = false; }, 0); }
+  };
   view.addEventListener("pointerup", ptrEnd); view.addEventListener("pointercancel", ptrEnd);
-  let wheelT = 0;
-  view.addEventListener("wheel", (e) => { e.preventDefault(); const now = Date.now(); if (now - wheelT < 220) return; wheelT = now; const r = view.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1 : -1, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
-  view.addEventListener("dblclick", (e) => { if (e.target.closest("[data-spot]")) return; const r = view.getBoundingClientRect(); zoomAt(1, e.clientX - r.left, e.clientY - r.top); });
+  view.addEventListener("wheel", (e) => { e.preventDefault(); const [x, y] = vpos(e.clientX, e.clientY); zoomAt(-Math.max(-1, Math.min(1, e.deltaY / 240)), x, y); }, { passive: false });
+  view.addEventListener("dblclick", (e) => { if (e.target.closest("[data-spot]")) return; const [x, y] = vpos(e.clientX, e.clientY); zoomAnim(1, x, y); });
   addEventListener("resize", () => { drawMap(); if (state.tab === "rides") renderMiniMap(); });
 
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
