@@ -205,7 +205,7 @@ function api(u, F, fs, S, st) {
       await Promise.all(list.filter((id) => !cache[id]).map(async (id) => {
         let p = {};
         try { const d = await F.getDoc(F.doc(fs, "profiles/" + id)); p = d.exists() ? d.data() : {}; } catch {}
-        cache[id] = { id, name: p.name || "", avatarUrl: p.photo || initials(p.name, id), color: "#888", email: null, isMe: id === u.uid, guest: false };
+        cache[id] = { id, name: p.name || "", avatarUrl: p.photo || initials(p.name || p.nick, id), color: "#888", email: null, isMe: id === u.uid, guest: false };
       }));
       return Object.fromEntries(list.map((id) => [id, cache[id]]));
     },

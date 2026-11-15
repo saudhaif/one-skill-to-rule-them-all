@@ -674,6 +674,11 @@ button.pp { cursor: pointer; }
 .spot .lab { display: grid; justify-items: center; line-height: 1.15; max-width: 170px; text-align: center; font: 800 15px var(--font); color: #fff; -webkit-text-stroke: 3px rgba(8, 16, 26, .85); paint-order: stroke fill; }
 .spot .lab small { font: 700 12px var(--font); color: #ffd9cc; }
 .spot.sel .bub { transform: scale(1.12); }
+.spot.cluster { transform: translate(-50%, -50%); z-index: 2; }
+.spot.cluster .bub { width: 62px; height: 62px; background: #111a24; border-color: var(--accent); }
+.spot.cluster.run .bub { border-color: #12b886; }
+.spot.cluster .bub::after { display: none; }
+.spot.cluster .bub b { font: 800 22px var(--font); color: #fff; }
 .medot { position: absolute; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 4px; pointer-events: none; }
 .medot img { width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff; background: #333; box-shadow: 0 0 0 6px rgba(66, 165, 255, .35); }
 .medot span { font: 800 13px var(--font); background: rgba(10, 16, 24, .85); padding: 3px 9px; border-radius: 8px; }
@@ -2893,7 +2898,23 @@ Their upcoming rides: ${next}.`;
     }
     // Spots and me.
     const sp = mapSpots(), pins = $("#smapPins"), now = Date.now();
-    pins.innerHTML = sp.map((s) => {
+    // Pins that would overlap on screen join one cluster showing how many rides it holds; tapping it zooms in.
+    // Once place names show under the pins they need more room, so pins group from further apart.
+    const groups = [], gap = z >= 8 ? [150, 110] : [64, 64];
+    for (const s of [...sp].sort((a, b) => b.rides.length - a.rides.length)) {
+      const x = wx(s.lon, z) - x0, y = wy(s.lat, z) - y0;
+      const g = groups.find((q) => Math.abs(q.x - x) < gap[0] && Math.abs(q.y - y) < gap[1]);
+      if (g) g.spots.push(s); else groups.push({ x, y, spots: [s] });
+    }
+    pins.innerHTML = groups.map((g) => {
+      if (g.spots.length < 2) return pinHTML(g.spots[0]);
+      if (g.x < -60 || g.y < -60 || g.x > w + 60 || g.y > h + 60) return "";
+      const n = g.spots.reduce((a, q) => a + q.rides.length, 0), run = g.spots.every((q) => q.rides.every((r) => sportOf(r) === "run"));
+      const mine = g.spots.some((q) => q.rides.some((r) => riders(r.id).includes(state.me)));
+      return `<button type="button" class="spot cluster${run ? " run" : ""}${mine ? " mine" : ""}" data-cluster="${g.x.toFixed(1)},${g.y.toFixed(1)}" aria-label="${esc(mp("rides", { n }))}" style="left:${g.x.toFixed(1)}px;top:${g.y.toFixed(1)}px"><span class="bub"><b>${n}</b></span></button>`;
+    }).join("") + (map.me ? `<div class="medot" style="left:${(wx(map.me[1], z) - x0).toFixed(1)}px;top:${(wy(map.me[0], z) - y0).toFixed(1)}px"><img data-pp="${esc(state.me || "")}" alt=""><span>${esc(mp("me"))}</span></div>` : "");
+    fillPeopleMarks();
+    function pinHTML(s) {
       const x = wx(s.lon, z) - x0, y = wy(s.lat, z) - y0; if (x < -120 || y < -40 || x > w + 120 || y > h + 160) return "";
       const r = s.rides[0], ids = [...new Set(s.rides.flatMap((q) => riders(q.id)))], mine = s.rides.some((q) => riders(q.id).includes(state.me));
       const sport = s.rides.every((q) => sportOf(q) === "run") ? "run" : "bike";
@@ -2902,8 +2923,7 @@ Their upcoming rides: ${next}.`;
         ${ids.length ? `<span class="faces">${ids.slice(0, 3).map((id) => `<img data-pp="${esc(id)}" alt="">`).join("")}</span>` : ""}
         ${z >= 8 ? `<span class="lab">${esc(txt(r, "meet") ?? r.meetPoint ?? t("em_" + r.emirate))}<small>${esc(fmtDate.format(new Date(r.startAt)))} · ${esc(fmtTime.format(new Date(r.startAt)))}</small></span>` : ""}
       </button>`;
-    }).join("") + (map.me ? `<div class="medot" style="left:${(wx(map.me[1], z) - x0).toFixed(1)}px;top:${(wy(map.me[0], z) - y0).toFixed(1)}px"><img data-pp="${esc(state.me || "")}" alt=""><span>${esc(mp("me"))}</span></div>` : "");
-    fillPeopleMarks();
+    }
     // Area name: the nearest emirate to the middle of the view, with the temperature where known.
     const cl = [uny(map.cy, z), unx(map.cx, z)];
     const near = Object.entries(EM_LL).sort((a, b) => Math.hypot(a[1][0] - cl[0], a[1][1] - cl[1]) - Math.hypot(b[1][0] - cl[0], b[1][1] - cl[1]))[0][0];
@@ -2951,6 +2971,8 @@ Their upcoming rides: ${next}.`;
     if (e.target.closest("[data-mx]")) { map.sel = null; $("#smapCard").hidden = true; drawMap(); return; }
     const rb = e.target.closest("[data-mride]");
     if (rb) { const id = rb.dataset.mride; closeMap(); state.tab = "rides"; state.open[id] = true; state.day = "all"; render(); document.querySelector(`.ride[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "center" }); return; }
+    const cg = e.target.closest("[data-cluster]");
+    if (cg && !map.moved) { const [x, y] = cg.dataset.cluster.split(",").map(Number); zoomAnim(2, x, y); return; }
     const sp = e.target.closest("[data-spot]");
     if (sp && !map.moved) openSpot(sp.dataset.spot);
   });
