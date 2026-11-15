@@ -1,0 +1,17 @@
+{
+  "category": "watches",
+  "condition": "likenew",
+  "createdAt": "2026-11-04T00:00:00.000Z",
+  "descKey": "exi1d",
+  "description": "إعلان تجريبي للمعاينة.",
+  "emirate": "DXB",
+  "example": true,
+  "phone": "+971 50 000 0000",
+  "photo": null,
+  "price": 650,
+  "sellerId": null,
+  "sold": false,
+  "sport": "bike",
+  "title": "مثال: عدّاد Garmin Edge 530",
+  "titleKey": "exi1"
+}
