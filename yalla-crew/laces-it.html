@@ -2964,9 +2964,9 @@ Their upcoming rides: ${next}.`;
   }
   view.addEventListener("pointerdown", (e) => {
     map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
-    try { view.setPointerCapture(e.pointerId); } catch {}
+    // The finger is captured only once it drags or pinches, so a plain tap still reaches the pin under it.
     if (map.ptrs.size === 1) { map.moved = false; map.drag = { x: e.clientX, y: e.clientY, cx: map.cx, cy: map.cy }; }
-    if (map.ptrs.size === 2) { startPinch(); map.drag = null; }
+    if (map.ptrs.size === 2) { startPinch(); map.drag = null; for (const id of map.ptrs.keys()) try { view.setPointerCapture(id); } catch {} }
   });
   view.addEventListener("pointermove", (e) => {
     if (!map.ptrs.has(e.pointerId)) return;
@@ -2979,7 +2979,7 @@ Their upcoming rides: ${next}.`;
     }
     if (!map.drag) return;
     const dx = e.clientX - map.drag.x, dy = e.clientY - map.drag.y;
-    if (Math.abs(dx) + Math.abs(dy) > 6) { map.moved = true; view.classList.add("drag"); }
+    if (!map.moved && Math.abs(dx) + Math.abs(dy) > 6) { map.moved = true; view.classList.add("drag"); try { view.setPointerCapture(e.pointerId); } catch {} }
     if (map.moved) { map.cx = map.drag.cx - dx; map.cy = map.drag.cy - dy; drawMap(); }
   });
   const ptrEnd = (e) => {
@@ -3057,8 +3057,24 @@ Their upcoming rides: ${next}.`;
     if (clipState.sig.startsWith(clipState.tab + "|") && ids.length === prev.length && ids.every((id) => prev.includes(id))) list = prev.map((id) => list.find((c) => c.id === id));
     const sig = clipState.tab + "|" + list.map((c) => c.id + (c.caption || "")).join(",");
     if (sig !== clipState.sig) {
-      clipState.sig = sig; clipState.order = list.map((c) => c.id);
-      feed.innerHTML = list.length ? list.map((c) => `<article class="clip" data-clip="${esc(c.id)}">
+      const have = [...feed.querySelectorAll(".clip")].map((e) => e.dataset.clip), ids = list.map((c) => c.id);
+      const sameTab = clipState.sig.startsWith(clipState.tab + "|");
+      clipState.sig = sig;
+      if (sameTab && have.length && have.every((id) => ids.includes(id)) && list.every((c) => !have.includes(c.id) || feed.querySelector(`[data-clip="${CSS.escape(c.id)}"] .cap p`)?.textContent === (c.caption || undefined) || !c.caption)) {
+        // New clips from others join the end of the feed, so the clip you're watching keeps playing.
+        const add = list.filter((c) => !have.includes(c.id));
+        feed.insertAdjacentHTML("beforeend", add.map(clipHTML).join(""));
+        clipState.order = [...have, ...add.map((c) => c.id)];
+      } else {
+        clipState.order = ids;
+        feed.innerHTML = list.length ? list.map(clipHTML).join("") : `<div class="cempty">${cl(clipState.tab === "fol" ? "emptyF" : "empty")}</div>`;
+      }
+      fillPeopleMarks(); watchClips();
+      if (clipState.focus) { feed.querySelector(`[data-clip="${CSS.escape(clipState.focus)}"]`)?.scrollIntoView(); clipState.focus = null; }
+    }
+    paintClipCounts();
+  }
+  const clipHTML = (c) => `<article class="clip" data-clip="${esc(c.id)}">
         <video src="${esc(photoSrc(c.src))}" loop playsinline muted preload="metadata"></video>
         <div class="shade"></div><div class="burst" aria-hidden="true">❤️</div><div class="paused" hidden>${ICON.play}</div>
         <div class="rail">
@@ -3070,12 +3086,7 @@ Their upcoming rides: ${next}.`;
           ${c.uid === state.me ? `<button type="button" data-cdel aria-label="${esc(cl("del"))}">${ICON.trash}<span>${esc(cl("del"))}</span></button>` : ""}
         </div>
         <div class="cap"><b data-pn="${esc(c.uid)}"></b>${c.caption ? `<p>${esc(c.caption)}</p>` : ""}<span class="tag">#${esc(t(c.sport === "run" ? "run" : "bike"))}</span></div>
-      </article>`).join("") : `<div class="cempty">${cl(clipState.tab === "fol" ? "emptyF" : "empty")}</div>`;
-      fillPeopleMarks(); watchClips();
-      if (clipState.focus) { feed.querySelector(`[data-clip="${CSS.escape(clipState.focus)}"]`)?.scrollIntoView(); clipState.focus = null; }
-    }
-    paintClipCounts();
-  }
+      </article>`;
   function paintClipCounts() {
     const mj = mineJ() || {};
     for (const el of document.querySelectorAll("#clipFeed .clip")) {
