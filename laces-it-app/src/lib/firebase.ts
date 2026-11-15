@@ -19,7 +19,10 @@ export const firebaseConfig = {
 export const firebaseReady = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
 
 const first = getApps().length === 0;
-export const app = first ? initializeApp(firebaseConfig.projectId ? firebaseConfig : { ...firebaseConfig, projectId: 'laces-it-demo' }) : getApp();
+// Without a config (e.g. trying the app in Expo Go), Firebase still needs non-empty values to start, or Auth
+// throws auth/invalid-api-key at launch. Nothing is sent to Firebase then: the app runs on example rides.
+const placeholder = { apiKey: 'not-configured', authDomain: 'laces-it-demo.firebaseapp.com', projectId: 'laces-it-demo', storageBucket: '', appId: '' };
+export const app = first ? initializeApp(firebaseReady ? firebaseConfig : placeholder) : getApp();
 
 export const auth: Auth =
   first && Platform.OS !== 'web'
