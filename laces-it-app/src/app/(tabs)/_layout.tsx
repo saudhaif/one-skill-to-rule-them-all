@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router/js-tabs';
 
 import { IconBoard, IconClips, IconMarket, IconMe, IconRides, IconRooms } from '@/components/icons';
+import { FEATURES } from '@/lib/features';
 import { useApp } from '@/lib/store';
 import { C } from '@/lib/theme';
 
@@ -24,7 +25,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="clips" options={tab(t('tabClips'), IconClips)} />
       <Tabs.Screen name="market" options={tab(t('tabMarket'), IconMarket)} />
       <Tabs.Screen name="board" options={tab(t('tabBoard'), IconBoard)} />
-      <Tabs.Screen name="rooms" options={tab(t('tabRooms'), IconRooms)} />
+      {/* Rooms are switched off for now (FEATURES.rooms); the screen stays for when they come back. */}
+      <Tabs.Screen name="rooms" options={FEATURES.rooms ? tab(t('tabRooms'), IconRooms) : { href: null }} />
       <Tabs.Screen name="me" options={tab(t('tabMe'), IconMe)} />
     </Tabs>
   );

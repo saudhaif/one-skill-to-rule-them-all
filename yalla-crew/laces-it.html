@@ -1300,6 +1300,9 @@ button.pp { cursor: pointer; }
   // Languages the app offers. Filipino and Hindi stay translated in I18N (and every other dictionary)
   // but are switched off for now; add "fil" and "hi" back here, and their options in #langSel, to bring them back.
   const LANGS = ["ar", "en"];
+  // Sections that are switched off for now. Their code and their data in the database stay as they are;
+  // set a section to true to bring it back (Rooms brings voice rooms and live video with it).
+  const FEATURES = { rooms: false };
   const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
   const LEVELS = ["beg", "int", "adv"];
   const CATS = ["bikes", "parts", "apparel", "shoes", "watches", "helmets", "nutrition", "other"];
@@ -1350,7 +1353,7 @@ button.pp { cursor: pointer; }
   const state = {
     mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], clips: [], roomCat: "all", roomLang: "all", me: null, canWrite: true,
     sport: "all", emirate: "all", day: "all", mine: false, ai: {}, open: {}, gpx: null,
-    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" ? "rooms" : /^#clips?\b/.test(location.hash) ? "clips" : "rides",
+    tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" && FEATURES.rooms ? "rooms" : /^#clips?\b/.test(location.hash) ? "clips" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
   let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, writeChain = Promise.resolve();
@@ -3067,7 +3070,7 @@ Their upcoming rides: ${next}.`;
   }
   function renderClips() {
     $("#clipTabs").innerHTML = ["fol", "fy"].map((k) => `<button type="button" data-ctab="${k}" aria-pressed="${clipState.tab === k}">${esc(cl(k))}</button>`).join("");
-    $("#clipLive").hidden = !voice;
+    $("#clipLive").hidden = !voice || !FEATURES.rooms;
     $("#clipAdd").hidden = !(state.mode === "live" && state.canWrite && state.me);
     $("#clipAdd").setAttribute("aria-label", cl("add")); if (!$("#clipAdd").firstChild) $("#clipAdd").innerHTML = ICON.plus;
     paintSnd();
@@ -3562,7 +3565,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
     $("#tabClipsT").textContent = cl("tab");
     $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides";
-    $("#tabRoomsT").textContent = rm("tab");
+    const roomsT = $("#tabRoomsT"); if (roomsT) roomsT.textContent = rm("tab"); // the Rooms tab is gone while FEATURES.rooms is off
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
@@ -3627,6 +3630,9 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     try { localStorage.setItem("yc-lang", lang); } catch {}
     applyLang();
   });
+
+  // Sections switched off: their tab leaves the bar, and the bar closes up.
+  if (!FEATURES.rooms) { document.querySelector('[data-tab="rooms"]')?.remove(); document.querySelector(".tabbar .in").style.gridTemplateColumns = "repeat(5, 1fr)"; }
 
   // ---------- Events ----------
   for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => {
