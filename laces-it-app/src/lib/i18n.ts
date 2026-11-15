@@ -2,14 +2,17 @@
 import { getLocales } from 'expo-localization';
 
 export type Lang = 'ar' | 'en' | 'fil' | 'hi';
-export const LANGS: Lang[] = ['ar', 'en', 'fil', 'hi'];
+// Languages the app offers. Filipino and Hindi stay translated below (DICTS) but are switched off for now;
+// add 'fil' and 'hi' back to this list to bring them back.
+export const LANGS: Lang[] = ['ar', 'en'];
 export const LANG_NAMES: Record<Lang, string> = { ar: 'عربي', en: 'English', fil: 'Filipino', hi: 'हिन्दी' };
 export const isRTL = (l: Lang) => l === 'ar';
 export const LOCALES: Record<Lang, string> = { ar: 'ar-AE', en: 'en-AE', fil: 'fil-PH', hi: 'hi-IN' };
 
 export function deviceLang(): Lang {
   const code = getLocales()[0]?.languageCode ?? 'en';
-  return (LANGS as string[]).includes(code) ? (code as Lang) : code === 'tl' ? 'fil' : 'en';
+  const l = code === 'tl' ? 'fil' : code;
+  return (LANGS as string[]).includes(l) ? (l as Lang) : code === 'ar' ? 'ar' : 'en';
 }
 
 const ar = {

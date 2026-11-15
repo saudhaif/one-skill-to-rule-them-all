@@ -6,7 +6,7 @@ import { collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/fi
 import { create } from 'zustand';
 
 import { auth, db, decode, encode, firebaseReady } from './firebase';
-import { deviceLang, translate, type Key, type Lang } from './i18n';
+import { deviceLang, LANGS, translate, type Key, type Lang } from './i18n';
 
 export type LatLon = [number, number];
 export type Ride = {
@@ -56,7 +56,7 @@ export const useApp = create<State>((set, get) => ({
 }));
 
 AsyncStorage.getItem('lacesit.lang')
-  .then((l) => { if (l === 'ar' || l === 'en' || l === 'fil' || l === 'hi') useApp.setState({ lang: l }); })
+  .then((l) => { if (l && (LANGS as string[]).includes(l)) useApp.setState({ lang: l as Lang }); })
   .catch(() => {});
 
 // Listen to the signed-in member and, once signed in, to rides, joins and profiles.

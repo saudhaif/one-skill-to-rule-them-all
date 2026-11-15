@@ -787,8 +787,6 @@ button.pp { cursor: pointer; }
     <select id="langSel" class="langsel" data-i18n-aria="langLabel">
       <option value="ar" lang="ar">عربي</option>
       <option value="en" lang="en">English</option>
-      <option value="fil" lang="fil">Filipino</option>
-      <option value="hi" lang="hi">हिन्दी</option>
     </select>
     </div>
   </div>
@@ -1299,7 +1297,9 @@ button.pp { cursor: pointer; }
     hi: { diagReady: "फ़ोटो अपलोड तैयार है। बटन दबाकर फ़ोटो चुनें।", diagNoFile: "गैलरी से कोई फ़ाइल नहीं आई।", diagGot: "फ़ोटो मिली",  photoOff: "इस व्यू में फ़ोटो अपलोड उपलब्ध नहीं है। फ़ोन के ब्राउज़र में claude.ai पर ऐप खोलकर देखें।",  savePhoto: "फ़ोटो फ़ोन में सेव करें", errSavePhoto: "फ़ोटो सेव नहीं हुई। फिर कोशिश करें।", errSaveOff: "यहाँ सेव उपलब्ध नहीं है।", bike3d: "घूमती 3D साइकिल; घुमाने के लिए खींचें", addPhoto: "फ़ोटो जोड़ें", changePhoto: "फ़ोटो बदलें", removePhoto: "फ़ोटो हटाएँ", preparing: "फ़ोटो तैयार हो रही है…", errPhotoType: "यह फ़ोटो पढ़ी नहीं जा सकी। JPG या PNG आज़माएँ।", errPhotoBig: "फ़ोटो बहुत बड़ी है। छोटी चुनें।", errPhotoQuota: "फ़ोटो स्टोरेज भर गया है। पुरानी लिस्टिंग हटाएँ।", tabBoard: "रैंकिंग", details: "विवरण", hide: "छिपाएँ", boardEmpty: "पहली राइड पूरी होने के बाद रैंकिंग दिखेगी।", marketFoot: "खरीद-बिक्री सीधे सदस्यों के बीच होती है; पैसे देने से पहले सामान जाँच लें।", newRideA: "नई राइड", sellA: "सामान बेचें" }
   };
   for (const k in EXTRA) Object.assign(I18N[k], EXTRA[k]);
-  const LANGS = Object.keys(I18N);
+  // Languages the app offers. Filipino and Hindi stay translated in I18N (and every other dictionary)
+  // but are switched off for now; add "fil" and "hi" back here, and their options in #langSel, to bring them back.
+  const LANGS = ["ar", "en"];
   const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
   const LEVELS = ["beg", "int", "adv"];
   const CATS = ["bikes", "parts", "apparel", "shoes", "watches", "helmets", "nutrition", "other"];
@@ -2335,7 +2335,7 @@ Their upcoming rides: ${next}.`;
   }
   // ---------- Chat rooms (HelloTalk-style), by category and language ----------
   const ROOM_CATS = ["rides", "training", "gear", "nutrition", "events", "beginners", "general"];
-  const ROOM_LANGS = ["ar", "en", "fil", "hi", "mix"];
+  const ROOM_LANGS = ["ar", "en", "mix"]; // also "fil", "hi" when those languages come back
   const RM = {
     ar: { tab: "الغرف", all: "الكل", allLang: "كل اللغات", c_rides: "طلعات", c_training: "تدريب", c_gear: "عدّة وصيانة", c_nutrition: "تغذية", c_events: "سباقات وفعاليات", c_beginners: "مبتدئين", c_general: "سوالف عامة",
       l_ar: "عربي", l_en: "English", l_fil: "Filipino", l_hi: "हिन्दी", l_mix: "AR⇄EN", newT: "غرفة جديدة", name: "اسم الغرفة", namePh: "مثال: صيانة السيكل في البيت", cat: "التصنيف", lang: "اللغة", create: "افتح الغرفة",
