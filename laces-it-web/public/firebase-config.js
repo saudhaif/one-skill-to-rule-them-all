@@ -27,3 +27,8 @@ export const emulators = location.hostname === "localhost" && new URLSearchParam
 export const iceServers = [
   { urls: "stun:stun.l.google.com:19302" }
 ];
+
+// Google Maps key (Maps JavaScript API + Maps Static API) for the meeting-points map in satellite view.
+// Google Cloud console → APIs & Services → Credentials → Create API key, and limit it to this site's address
+// (HTTP referrers). Empty = the map uses Esri satellite imagery instead.
+export const googleMapsKey = "";

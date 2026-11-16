@@ -651,7 +651,11 @@ button.pp { cursor: pointer; }
 .smap { position: fixed; inset: 0; z-index: 8; background: #0b1622; color: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .smap .view { position: absolute; inset: 0; cursor: grab; }
 .smap .view.drag { cursor: grabbing; }
-.smap .tiles, .smap .pins { position: absolute; inset: 0; }
+.smap .tiles, .smap .pins, .smap .gmap { position: absolute; inset: 0; }
+.smap .pins { pointer-events: none; }
+.smap .pins .spot { pointer-events: auto; }
+.smap:has(#smapCard:not([hidden])) .mctl { display: none; }
+.smap .gmap[hidden] { display: none; }
 .smap .tiles img { position: absolute; left: 0; top: 0; width: 256px; height: 256px; max-width: none; pointer-events: none; }
 .smap .tiles.drawn::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .smap .tiles svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -850,7 +854,7 @@ button.pp { cursor: pointer; }
   </main>
 
   <section class="smap" id="smap" hidden role="dialog" aria-modal="true" aria-labelledby="smapArea">
-    <div class="view" id="smapView"><div class="tiles" id="smapTiles"></div><div class="pins" id="smapPins"></div></div>
+    <div class="view" id="smapView"><div class="gmap" id="smapG" hidden></div><div class="tiles" id="smapTiles"></div><div class="pins" id="smapPins"></div></div>
     <div class="mtop">
       <div class="mhead"><button type="button" class="mclose" id="smapClose"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="marea"><b id="smapArea"></b><span id="smapWx"></span></div></div>
       <div class="mchips" id="smapChips" role="group"></div>
@@ -1377,7 +1381,7 @@ button.pp { cursor: pointer; }
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" && FEATURES.rooms ? "rooms" : /^#clips?\b/.test(location.hash) ? "clips" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
-  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, writeChain = Promise.resolve();
+  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, gmaps = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
 
   function haversine(a, b) {
@@ -2822,6 +2826,12 @@ Their upcoming rides: ${next}.`;
   function mapFit() {
     const sp = mapSpots(), pts = sp.length ? sp.map((s) => [s.lat, s.lon]) : [[24.2, 54.3], [25.6, 56.2]];
     if (map.me) pts.push(map.me);
+    if (map.g) {
+      const { gm, G } = map.g;
+      if (pts.length === 1) { gm.setCenter({ lat: pts[0][0], lng: pts[0][1] }); gm.setZoom(13); return; }
+      const b = new G.LatLngBounds(); for (const [la, lo] of pts) b.extend({ lat: la, lng: lo });
+      gm.fitBounds(b, { top: 170, bottom: 70, left: 50, right: 90 }); return;
+    }
     const [w, h] = mapSize(), v = fitView(pts, w, h, 120, 330, 13);
     map.z = v.z; map.cx = v.cx; map.cy = v.cy - 40;
     drawMap();
@@ -2832,10 +2842,15 @@ Their upcoming rides: ${next}.`;
     const el = $("#mapOpen"), w = el.clientWidth, h = el.clientHeight; if (!w) return;
     const sp = mapSpots("all"), pts = sp.length ? sp.map((x) => [x.lat, x.lon]) : [[24.2, 54.3], [25.6, 56.2]];
     const v = fitView(pts, w, h, 60, 70, 12), x0 = v.cx - w / 2, y0 = v.cy - h / 2 + 12;
-    const key = [w, v.z, Math.round(v.cx), Math.round(v.cy), map.sat, sp.map((x) => x.key + x.rides.length).join()].join("|");
+    const key = [w, v.z, Math.round(v.cx), Math.round(v.cy), map.sat, !!gmaps?.key && !map.gStaticFailed, sp.map((x) => x.key + x.rides.length).join()].join("|");
     if (key === miniKey) return; miniKey = key;
     const tiles = $("#mmTiles");
-    if (map.sat === false) {
+    if (gmaps?.key && !map.gStaticFailed) {
+      // The same view as a Google satellite picture, so the dots line up.
+      const c = [uny(v.cy - h / 2 + 12 + h / 2, v.z), unx(v.cx, v.z)];
+      tiles.innerHTML = `<img alt="" style="width:${w}px;height:${h}px;transform:none" src="https://maps.googleapis.com/maps/api/staticmap?center=${c[0].toFixed(5)},${c[1].toFixed(5)}&zoom=${v.z}&size=${Math.min(640, w)}x${Math.min(640, h)}&scale=2&maptype=satellite&key=${encodeURIComponent(gmaps.key)}">`;
+      tiles.querySelector("img").onerror = () => { map.gStaticFailed = true; miniKey = ""; renderMiniMap(); };
+    } else if (map.sat === false) {
       const pt = ([la, lo]) => `${(wx(lo, v.z) - x0).toFixed(1)},${(wy(la, v.z) - y0).toFixed(1)}`;
       tiles.innerHTML = `<svg><rect width="100%" height="100%" fill="#0d2233"/><polygon points="${UAE_SHAPE.map(pt).join(" ")}" fill="#b89a6a" stroke="#e8d3a8" stroke-width="1.5"/></svg>`;
     } else {
@@ -2859,16 +2874,59 @@ Their upcoming rides: ${next}.`;
   }
   // Zoom smoothly by dz levels around a point on screen (buttons, double tap).
   function zoomAnim(dz, sx, sy) {
+    if (map.g) {
+      const { gm, ov, G } = map.g;
+      if (sx != null && ov.getProjection()) gm.panTo(ov.getProjection().fromContainerPixelToLatLng(new G.Point(sx, sy)));
+      gm.setZoom(Math.round(gm.getZoom() + dz)); return;
+    }
     const from = map.z, to = Math.max(6, Math.min(18, Math.round(from + dz))), t0 = performance.now();
     if (calm()) { zoomAt(to - from, sx, sy); return; }
     const step = (now) => { const k = Math.min(1, (now - t0) / 260), e = 1 - (1 - k) ** 3; zoomAt(from + (to - from) * e - map.z, sx, sy); if (k < 1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   }
+  // ---- Google Maps (satellite with place names), where the app has a key: the standalone app. ----
+  // Google draws the imagery and handles fingers; our pins, clusters and card sit on top unchanged.
+  function loadGoogle() {
+    if (map.gLoad) return map.gLoad;
+    map.gLoad = new Promise((res, rej) => {
+      if (window.google?.maps?.Map) return res();
+      window.__lacesGmapsReady = () => res();
+      window.gm_authFailure = () => { map.gFailed = true; dropGoogle(); };
+      const sc = document.createElement("script");
+      sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(gmaps.key)}&v=weekly&language=${lang}&region=AE&callback=__lacesGmapsReady`;
+      sc.async = true; sc.onerror = () => rej(new Error("gmaps"));
+      document.head.appendChild(sc);
+      setTimeout(() => rej(new Error("timeout")), 15000);
+    });
+    return map.gLoad;
+  }
+  function initGoogle() {
+    if (map.g || map.gFailed) return;
+    const G = google.maps, el = $("#smapG"); el.hidden = false;
+    const gm = new G.Map(el, { mapTypeId: "hybrid", disableDefaultUI: true, gestureHandling: "greedy", clickableIcons: false, keyboardShortcuts: false, minZoom: 5, maxZoom: 19, backgroundColor: "#0b1622" });
+    const ov = new G.OverlayView(); ov.onAdd = () => {}; ov.onRemove = () => {}; ov.draw = () => drawMap(); ov.setMap(gm);
+    gm.addListener("bounds_changed", () => drawMap());
+    gm.addListener("click", () => { if (map.sel) { map.sel = null; $("#smapCard").hidden = true; drawMap(); } });
+    map.g = { gm, ov, G };
+    $("#smapTiles").innerHTML = ""; $("#smapTiles").hidden = true; for (const t of map.tiles.values()) t.remove(); map.tiles.clear();
+    paintAttr(); mapFit();
+  }
+  function dropGoogle() {
+    if (map.g) { map.g.ov.setMap(null); map.g = null; }
+    $("#smapG").hidden = true; $("#smapTiles").hidden = false; paintAttr(); drawMap();
+  }
+  // Where a place is on screen, in either kind of map.
+  function toScreen(la, lo) {
+    if (map.g) { const pr = map.g.ov.getProjection(); if (!pr) return [-9999, -9999]; const q = pr.fromLatLngToContainerPixel(new map.g.G.LatLng(la, lo)); return [q.x, q.y]; }
+    const [w, h] = mapSize(); return [wx(lo, map.z) - (map.cx - w / 2), wy(la, map.z) - (map.cy - h / 2)];
+  }
+  const mapZoom = () => (map.g ? map.g.gm.getZoom() : map.z);
   function drawMap() { if (!map.raf) map.raf = requestAnimationFrame(() => { map.raf = 0; paintMap(); }); }
   function paintMap() {
     if ($("#smap").hidden) return;
-    const [w, h] = mapSize(), z = map.z, x0 = map.cx - w / 2, y0 = map.cy - h / 2, box = $("#smapTiles");
-    if (map.sat !== false) {
+    const [w, h] = mapSize(), z = mapZoom(), x0 = map.cx - w / 2, y0 = map.cy - h / 2, box = $("#smapTiles");
+    if (map.g) { /* Google draws the imagery */ }
+    else if (map.sat !== false) {
       box.querySelector("svg")?.remove(); box.classList.remove("drawn");
       // Fractional zoom: tiles come from the nearest whole level and are scaled to fit.
       const tz = Math.max(0, Math.min(18, Math.round(z))), ts = 256 * 2 ** (z - tz), n = 2 ** tz, keep = new Set();
@@ -2900,7 +2958,7 @@ Their upcoming rides: ${next}.`;
       }
       if ([...keep].filter((k) => k[0] === "i").every((k) => map.tiles.get(k)?.complete)) for (const [k, img] of map.tiles) if (!keep.has(k)) { img.remove(); map.tiles.delete(k); }
     }
-    if (map.sat === false) {
+    if (!map.g && map.sat === false) {
       // Drawn fallback, made to read like an aerial view: deep sea, desert, the Hajar mountains,
       // the cities as built-up patches, and the emirates' names.
       box.classList.add("drawn");
@@ -2926,7 +2984,7 @@ Their upcoming rides: ${next}.`;
     // Once place names show under the pins they need more room, so pins group from further apart.
     const groups = [], gap = z >= 8 ? [150, 110] : [64, 64];
     for (const s of [...sp].sort((a, b) => b.rides.length - a.rides.length)) {
-      const x = wx(s.lon, z) - x0, y = wy(s.lat, z) - y0;
+      const [x, y] = toScreen(s.lat, s.lon);
       const g = groups.find((q) => Math.abs(q.x - x) < gap[0] && Math.abs(q.y - y) < gap[1]);
       if (g) g.spots.push(s); else groups.push({ x, y, spots: [s] });
     }
@@ -2936,10 +2994,10 @@ Their upcoming rides: ${next}.`;
       const n = g.spots.reduce((a, q) => a + q.rides.length, 0), run = g.spots.every((q) => q.rides.every((r) => sportOf(r) === "run"));
       const mine = g.spots.some((q) => q.rides.some((r) => riders(r.id).includes(state.me)));
       return `<button type="button" class="spot cluster${run ? " run" : ""}${mine ? " mine" : ""}" data-cluster="${g.x.toFixed(1)},${g.y.toFixed(1)}" aria-label="${esc(mp("rides", { n }))}" style="left:${g.x.toFixed(1)}px;top:${g.y.toFixed(1)}px"><span class="bub"><b>${n}</b></span></button>`;
-    }).join("") + (map.me ? `<div class="medot" style="left:${(wx(map.me[1], z) - x0).toFixed(1)}px;top:${(wy(map.me[0], z) - y0).toFixed(1)}px"><img data-pp="${esc(state.me || "")}" alt=""><span>${esc(mp("me"))}</span></div>` : "");
+    }).join("") + (map.me ? `<div class="medot" style="left:${toScreen(...map.me)[0].toFixed(1)}px;top:${toScreen(...map.me)[1].toFixed(1)}px"><img data-pp="${esc(state.me || "")}" alt=""><span>${esc(mp("me"))}</span></div>` : "");
     fillPeopleMarks();
     function pinHTML(s) {
-      const x = wx(s.lon, z) - x0, y = wy(s.lat, z) - y0; if (x < -120 || y < -40 || x > w + 120 || y > h + 160) return "";
+      const [x, y] = toScreen(s.lat, s.lon); if (x < -120 || y < -40 || x > w + 120 || y > h + 160) return "";
       const r = s.rides[0], ids = [...new Set(s.rides.flatMap((q) => riders(q.id)))], mine = s.rides.some((q) => riders(q.id).includes(state.me));
       const sport = s.rides.every((q) => sportOf(q) === "run") ? "run" : "bike";
       return `<button type="button" class="spot ${sport}${mine ? " mine" : ""}${map.sel === s.key ? " sel" : ""}" data-spot="${esc(s.key)}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">
@@ -2949,13 +3007,13 @@ Their upcoming rides: ${next}.`;
       </button>`;
     }
     // Area name: the nearest emirate to the middle of the view, with the temperature where known.
-    const cl = [uny(map.cy, z), unx(map.cx, z)];
+    const gc = map.g?.gm.getCenter(), cl = gc ? [gc.lat(), gc.lng()] : [uny(map.cy, z), unx(map.cx, z)];
     const near = Object.entries(EM_LL).sort((a, b) => Math.hypot(a[1][0] - cl[0], a[1][1] - cl[1]) - Math.hypot(b[1][0] - cl[0], b[1][1] - cl[1]))[0][0];
     $("#smapArea").textContent = t("em_" + near);
     const cur = myWx.state === "ok" ? myWx.hours.find((q) => q.t.slice(0, 13) === hourKey(new Date())) : null;
     $("#smapWx").textContent = cur?.temp != null ? `☀ ${Math.round(cur.temp)}°C` : "";
   }
-  function paintAttr() { $("#smapAttr").textContent = map.sat === false ? mp("drawn") : mp("attr"); }
+  function paintAttr() { $("#smapAttr").textContent = map.g ? "" : map.sat === false ? mp("drawn") : mp("attr"); }
   function paintMapChips() {
     const ks = ["all", "bike", "run", "week", ...(state.me && state.mode === "live" ? ["mine"] : [])];
     $("#smapChips").innerHTML = ks.map((k) => `<button type="button" data-mf="${k}" aria-pressed="${map.filter === k}">${k === "bike" ? ICON_BIKE.replace("<svg", '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"') + esc(t("bike")) : k === "run" ? ICON_RUN.replace("<svg", '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"') + esc(t("run")) : esc(mp(k))}</button>`).join("");
@@ -2978,6 +3036,7 @@ Their upcoming rides: ${next}.`;
     $("#smap [data-mme]").hidden = !(geo && navigator.geolocation);
     map.sel = null; $("#smapCard").hidden = true;
     paintMapChips(); paintAttr(); mapFit();
+    if (gmaps?.key && !map.g && !map.gFailed) loadGoogle().then(initGoogle).catch(() => { map.gFailed = true; });
     $("#smapClose").focus();
   }
   function closeMap() { $("#smap").hidden = true; document.body.style.overflow = ""; $("#mapOpen").focus(); }
@@ -2989,7 +3048,7 @@ Their upcoming rides: ${next}.`;
     const z = e.target.closest("[data-mz]"); if (z) { zoomAnim(+z.dataset.mz); return; }
     if (e.target.closest("[data-mfit]")) { mapFit(); return; }
     if (e.target.closest("[data-mme]")) {
-      navigator.geolocation.getCurrentPosition((p) => { map.me = [p.coords.latitude, p.coords.longitude]; map.z = Math.max(map.z, 12); map.cx = wx(map.me[1], map.z); map.cy = wy(map.me[0], map.z); drawMap(); }, () => {}, { maximumAge: 6e4, timeout: 15000 });
+      navigator.geolocation.getCurrentPosition((p) => { map.me = [p.coords.latitude, p.coords.longitude]; if (map.g) { map.g.gm.setCenter({ lat: map.me[0], lng: map.me[1] }); map.g.gm.setZoom(Math.max(map.g.gm.getZoom(), 12)); return; } map.z = Math.max(map.z, 12); map.cx = wx(map.me[1], map.z); map.cy = wy(map.me[0], map.z); drawMap(); }, () => {}, { maximumAge: 6e4, timeout: 15000 });
       return;
     }
     if (e.target.closest("[data-mx]")) { map.sel = null; $("#smapCard").hidden = true; drawMap(); return; }
@@ -3009,12 +3068,14 @@ Their upcoming rides: ${next}.`;
     map.pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z: map.z, px: map.cx + m[0] - w / 2, py: map.cy + m[1] - h / 2 };
   }
   view.addEventListener("pointerdown", (e) => {
+    if (map.g) return;
     map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
     // The finger is captured only once it drags or pinches, so a plain tap still reaches the pin under it.
     if (map.ptrs.size === 1) { map.moved = false; map.drag = { x: e.clientX, y: e.clientY, cx: map.cx, cy: map.cy }; }
     if (map.ptrs.size === 2) { startPinch(); map.drag = null; for (const id of map.ptrs.keys()) try { view.setPointerCapture(id); } catch {} }
   });
   view.addEventListener("pointermove", (e) => {
+    if (map.g) return;
     if (!map.ptrs.has(e.pointerId)) return;
     map.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
     if (map.ptrs.size >= 2 && map.pinch) {
@@ -3036,8 +3097,8 @@ Their upcoming rides: ${next}.`;
     if (!map.ptrs.size) { map.drag = null; view.classList.remove("drag"); setTimeout(() => { map.moved = false; }, 0); }
   };
   view.addEventListener("pointerup", ptrEnd); view.addEventListener("pointercancel", ptrEnd);
-  view.addEventListener("wheel", (e) => { e.preventDefault(); const [x, y] = vpos(e.clientX, e.clientY); zoomAt(-Math.max(-1, Math.min(1, e.deltaY / 240)), x, y); }, { passive: false });
-  view.addEventListener("dblclick", (e) => { if (e.target.closest("[data-spot]")) return; const [x, y] = vpos(e.clientX, e.clientY); zoomAnim(1, x, y); });
+  view.addEventListener("wheel", (e) => { if (map.g) return; e.preventDefault(); const [x, y] = vpos(e.clientX, e.clientY); zoomAt(-Math.max(-1, Math.min(1, e.deltaY / 240)), x, y); }, { passive: false });
+  view.addEventListener("dblclick", (e) => { if (map.g || e.target.closest("[data-spot]")) return; const [x, y] = vpos(e.clientX, e.clientY); zoomAnim(1, x, y); });
   addEventListener("resize", () => { drawMap(); if (state.tab === "rides") renderMiniMap(); });
 
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
@@ -4031,7 +4092,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample, assets, downloads, geo, weather, voice] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather", "voice"].map((n) => claude.use(n)));
+    [db, user, sample, assets, downloads, geo, weather, voice, gmaps] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather", "voice", "gmaps"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;

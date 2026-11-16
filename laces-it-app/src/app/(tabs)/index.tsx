@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconExpand } from '@/components/icons';
 import { RideCard } from '@/components/RideCard';
 import { LOCALES } from '@/lib/i18n';
+import { MAP_PROVIDER } from '@/lib/maps';
 import { regionFor, spots, upcoming } from '@/lib/spots';
 import { rideTitle, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
@@ -27,7 +28,7 @@ export default function Rides() {
       <Text style={s.logo}>{t('appName')}</Text>
       {/* Map preview: a still satellite view with a dot per meeting point; tap to open the full map. */}
       <Pressable accessibilityRole="button" accessibilityLabel={t('mapTitle')} onPress={() => router.push('/map')} style={s.mini}>
-        <MapView style={StyleSheet.absoluteFill} mapType="satellite" region={region} liteMode scrollEnabled={false} zoomEnabled={false} pitchEnabled={false} rotateEnabled={false} pointerEvents="none" toolbarEnabled={false}>
+        <MapView provider={MAP_PROVIDER} style={StyleSheet.absoluteFill} mapType="satellite" region={region} liteMode scrollEnabled={false} zoomEnabled={false} pitchEnabled={false} rotateEnabled={false} pointerEvents="none" toolbarEnabled={false}>
           {sp.map((x) => (
             <Marker key={x.key} coordinate={{ latitude: x.lat, longitude: x.lon }} tracksViewChanges={false}>
               <View style={[s.dot, { backgroundColor: x.rides.every((r) => r.sport === 'run') ? C.run : C.accent }]} />

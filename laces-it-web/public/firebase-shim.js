@@ -2,7 +2,8 @@
 // configured), Firestore for rides, sign-ups and listings, Storage for photos.
 // It serves the same small `claude.use(name)` surface the page was written for,
 // so the page code stays the same as the Claude-hosted version.
-import { firebaseConfig, uaePass, sdk, emulators, iceServers } from "./firebase-config.js";
+import * as CFG from "./firebase-config.js";
+const { firebaseConfig, uaePass, sdk, emulators, iceServers } = CFG;
 
 const TXT = {
   ar: { title: "سجّل دخولك", sub: "طلعات السياكل والجري وسوق العدّة في الإمارات.", google: "المتابعة بحساب Google", uae: "الدخول بـ UAE PASS", soon: "قريباً", out: "خروج",
@@ -262,5 +263,7 @@ function api(u, F, fs, S, st) {
   };
   // Voice rooms need a microphone and WebRTC; the page signals through the database.
   const voice = window.RTCPeerConnection && navigator.mediaDevices?.getUserMedia ? { iceServers: iceServers || [] } : null;
-  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation, weather, voice };
+  // Google Maps for the satellite map, when a key is set in firebase-config.js.
+  const gmaps = CFG.googleMapsKey ? { key: CFG.googleMapsKey } : null;
+  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation, weather, voice, gmaps };
 }

@@ -102,6 +102,24 @@ laces-it-app/
   - في الويب: أضف `"fil"` و `"hi"` إلى `LANGS` في `yalla-crew/laces-it.html`، وأضف خيارهم في قائمة اللغة `#langSel`.
   - في تطبيق الهاتف: أضفهم إلى `LANGS` في `src/lib/i18n.ts`.
 
+### خريطة التجمعات: Google Maps بالأقمار الصناعية
+
+- **تطبيق الهاتف:**
+  - Android يستخدم Google Maps دائماً.
+  - iPhone يستخدم Google Maps إذا انبنى بمفتاح iOS. حط `GOOGLE_MAPS_IOS_KEY`، وحط `EXPO_PUBLIC_GOOGLE_MAPS_IOS=1`.
+  - بدون مفتاح iOS، يستخدم iPhone عرض الأقمار الصناعية من Apple.
+- **نسخة الويب المستقلة (Firebase):** حط المفتاح في `googleMapsKey` في `laces-it-web/public/firebase-config.js`.
+  - الخريطة الكاملة تطلع بعرض Google «hybrid»، يعني صور الأقمار الصناعية مع أسماء المناطق.
+  - الخريطة الصغيرة صورة أقمار صناعية من Google.
+  - بدون مفتاح أو إذا Google ما حمّل: صور Esri، أو الخريطة المرسومة.
+- **رابط Claude:** ما يسمح بتحميل Google Maps، فيستخدم الخريطة البديلة.
+- **المفاتيح:** من Google Cloud console ← APIs & Services ← Credentials. فعّل هذي الخدمات:
+  - Maps SDK for Android، و Maps SDK for iOS.
+  - Maps JavaScript API، و Maps Static API.
+- **حماية المفاتيح:**
+  - مفتاح الويب: قيّده على عنوان موقعك (HTTP referrers).
+  - مفاتيح الجوال: قيّدها على `ae.lacesit.app`.
+
 ### الأقسام المطفّية حالياً
 
 - **الغرف (دردشة، صوت، بث مباشر، قلوب وتحدي):** مطفّية حالياً.

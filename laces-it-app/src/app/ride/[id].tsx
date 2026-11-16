@@ -6,6 +6,7 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 
 import { IconClose } from '@/components/icons';
 import { LOCALES } from '@/lib/i18n';
+import { MAP_PROVIDER } from '@/lib/maps';
 import { meetingPoint, regionFor } from '@/lib/spots';
 import { meId, rideTitle, riders, setJoined, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
@@ -29,7 +30,7 @@ export default function RideScreen() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={s.mapBox}>
-        <MapView style={StyleSheet.absoluteFill} mapType="hybrid" initialRegion={regionFor(r.route?.length ? r.route : [[lat, lon]])} toolbarEnabled={false} rotateEnabled={false}>
+        <MapView provider={MAP_PROVIDER} style={StyleSheet.absoluteFill} mapType="hybrid" initialRegion={regionFor(r.route?.length ? r.route : [[lat, lon]])} toolbarEnabled={false} rotateEnabled={false}>
           {route.length > 1 && <Polyline coordinates={route} strokeColor={C.accent} strokeWidth={5} />}
           <Marker coordinate={{ latitude: lat, longitude: lon }} pinColor={C.accent} />
         </MapView>

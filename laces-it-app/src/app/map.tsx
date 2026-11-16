@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconBike, IconClose, IconFit, IconLocate, IconRun } from '@/components/icons';
 import { LOCALES } from '@/lib/i18n';
+import { MAP_PROVIDER } from '@/lib/maps';
 import { regionFor, spots, upcoming, type Filter, type Spot } from '@/lib/spots';
 import { meId, rideTitle, riders, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
@@ -35,7 +36,7 @@ export default function MeetingMap() {
 
   return (
     <View style={s.wrap}>
-      <MapView
+      <MapView provider={MAP_PROVIDER}
         ref={map}
         style={StyleSheet.absoluteFill}
         mapType="hybrid"
