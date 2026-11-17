@@ -1339,7 +1339,7 @@ button.pp { cursor: pointer; }
   const LANGS = ["ar", "en"];
   // Sections that are switched off for now. Their code and their data in the database stay as they are;
   // set a section to true to bring it back (Rooms brings voice rooms and live video with it).
-  const FEATURES = { rooms: false };
+  const FEATURES = { rooms: false, money: false }; // money: Pro, featured listings, sponsors, revenue panel
   const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
   const LEVELS = ["beg", "int", "adv"];
   const CATS = ["bikes", "parts", "apparel", "shoes", "watches", "helmets", "nutrition", "other"];
@@ -3141,9 +3141,9 @@ Their upcoming rides: ${next}.`;
   };
   const mo = (k, v) => { let x = (MO[lang] || MO.en)[k] ?? MO.en[k]; if (v && typeof x === "string") for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
   const live_ = (until) => !until || Date.parse(until) > Date.now();
-  const isPro = (uid) => !!uid && !!state.ents[uid]?.pro && live_(state.ents[uid].until);
-  const isFeatured = (id) => !!state.featured[id] && live_(state.featured[id].until);
-  const activeSponsors = (where) => state.sponsors.filter((s) => s.active !== false && live_(s.until) && (!where || s.where === where));
+  const isPro = (uid) => FEATURES.money && !!uid && !!state.ents[uid]?.pro && live_(state.ents[uid].until);
+  const isFeatured = (id) => FEATURES.money && !!state.featured[id] && live_(state.featured[id].until);
+  const activeSponsors = (where) => !FEATURES.money ? [] : state.sponsors.filter((s) => s.active !== false && live_(s.until) && (!where || s.where === where));
   const clipMax = () => (isPro(state.me) ? PRO.clipSeconds : FREE.clipSeconds);
   const proBadge = (uid) => (isPro(uid) ? ` <span class="probadge">PRO</span>` : "");
   const dayStr = (iso) => new Intl.DateTimeFormat(I18N[lang].locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
@@ -3156,12 +3156,12 @@ Their upcoming rides: ${next}.`;
   }
   // Payment links come from the standalone app's firebase-config.js (payments); on the Claude page there are none.
   function payHref(kind) {
-    const u = pay?.[kind]; if (!u) return "";
+    const u = FEATURES.money && pay?.[kind]; if (!u) return "";
     return u + (u.includes("?") ? "&" : "?") + "client_reference_id=" + encodeURIComponent(state.me || "");
   }
   function renderPro() {
     const el = $("#proCard"); if (!el) return;
-    if (state.mode !== "live" || !state.me) { el.hidden = true; return; }
+    if (!FEATURES.money || state.mode !== "live" || !state.me) { el.hidden = true; return; }
     el.hidden = false;
     if (isPro(state.me)) {
       const e = state.ents[state.me];
@@ -3181,7 +3181,7 @@ Their upcoming rides: ${next}.`;
   }
   function renderAdmin() {
     const el = $("#adminCard"); if (!el) return;
-    if (!state.admin || state.mode !== "live") { el.hidden = true; return; }
+    if (!FEATURES.money || !state.admin || state.mode !== "live") { el.hidden = true; return; }
     el.hidden = false;
     const ids = [...new Set([...Object.keys(state.profiles), ...state.joins.map((j) => j.id)])];
     const nameOf = (id) => prof(id).nick || (id === state.me ? t("you") : id.slice(0, 6));
@@ -3443,7 +3443,7 @@ Their upcoming rides: ${next}.`;
     if (!/^video\//.test(f.type)) { err.textContent = cl("errType"); return; }
     if (f.size > MAX_CLIP_B) { err.textContent = cl("errBig"); return; }
     v.onloadedmetadata = () => {
-      if (!(v.duration <= clipMax() + 0.5)) { err.textContent = cl("errLong", { n: clipMax() }) + (isPro(state.me) ? "" : " " + mo("clipLimitPro")); v.hidden = true; return; }
+      if (!(v.duration <= clipMax() + 0.5)) { err.textContent = cl("errLong", { n: clipMax() }) + (FEATURES.money && !isPro(state.me) ? " " + mo("clipLimitPro") : ""); v.hidden = true; return; }
       clipState.file = f; clipState.dur = Math.round(v.duration); v.hidden = false; v.play().catch(() => {});
     };
     v.onerror = () => { err.textContent = cl("errRead"); };
@@ -4217,7 +4217,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (!title || !phone || !(price >= 0)) { err.textContent = t("errSellReq"); $(!title ? "#s-title" : !(price >= 0) ? "#s-price" : "#s-phone").focus(); return; }
     if (title.length < 6 || !$("#s-desc").value.trim()) { err.textContent = AD_HINT[lang]; $(title.length < 6 ? "#s-title" : "#s-desc").focus(); return; }
     if (waDigits(phone).length < 8 || waDigits(phone).length > 15) { err.textContent = t("errPhone"); $("#s-phone").focus(); return; }
-    if (!isPro(state.me) && state.listings.filter((x) => x.sellerId === state.me && !x.sold).length >= FREE.listings) { err.textContent = mo("limitList", { n: FREE.listings }); return; }
+    if (FEATURES.money && !isPro(state.me) && state.listings.filter((x) => x.sellerId === state.me && !x.sold).length >= FREE.listings) { err.textContent = mo("limitList", { n: FREE.listings }); return; }
     if ($("#s-photo").files.length && !photoBlob) { err.textContent = t("errPhotoType"); $("#s-photo").focus(); return; }
     err.textContent = "";
     const btn = $("#sellBtn"); btn.disabled = true;
@@ -4277,12 +4277,13 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       if (state.mode === "live" && state.tab === "clips") renderClips();
     }, () => {});
     const moneyRender = () => { if (state.mode === "live" && ["me", "market", "rides", "clips"].includes(state.tab)) render(); };
-    db.collection("entitlements").onSnapshot((s) => { state.ents = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
-    db.collection("featured").onSnapshot((s) => { state.featured = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
-    db.collection("sponsors").onSnapshot((s) => { state.sponsors = s.docs.map((d) => ({ id: d.id, ...d.data() })); moneyRender(); }, () => {});
+    if (FEATURES.money) db.collection("entitlements").onSnapshot((s) => { state.ents = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
+    if (FEATURES.money) db.collection("featured").onSnapshot((s) => { state.featured = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
+    if (FEATURES.money) db.collection("sponsors").onSnapshot((s) => { state.sponsors = s.docs.map((d) => ({ id: d.id, ...d.data() })); moneyRender(); }, () => {});
     // Admins: the page's editors on Claude; in the standalone app, accounts listed in admins/<uid> (set in the Firebase console).
     (async () => {
       try { state.admin = !!(await user?.canEdit?.()); } catch {}
+      if (!FEATURES.money) return;
       if (!state.admin && state.me) try { state.admin = !!(await db.doc("admins/" + state.me).get()).exists; } catch {}
       if (state.admin) moneyRender();
     })();
