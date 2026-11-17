@@ -761,6 +761,34 @@ button.pp { cursor: pointer; }
 .homead .hs { background: var(--accent); color: #fff; font: 800 13px var(--font); padding: 8px 12px; border-radius: 999px; }
 .item.flash { animation: yc-flash 1.6s ease-out; }
 @keyframes yc-flash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
+/* Workout: live ride screen */
+.wobtn { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; border-radius: 18px; padding: 14px; background: #0f1a14; color: #fff; text-align: start; font: inherit; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.wobtn .wop { width: 46px; height: 46px; border-radius: 50%; background: #12b886; display: grid; place-items: center; font-size: 20px; flex: none; }
+.wobtn b { display: block; font: 800 16px var(--font); }
+.wobtn small { font-size: 12px; opacity: .8; }
+.workout { position: fixed; inset: 0; z-index: 9; background: #07110c; color: #fff; overflow-y: auto; }
+.workout .woin { max-width: 520px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
+.workout .wotop { display: flex; justify-content: space-between; align-items: center; font: 700 12px var(--font); }
+.workout .gps { color: #ffb4a0; } .workout .gps.ok { color: #8ef0c4; }
+.workout .pausedtag { background: #ffd24a; color: #1a0b06; padding: 3px 10px; border-radius: 999px; }
+.workout .wospeed { text-align: center; padding: 10px 0; }
+.workout .wospeed b { display: block; font: 900 96px/1 var(--logo, var(--font)); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.workout .wospeed span { font: 700 16px var(--font); opacity: .7; }
+.workout .wogrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.workout .wogrid div { background: rgba(255, 255, 255, .07); border-radius: 16px; padding: 10px; display: grid; gap: 2px; }
+.workout .wogrid span { font: 700 11px var(--font); opacity: .7; }
+.workout .wogrid b { font: 800 26px var(--font); font-variant-numeric: tabular-nums; }
+.workout .wogrid small { font-size: 11px; opacity: .7; }
+.workout .wogrid.sum { grid-template-columns: repeat(2, 1fr); }
+.workout .hrbox.z1 { background: rgba(120, 180, 255, .2); } .workout .hrbox.z2 { background: rgba(18, 184, 134, .25); } .workout .hrbox.z3 { background: rgba(255, 210, 74, .25); } .workout .hrbox.z4 { background: rgba(255, 140, 50, .3); } .workout .hrbox.z5 { background: rgba(229, 32, 46, .35); }
+.workout .wosensors { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.workout .wosensors .chip { background: rgba(255, 255, 255, .1); color: #fff; border: 0; }
+.workout .wosensors .dev { font: 700 12px var(--font); color: #8ef0c4; } .workout .wosensors .dev.lost { color: #ffb4a0; }
+.workout .wosensors .sub { width: 100%; color: rgba(255, 255, 255, .6); margin: 0; font-size: 12px; }
+.workout .woacts { display: flex; gap: 10px; }
+.workout .woacts .btn { flex: 1; min-height: 56px; font-size: 17px; }
+.workout .btn.go { background: #12b886; }
+.workout .womsg { position: fixed; left: 16px; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: rgba(0, 0, 0, .85); padding: 10px 14px; border-radius: 12px; margin: 0; text-align: center; font-size: 13px; }
 /* Clips: full-screen vertical video feed */
 .clips { position: fixed; inset: 0; z-index: 6; background: #000; color: #fff; }
 .clips .feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
@@ -863,6 +891,7 @@ button.pp { cursor: pointer; }
   <div class="mmwrap" id="mmWrap">
     <button type="button" class="minimap" id="mapOpen"><span class="mm-tiles" id="mmTiles" aria-hidden="true"></span><span class="mm-pins" id="mmPins" aria-hidden="true"></span><span class="mm-lab"><b id="mapOpenT"></b><small id="mapOpenS"></small></span><span class="mm-exp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></span></button>
   </div>
+  <div class="mmwrap" id="woWrap" hidden><button type="button" class="wobtn" id="woOpen"><span class="wop">▶</span><span><b id="woOpenT"></b><small id="woOpenS"></small></span></button></div>
   <section class="hero" id="hero"></section>
 
   <main class="pad">
@@ -913,6 +942,8 @@ button.pp { cursor: pointer; }
       <p class="notice" id="boardEmpty" data-i18n="boardEmpty" hidden></p>
     </section>
   </main>
+
+  <section class="workout" id="workout" hidden role="dialog" aria-modal="true"><div class="woin" id="woBody"></div><p class="womsg" id="woMsg" role="status" hidden></p></section>
 
   <section class="smap" id="smap" hidden role="dialog" aria-modal="true" aria-labelledby="smapArea">
     <div class="view" id="smapView"><div class="gmap" id="smapG" hidden></div><div class="tiles" id="smapTiles"></div><div class="pins" id="smapPins"></div></div>
@@ -3311,14 +3342,14 @@ Their upcoming rides: ${next}.`;
   const vatLine = (total) => { const v = vatSplit(total); return af("vatLine", { net: money2(v.net), vat: money2(v.vat), total: money2(v.total) }); };
   if (/[?&]emu\b/.test(location.search)) { const n = +new URLSearchParams(location.search).get("freeSellers"); if (n >= 0 && location.search.includes("freeSellers")) ADFEE.freeSellers = n; }
   const AF = {
-    ar: { cash: "💵 الدفع كاش عند الاستلام", tips: "نصيحة: عاين الغرض قبل ما تدفع، وتلاقوا في مكان عام، ولا تحوّل فلوس قبل الاستلام. ليز ات ما يتدخل في البيع.",
+    ar: { cash: "💵 تدفع للبائع مباشرة كاش عند الاستلام. ما في شراء داخل التطبيق", tips: "نصيحة: عاين الغرض قبل ما تدفع، وتلاقوا في مكان عام، ولا تحوّل فلوس قبل الاستلام. ليز ات ما يتدخل في البيع.",
       pending: "بانتظار رسوم النشر", pendingNote: "إعلانك محفوظ ويظهر لك بس. ادفع {p} درهم للإدارة (كاش أو تحويل)، وينشر لمدة {n} يوم.",
       vatLine: "{net} + ضريبة 5% {vat} = {total} د.إ", vatNote: "الأسعار شاملة ضريبة القيمة المضافة 5%.", vatN: "منها ضريبة", planT: "مدة الإعلان", planOpt: "{n} يوم · {p} د.إ", homeOpt: "اعرض إعلاني في أعلى الشاشة الرئيسية ({n} أيام · {p} د.إ)", homeWait: "بانتظار رسوم الشاشة الرئيسية ({p} د.إ)", homeLive: "في الشاشة الرئيسية لين {d}",
       homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
       liveUntil: "منشور لين {d}", expired: "انتهت مدة النشر. ادفع {p} درهم لتجديده {n} يوم.", free: "أول {n} بائع إعلاناتهم مجانية.",
       saved: "انحفظ إعلانك. ينشر بعد دفع رسوم {p} درهم.", panel: "رسوم الإعلانات", panelSub: "إعلانات تنتظر الدفع. لما يوصلك المبلغ اضغط «تم الدفع».", paidBtn: "تم الدفع، انشر {n} يوم",
       noPending: "ما فيه إعلانات تنتظر الدفع.", activeN: "إعلانات مدفوعة نشطة", monthN: "رسوم هالشهر", freeN: "بائعين مجانيين", aed: "د.إ", done: "تم ✓", err: "ما انحفظ. تأكد إنك مسؤول وإن الاتصال شغّال.", remove: "إلغاء النشر" },
-    en: { cash: "💵 Cash on pickup", tips: "Tip: check the item before you pay, meet in a public place, and don't transfer money before pickup. Laces It isn't part of the sale.",
+    en: { cash: "💵 Pay the seller directly in cash at pickup. Nothing is bought inside the app", tips: "Tip: check the item before you pay, meet in a public place, and don't transfer money before pickup. Laces It isn't part of the sale.",
       pending: "Waiting for the listing fee", pendingNote: "Your listing is saved and only you can see it. Pay AED {p} to the admins (cash or transfer) and it goes live for {n} days.",
       vatLine: "AED {net} + 5% VAT {vat} = {total}", vatNote: "Prices include 5% VAT.", vatN: "of which VAT", planT: "Listing time", planOpt: "{n} days · AED {p}", homeOpt: "Show my listing at the top of the home screen ({n} days · AED {p})", homeWait: "Waiting for the home-screen fee (AED {p})", homeLive: "On the home screen until {d}",
       homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
@@ -3407,6 +3438,159 @@ Their upcoming rides: ${next}.`;
     }
     catch { sayAdmin(af("err")); b.disabled = false; }
   });
+
+  // ---------- Workout: live ride screen (speed from GPS; heart rate, cadence and power from Bluetooth sensors) ----------
+  // Watches that broadcast heart rate over Bluetooth (WHOOP "Broadcast Heart Rate", Garmin "Broadcast Heart Rate",
+  // Polar, Wahoo, chest straps) connect through the standard Heart Rate service. Speed/cadence sensors and power
+  // meters use the standard Cycling Speed and Cadence and Cycling Power services. Needs GPS (standalone app).
+  const WO = {
+    ar: { open: "ابدأ تمرين", openS: "السرعة والمسافة مباشر، والقلب من ساعتك", start: "ابدأ", pause: "إيقاف مؤقت", resume: "كمّل", finish: "إنهاء", finishSure: "اضغط مرة ثانية للإنهاء",
+      speed: "السرعة", kmh: "كم/س", time: "الوقت", dist: "المسافة", km: "كم", avg: "المتوسط", max: "الأعلى", hr: "القلب", bpm: "نبضة", cad: "الكادنس", rpm: "دورة", power: "الطاقة", w: "واط", climb: "الصعود", m: "م",
+      hrBtn: "اربط الساعة / حساس القلب", cscBtn: "حساس السرعة والكادنس", pwrBtn: "عداد الطاقة", connected: "متصل: {n}", lost: "انقطع: {n}",
+      noBt: "الربط بالبلوتوث يشتغل في Chrome على أندرويد أو الكمبيوتر. على iPhone يطلع مع تطبيق الهاتف.", gpsWait: "ننتظر إشارة GPS…", gpsDenied: "ما سمحت للتطبيق يشوف موقعك.",
+      watchHelp: "في ساعتك فعّل «بث نبض القلب» (Broadcast Heart Rate)، وبعدين اضغط زر الربط.", summary: "ملخص التمرين", save: "احفظ", saved: "انحفظ ✓", gpx: "نزّل GPX", close: "إغلاق", zone: "منطقة {n}", sport: "الرياضة" },
+    en: { open: "Start workout", openS: "Live speed and distance, heart rate from your watch", start: "Start", pause: "Pause", resume: "Resume", finish: "Finish", finishSure: "Tap again to finish",
+      speed: "Speed", kmh: "km/h", time: "Time", dist: "Distance", km: "km", avg: "Average", max: "Max", hr: "Heart", bpm: "bpm", cad: "Cadence", rpm: "rpm", power: "Power", w: "W", climb: "Climb", m: "m",
+      hrBtn: "Connect watch / heart sensor", cscBtn: "Speed & cadence sensor", pwrBtn: "Power meter", connected: "Connected: {n}", lost: "Disconnected: {n}",
+      noBt: "Bluetooth sensors work in Chrome on Android or a computer. On iPhone they come with the phone app.", gpsWait: "Waiting for GPS…", gpsDenied: "Location access is off.",
+      watchHelp: "On your watch turn on Broadcast Heart Rate, then tap Connect.", summary: "Workout summary", save: "Save workout", saved: "Saved ✓", gpx: "Download GPX", close: "Close", zone: "Zone {n}", sport: "Sport" }
+  };
+  const wo = (k, v) => { let x = (WO[lang] || WO.en)[k] ?? WO.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const W = { on: false, paused: false, t0: 0, moving: 0, lastTick: 0, dist: 0, max: 0, climb: 0, pts: [], last: null, gps: null, watch: null, tick: 0, speed: 0, sport: "bike",
+    hr: null, hrs: [], cad: null, pwr: null, pwrs: [], dev: {}, csc: null, lock: null, done: null };
+  const hav = (a, b) => { const R = 6371e3, r = Math.PI / 180, dLa = (b[0] - a[0]) * r, dLo = (b[1] - a[1]) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  const hms = (s) => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+  const hrZone = (bpm) => { const mx = 190; const p = bpm / mx; return p < .6 ? 1 : p < .7 ? 2 : p < .8 ? 3 : p < .9 ? 4 : 5; };
+  function openWorkout() {
+    $("#workout").hidden = false; document.body.style.overflow = "hidden"; W.done = null; paintWorkout();
+    if (!W.watch && navigator.geolocation) {
+      W.watch = navigator.geolocation.watchPosition(onGps, (e) => { W.gpsErr = e.code === 1 ? wo("gpsDenied") : ""; paintWorkout(); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    }
+  }
+  function closeWorkout() {
+    if (W.on) return; // finish first
+    $("#workout").hidden = true; document.body.style.overflow = "";
+    if (W.watch != null) { navigator.geolocation.clearWatch(W.watch); W.watch = null; }
+  }
+  function onGps(p) {
+    const c = p.coords, pt = [c.latitude, c.longitude], now = p.timestamp || Date.now();
+    W.gps = { acc: c.accuracy, at: now };
+    if (!W.on || W.paused || c.accuracy > 35) { paintWorkout(); return; }
+    if (W.last) {
+      const d = hav(W.last.pt, pt), dt = (now - W.last.at) / 1000;
+      if (d > 1.5 && dt > 0) {
+        W.dist += d;
+        const v = c.speed != null && c.speed >= 0 ? c.speed * 3.6 : d / dt * 3.6;
+        W.speed = W.speed ? W.speed * .5 + v * .5 : v; if (W.speed > W.max && W.speed < 120) W.max = W.speed;
+        if (c.altitude != null) { if (W.altRef == null || c.altitude < W.altRef) W.altRef = c.altitude; else if (c.altitude - W.altRef >= 3) { W.climb += c.altitude - W.altRef; W.altRef = c.altitude; } }
+        W.pts.push([+pt[0].toFixed(6), +pt[1].toFixed(6), c.altitude != null ? Math.round(c.altitude) : null, new Date(now).toISOString(), W.hr]);
+      }
+    } else W.pts.push([+pt[0].toFixed(6), +pt[1].toFixed(6), c.altitude != null ? Math.round(c.altitude) : null, new Date(now).toISOString(), W.hr]);
+    W.last = { pt, at: now, alt: c.altitude };
+    paintWorkout();
+  }
+  function startWorkout() {
+    Object.assign(W, { on: true, paused: false, t0: Date.now(), moving: 0, lastTick: Date.now(), dist: 0, max: 0, climb: 0, pts: [], last: null, altRef: null, speed: 0, hrs: [], pwrs: [], done: null });
+    clearInterval(W.tick); W.tick = setInterval(() => { const n = Date.now(); if (!W.paused) W.moving += (n - W.lastTick) / 1000; W.lastTick = n; if (W.hr) W.hrs.push(W.hr); if (W.pwr != null) W.pwrs.push(W.pwr); if (W.gps && n - W.gps.at > 6000) W.speed = W.speed * .7; paintWorkout(); }, 1000);
+    navigator.wakeLock?.request("screen").then((l) => { W.lock = l; }).catch(() => {});
+    paintWorkout();
+  }
+  function finishWorkout() {
+    clearInterval(W.tick); W.on = false; W.lock?.release?.().catch(() => {}); W.lock = null;
+    const avg = W.moving > 0 ? Math.min(W.dist / W.moving * 3.6, W.max || Infinity) : 0;
+    const mean = (a) => (a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null);
+    W.done = { sport: W.sport, startAt: new Date(W.t0).toISOString(), seconds: Math.round(W.moving), km: +(W.dist / 1000).toFixed(2), avgKmh: +avg.toFixed(1), maxKmh: +W.max.toFixed(1), climbM: Math.round(W.climb), hrAvg: mean(W.hrs), hrMax: W.hrs.length ? Math.max(...W.hrs) : null, powerAvg: mean(W.pwrs), points: W.pts.length };
+    paintWorkout();
+  }
+  async function saveWorkout(b) {
+    if (!W.done || !db || !state.me) return;
+    b.disabled = true;
+    try { await db.collection("workouts").add({ uid: state.me, ...W.done, route: W.pts.filter((_, i) => i % Math.max(1, Math.ceil(W.pts.length / 400)) === 0).map((p) => [p[0], p[1]]), createdAt: new Date().toISOString() }); b.textContent = wo("saved"); }
+    catch { b.disabled = false; flash(t("errSave")); }
+  }
+  function gpxOf() {
+    const pts = W.pts.map((p) => `<trkpt lat="${p[0]}" lon="${p[1]}">${p[2] != null ? `<ele>${p[2]}</ele>` : ""}<time>${p[3]}</time>${p[4] ? `<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>${p[4]}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>` : ""}</trkpt>`).join("");
+    return `<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Laces It" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"><trk><name>Laces It ${W.done?.startAt || ""}</name><trkseg>${pts}</trkseg></trk></gpx>`;
+  }
+  async function downloadGpx() {
+    const blob = new Blob([gpxOf()], { type: "application/gpx+xml" }), name = "laces-it-" + (W.done?.startAt || "").slice(0, 16).replace(/[:T]/g, "-") + ".gpx";
+    if (downloads) { try { await downloads.save({ filename: name, data: blob }); return; } catch (e) { if (e?.code === "declined") return; } }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  // ---- Bluetooth sensors (Web Bluetooth, standard GATT services) ----
+  async function connectSensor(kind) {
+    if (!navigator.bluetooth) { flashWo(wo("noBt")); return; }
+    const svc = { hr: "heart_rate", csc: "cycling_speed_and_cadence", pwr: "cycling_power" }[kind];
+    const chr = { hr: "heart_rate_measurement", csc: "csc_measurement", pwr: "cycling_power_measurement" }[kind];
+    try {
+      const dev = await navigator.bluetooth.requestDevice({ filters: [{ services: [svc] }] });
+      dev.addEventListener("gattserverdisconnected", () => { W.dev[kind] = { name: dev.name, lost: true }; if (kind === "hr") W.hr = null; if (kind === "pwr") W.pwr = null; if (kind === "csc") W.cad = null; paintWorkout(); });
+      const server = await dev.gatt.connect(), service = await server.getPrimaryService(svc), ch = await service.getCharacteristic(chr);
+      ch.addEventListener("characteristicvaluechanged", (e) => onSensor(kind, e.target.value));
+      await ch.startNotifications();
+      W.dev[kind] = { name: dev.name || kind, lost: false }; paintWorkout();
+    } catch (e) { if (e?.name !== "NotFoundError") flashWo(String(e?.message || e)); }
+  }
+  function onSensor(kind, v) {
+    if (kind === "hr") { const f = v.getUint8(0); W.hr = f & 1 ? v.getUint16(1, true) : v.getUint8(1); }
+    else if (kind === "pwr") W.pwr = v.getInt16(2, true);
+    else if (kind === "csc") {
+      // Crank revolutions give cadence; wheel revolutions give speed when GPS is weak (2.105 m wheel).
+      const f = v.getUint8(0); let o = 1, wheel = null, crank = null;
+      if (f & 1) { wheel = [v.getUint32(o, true), v.getUint16(o + 4, true)]; o += 6; }
+      if (f & 2) crank = [v.getUint16(o, true), v.getUint16(o + 2, true)];
+      const prev = W.csc || {};
+      if (crank && prev.crank) { const dr = (crank[0] - prev.crank[0] + 65536) % 65536, dt = ((crank[1] - prev.crank[1] + 65536) % 65536) / 1024; if (dt > 0) W.cad = Math.round(dr / dt * 60); else if (dr === 0) W.cad = 0; }
+      if (wheel && prev.wheel && (!W.gps || Date.now() - W.gps.at > 5000)) { const dr = wheel[0] - prev.wheel[0], dt = ((wheel[1] - prev.wheel[1] + 65536) % 65536) / 1024; if (dt > 0 && dr >= 0) { W.speed = dr * 2.105 / dt * 3.6; if (W.on && !W.paused) W.dist += dr * 2.105; } }
+      W.csc = { crank: crank || prev.crank, wheel: wheel || prev.wheel };
+    }
+    paintWorkout();
+  }
+  let woMsgT = 0;
+  function flashWo(m) { const el = $("#woMsg"); el.textContent = m; el.hidden = false; clearTimeout(woMsgT); woMsgT = setTimeout(() => { el.hidden = true; }, 5000); }
+  function paintWorkout() {
+    const el = $("#woBody"); if (!el || $("#workout").hidden) return;
+    if (W.done) {
+      const d = W.done;
+      el.innerHTML = `<h2 class="h2">${esc(wo("summary"))}</h2>
+        <div class="wogrid sum">${[["dist", d.km.toLocaleString(I18N[lang].locale), "km"], ["time", hms(d.seconds), ""], ["avg", d.avgKmh, "kmh"], ["max", d.maxKmh, "kmh"], ["climb", d.climbM, "m"], ...(d.hrAvg ? [["hr", d.hrAvg + " / " + d.hrMax, "bpm"]] : []), ...(d.powerAvg != null ? [["power", d.powerAvg, "w"]] : [])].map(([k, v, u]) => `<div><span>${esc(wo(k))}</span><b>${esc(String(v))}</b><small>${u ? esc(wo(u)) : ""}</small></div>`).join("")}</div>
+        <div class="woacts"><button type="button" class="btn" data-wo="save">${esc(wo("save"))}</button><button type="button" class="btn soft" data-wo="gpx">${esc(wo("gpx"))}</button><button type="button" class="btn soft" data-wo="close">${esc(wo("close"))}</button></div>`;
+      return;
+    }
+    const avg = W.moving > 0 ? Math.min(W.dist / W.moving * 3.6, W.max || Infinity) : 0, el2 = (k) => W.dev[k] ? `<span class="dev${W.dev[k].lost ? " lost" : ""}">${esc(wo(W.dev[k].lost ? "lost" : "connected", { n: W.dev[k].name }))}</span>` : "";
+    const gpsTxt = W.gpsErr || (!W.gps ? wo("gpsWait") : `GPS ±${Math.round(W.gps.acc)} ${wo("m")}`);
+    el.innerHTML = `<div class="wotop"><span class="gps${W.gps ? " ok" : ""}">${esc(gpsTxt)}</span>${W.on && W.paused ? `<span class="pausedtag">${esc(wo("pause"))}</span>` : ""}</div>
+      <div class="wospeed"><b>${(W.on && !W.paused ? W.speed : 0).toFixed(1)}</b><span>${esc(wo("kmh"))}</span></div>
+      <div class="wogrid">
+        <div><span>${esc(wo("time"))}</span><b>${hms(W.moving)}</b></div>
+        <div><span>${esc(wo("dist"))}</span><b>${(W.dist / 1000).toFixed(2)}</b><small>${esc(wo("km"))}</small></div>
+        <div><span>${esc(wo("avg"))}</span><b>${avg.toFixed(1)}</b><small>${esc(wo("kmh"))}</small></div>
+        <div class="hrbox${W.hr ? " z" + hrZone(W.hr) : ""}"><span>${esc(wo("hr"))} ❤</span><b>${W.hr ?? "—"}</b><small>${W.hr ? esc(wo("zone", { n: hrZone(W.hr) })) : esc(wo("bpm"))}</small></div>
+        <div><span>${esc(wo("cad"))}</span><b>${W.cad ?? "—"}</b><small>${esc(wo("rpm"))}</small></div>
+        <div><span>${esc(wo("power"))} ⚡</span><b>${W.pwr ?? "—"}</b><small>${esc(wo("w"))}</small></div>
+      </div>
+      <div class="wosensors">
+        <button type="button" class="chip" data-wo="hr">❤ ${esc(wo("hrBtn"))}</button>${el2("hr")}
+        <button type="button" class="chip" data-wo="csc">⚙️ ${esc(wo("cscBtn"))}</button>${el2("csc")}
+        <button type="button" class="chip" data-wo="pwr">⚡ ${esc(wo("pwrBtn"))}</button>${el2("pwr")}
+        <p class="sub">${esc(navigator.bluetooth ? wo("watchHelp") : wo("noBt"))}</p>
+      </div>
+      <div class="woacts">${!W.on ? `<button type="button" class="btn go" data-wo="start">▶ ${esc(wo("start"))}</button><button type="button" class="btn soft" data-wo="close">${esc(wo("close"))}</button>`
+        : `<button type="button" class="btn soft" data-wo="pause">${esc(wo(W.paused ? "resume" : "pause"))}</button><button type="button" class="btn stop" data-wo="finish">${esc(W.finishArm ? wo("finishSure") : wo("finish"))}</button>`}</div>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("#workout [data-wo]"); if (!b) return;
+    const a = b.dataset.wo;
+    if (a === "start") startWorkout();
+    else if (a === "pause") { W.paused = !W.paused; W.lastTick = Date.now(); W.last = null; paintWorkout(); }
+    else if (a === "finish") { if (!W.finishArm) { W.finishArm = true; paintWorkout(); setTimeout(() => { W.finishArm = false; paintWorkout(); }, 3000); } else { W.finishArm = false; finishWorkout(); } }
+    else if (a === "close") { W.done = null; closeWorkout(); }
+    else if (a === "save") saveWorkout(b);
+    else if (a === "gpx") downloadGpx();
+    else if (["hr", "csc", "pwr"].includes(a)) connectSensor(a);
+  });
+  $("#woOpen").addEventListener("click", openWorkout);
+  if (/[?&]emu\b/.test(location.search)) window.__wo = () => ({ on: W.on, km: +(W.dist / 1000).toFixed(3), speed: +W.speed.toFixed(1), hr: W.hr, cad: W.cad, pwr: W.pwr, pts: W.pts.length, done: W.done });
 
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
@@ -3961,6 +4145,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
     $("#tabClipsT").textContent = cl("tab");
     $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides"; renderHomeAd();
+    $("#woWrap").hidden = !(state.tab === "rides" && geo && navigator.geolocation && state.mode === "live"); $("#woOpenT").textContent = wo("open"); $("#woOpenS").textContent = wo("openS");
     const roomsT = $("#tabRoomsT"); if (roomsT) roomsT.textContent = rm("tab"); // the Rooms tab is gone while FEATURES.rooms is off
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {

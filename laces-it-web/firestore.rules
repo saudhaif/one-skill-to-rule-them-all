@@ -90,6 +90,11 @@ service cloud.firestore {
     }
 
     // Short videos: anyone signed in posts their own; only the poster changes or deletes it.
+    // Personal workouts (live ride screen): only the rider can read or write them
+    match /workouts/{id} {
+      allow read, update, delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+    }
     match /clips/{id} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
