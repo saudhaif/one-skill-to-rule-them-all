@@ -17,8 +17,10 @@ export default function SignIn() {
   const { t, lang, setLang } = useApp();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+  const googleReady = !!googleWebClientId;
   const [request, , prompt] = Google.useIdTokenAuthRequest({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    webClientId: googleWebClientId ?? 'not-configured.apps.googleusercontent.com',
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
   });
@@ -60,9 +62,9 @@ export default function SignIn() {
         )}
         <Pressable
           accessibilityRole="button"
-          disabled={!request || busy || !firebaseReady}
+          disabled={!request || busy || !firebaseReady || !googleReady}
           onPress={signIn}
-          style={({ pressed }) => [s.btn, (!request || !firebaseReady) && { opacity: 0.5 }, pressed && { transform: [{ scale: 0.98 }] }]}>
+          style={({ pressed }) => [s.btn, (!request || !firebaseReady || !googleReady) && { opacity: 0.5 }, pressed && { transform: [{ scale: 0.98 }] }]}>
           {busy ? <ActivityIndicator color={C.ink} /> : <Text style={s.btnT}>{t('google')}</Text>}
         </Pressable>
         <Pressable accessibilityRole="button" disabled style={[s.btn, s.btnDark, { opacity: 0.55 }]}>

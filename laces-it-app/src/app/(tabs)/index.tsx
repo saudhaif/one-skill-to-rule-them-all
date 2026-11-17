@@ -2,13 +2,12 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconExpand } from '@/components/icons';
 import { RideCard } from '@/components/RideCard';
+import { RideMapPreview } from '@/components/RideMap';
 import { LOCALES } from '@/lib/i18n';
-import { MAP_PROVIDER } from '@/lib/maps';
 import { regionFor, spots, upcoming } from '@/lib/spots';
 import { rideTitle, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
@@ -28,13 +27,7 @@ export default function Rides() {
       <Text style={s.logo}>{t('appName')}</Text>
       {/* Map preview: a still satellite view with a dot per meeting point; tap to open the full map. */}
       <Pressable accessibilityRole="button" accessibilityLabel={t('mapTitle')} onPress={() => router.push('/map')} style={s.mini}>
-        <MapView provider={MAP_PROVIDER} style={StyleSheet.absoluteFill} mapType="satellite" region={region} liteMode scrollEnabled={false} zoomEnabled={false} pitchEnabled={false} rotateEnabled={false} pointerEvents="none" toolbarEnabled={false}>
-          {sp.map((x) => (
-            <Marker key={x.key} coordinate={{ latitude: x.lat, longitude: x.lon }} tracksViewChanges={false}>
-              <View style={[s.dot, { backgroundColor: x.rides.every((r) => r.sport === 'run') ? C.run : C.accent }]} />
-            </Marker>
-          ))}
-        </MapView>
+        <RideMapPreview region={region} spots={sp} />
         <View style={s.miniShade} pointerEvents="none">
           <Text style={s.miniT}>{t('mapTitle')}</Text>
           <Text style={s.miniS}>{sp.length ? t('mapSub', { n: sp.length }) : t('mapSub0')}</Text>
