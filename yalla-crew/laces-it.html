@@ -3480,13 +3480,13 @@ Their upcoming rides: ${next}.`;
   }
   function startWorkout() {
     Object.assign(W, { on: true, paused: false, t0: Date.now(), moving: 0, lastTick: Date.now(), dist: 0, max: 0, climb: 0, pts: [], last: null, altRef: null, speed: 0, hrs: [], pwrs: [], done: null });
-    clearInterval(W.tick); W.tick = setInterval(() => { const n = Date.now(); if (!W.paused) W.moving += (n - W.lastTick) / 1000; W.lastTick = n; if (W.hr) W.hrs.push(W.hr); if (W.pwr != null) W.pwrs.push(W.pwr); if (W.gps && n - W.gps.at > 6000) W.speed = W.speed * .7; paintWorkout(); }, 1000);
+    clearInterval(W.tick); W.tick = setInterval(() => { const n = Date.now(); if (!W.paused) W.moving += (n - W.lastTick) / 1000; W.lastTick = n; if (!W.paused) { if (W.hr) W.hrs.push(W.hr); if (W.pwr != null) W.pwrs.push(W.pwr); } if (W.gps && n - W.gps.at > 6000) W.speed = W.speed * .7; paintWorkout(); }, 1000);
     navigator.wakeLock?.request("screen").then((l) => { W.lock = l; }).catch(() => {});
     paintWorkout();
   }
   function finishWorkout() {
     clearInterval(W.tick); W.on = false; W.lock?.release?.().catch(() => {}); W.lock = null;
-    const avg = W.moving > 0 ? Math.min(W.dist / W.moving * 3.6, W.max || Infinity) : 0;
+    const avg = W.moving > 0 ? W.dist / W.moving * 3.6 : 0;
     const mean = (a) => (a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null);
     W.done = { sport: W.sport, startAt: new Date(W.t0).toISOString(), seconds: Math.round(W.moving), km: +(W.dist / 1000).toFixed(2), avgKmh: +avg.toFixed(1), maxKmh: +W.max.toFixed(1), climbM: Math.round(W.climb), hrAvg: mean(W.hrs), hrMax: W.hrs.length ? Math.max(...W.hrs) : null, powerAvg: mean(W.pwrs), points: W.pts.length };
     paintWorkout();
@@ -3530,7 +3530,7 @@ Their upcoming rides: ${next}.`;
       if (f & 2) crank = [v.getUint16(o, true), v.getUint16(o + 2, true)];
       const prev = W.csc || {};
       if (crank && prev.crank) { const dr = (crank[0] - prev.crank[0] + 65536) % 65536, dt = ((crank[1] - prev.crank[1] + 65536) % 65536) / 1024; if (dt > 0) W.cad = Math.round(dr / dt * 60); else if (dr === 0) W.cad = 0; }
-      if (wheel && prev.wheel && (!W.gps || Date.now() - W.gps.at > 5000)) { const dr = wheel[0] - prev.wheel[0], dt = ((wheel[1] - prev.wheel[1] + 65536) % 65536) / 1024; if (dt > 0 && dr >= 0) { W.speed = dr * 2.105 / dt * 3.6; if (W.on && !W.paused) W.dist += dr * 2.105; } }
+      if (wheel && prev.wheel && (!W.gps || Date.now() - W.gps.at > 5000)) { const dr = (wheel[0] - prev.wheel[0] + 4294967296) % 4294967296, dt = ((wheel[1] - prev.wheel[1] + 65536) % 65536) / 1024; if (dt > 0) { W.speed = dr * 2.105 / dt * 3.6; if (W.speed > W.max && W.speed < 120) W.max = W.speed; if (W.on && !W.paused) W.dist += dr * 2.105; } }
       W.csc = { crank: crank || prev.crank, wheel: wheel || prev.wheel };
     }
     paintWorkout();
