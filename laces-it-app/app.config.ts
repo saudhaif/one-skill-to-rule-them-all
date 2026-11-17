@@ -6,6 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...(config as ExpoConfig),
   plugins: [
     ...(config.plugins ?? []),
+    'expo-web-browser',
     ['react-native-maps', {
       androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_KEY,
       iosGoogleMapsApiKey: process.env.GOOGLE_MAPS_IOS_KEY,

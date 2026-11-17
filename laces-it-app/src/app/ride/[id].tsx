@@ -2,11 +2,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
 
 import { IconClose } from '@/components/icons';
+import { RideMapDetail } from '@/components/RideMap';
 import { LOCALES } from '@/lib/i18n';
-import { MAP_PROVIDER } from '@/lib/maps';
 import { meetingPoint, regionFor } from '@/lib/spots';
 import { meId, rideTitle, riders, setJoined, useApp } from '@/lib/store';
 import { C, fmt } from '@/lib/theme';
@@ -21,7 +20,6 @@ export default function RideScreen() {
   if (!r) return <View style={s.wrap} />;
   const f = fmt(LOCALES[lang]), start = new Date(r.startAt), [lat, lon] = meetingPoint(r);
   const ids = riders(joins, r.id), joined = !!me && ids.includes(me);
-  const route = (r.route ?? []).map(([a, b]) => ({ latitude: a, longitude: b }));
   const toggle = async () => {
     setBusy(true); setErr('');
     try { await setJoined(r.id, !joined); } catch { setErr(t('errSave')); } finally { setBusy(false); }
@@ -30,10 +28,11 @@ export default function RideScreen() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={s.mapBox}>
-        <MapView provider={MAP_PROVIDER} style={StyleSheet.absoluteFill} mapType="hybrid" initialRegion={regionFor(r.route?.length ? r.route : [[lat, lon]])} toolbarEnabled={false} rotateEnabled={false}>
-          {route.length > 1 && <Polyline coordinates={route} strokeColor={C.accent} strokeWidth={5} />}
-          <Marker coordinate={{ latitude: lat, longitude: lon }} pinColor={C.accent} />
-        </MapView>
+        <RideMapDetail
+          region={regionFor(r.route?.length ? r.route : [[lat, lon]])}
+          route={(r.route ?? []).map(([a, b]) => ({ latitude: a, longitude: b }))}
+          coordinate={{ latitude: lat, longitude: lon }}
+        />
         <Pressable accessibilityRole="button" accessibilityLabel={t('close')} onPress={() => router.back()} style={s.close}><IconClose size={22} /></Pressable>
       </View>
       <View style={s.body}>
