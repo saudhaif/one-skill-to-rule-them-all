@@ -762,10 +762,12 @@ button.pp { cursor: pointer; }
 .item.flash { animation: yc-flash 1.6s ease-out; }
 @keyframes yc-flash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
 /* Workout: live ride screen */
-.wobtn { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; border-radius: 18px; padding: 14px; background: #0f1a14; color: #fff; text-align: start; font: inherit; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
-.wobtn .wop { width: 46px; height: 46px; border-radius: 50%; background: #12b886; display: grid; place-items: center; font-size: 20px; flex: none; }
-.wobtn b { display: block; font: 800 16px var(--font); }
-.wobtn small { font-size: 12px; opacity: .8; }
+.tabbar .wotab { color: var(--text, inherit); font-weight: 800; }
+.tabbar .wotab i { position: relative; display: grid; place-items: center; width: 52px; height: 52px; margin: -26px 0 -4px; border-radius: 50%; background: #12b886; box-shadow: 0 6px 18px rgba(18, 184, 134, .45), 0 0 0 4px var(--card); }
+.tabbar .wotab i::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid #12b886; animation: wo-ring 2s ease-out infinite; }
+.tabbar .wotab svg { width: 24px; height: 24px; fill: #fff; stroke: none; }
+@keyframes wo-ring { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tabbar .wotab i::before { animation: none; } }
 .workout { position: fixed; inset: 0; z-index: 9; background: #07110c; color: #fff; overflow-y: auto; }
 .workout .woin { max-width: 520px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
 .workout .wotop { display: flex; justify-content: space-between; align-items: center; font: 700 12px var(--font); }
@@ -891,7 +893,6 @@ button.pp { cursor: pointer; }
   <div class="mmwrap" id="mmWrap">
     <button type="button" class="minimap" id="mapOpen"><span class="mm-tiles" id="mmTiles" aria-hidden="true"></span><span class="mm-pins" id="mmPins" aria-hidden="true"></span><span class="mm-lab"><b id="mapOpenT"></b><small id="mapOpenS"></small></span><span class="mm-exp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></span></button>
   </div>
-  <div class="mmwrap" id="woWrap" hidden><button type="button" class="wobtn" id="woOpen"><span class="wop">▶</span><span><b id="woOpenT"></b><small id="woOpenS"></small></span></button></div>
   <section class="hero" id="hero"></section>
 
   <main class="pad">
@@ -979,6 +980,10 @@ button.pp { cursor: pointer; }
       <button type="button" data-tab="clips">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.5l9 5.5-9 5.5z"/><path d="M2.5 9h3M2 12h4M2.5 15h3"/></svg>
         <span id="tabClipsT"></span>
+      </button>
+      <button type="button" class="wotab" id="woOpen">
+        <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5l11 6.5-11 6.5z"/></svg></i>
+        <span id="woOpenT"></span>
       </button>
       <button type="button" data-tab="market">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5V4h8.5L21 13l-8 8z"/><circle cx="8" cy="8.5" r="1.4"/></svg>
@@ -3444,12 +3449,12 @@ Their upcoming rides: ${next}.`;
   // Polar, Wahoo, chest straps) connect through the standard Heart Rate service. Speed/cadence sensors and power
   // meters use the standard Cycling Speed and Cadence and Cycling Power services. Needs GPS (standalone app).
   const WO = {
-    ar: { open: "ابدأ تمرين", openS: "السرعة والمسافة مباشر، والقلب من ساعتك", start: "ابدأ", pause: "إيقاف مؤقت", resume: "كمّل", finish: "إنهاء", finishSure: "اضغط مرة ثانية للإنهاء",
+    ar: { open: "ابدأ تمرين", tab: "تمرين", openS: "السرعة والمسافة مباشر، والقلب من ساعتك", start: "ابدأ", pause: "إيقاف مؤقت", resume: "كمّل", finish: "إنهاء", finishSure: "اضغط مرة ثانية للإنهاء",
       speed: "السرعة", kmh: "كم/س", time: "الوقت", dist: "المسافة", km: "كم", avg: "المتوسط", max: "الأعلى", hr: "القلب", bpm: "نبضة", cad: "الكادنس", rpm: "دورة", power: "الطاقة", w: "واط", climb: "الصعود", m: "م",
       hrBtn: "اربط الساعة / حساس القلب", cscBtn: "حساس السرعة والكادنس", pwrBtn: "عداد الطاقة", connected: "متصل: {n}", lost: "انقطع: {n}",
       noBt: "الربط بالبلوتوث يشتغل في Chrome على أندرويد أو الكمبيوتر. على iPhone يطلع مع تطبيق الهاتف.", gpsWait: "ننتظر إشارة GPS…", gpsDenied: "ما سمحت للتطبيق يشوف موقعك.",
       watchHelp: "في ساعتك فعّل «بث نبض القلب» (Broadcast Heart Rate)، وبعدين اضغط زر الربط.", summary: "ملخص التمرين", save: "احفظ", saved: "انحفظ ✓", gpx: "نزّل GPX", close: "إغلاق", zone: "منطقة {n}", sport: "الرياضة" },
-    en: { open: "Start workout", openS: "Live speed and distance, heart rate from your watch", start: "Start", pause: "Pause", resume: "Resume", finish: "Finish", finishSure: "Tap again to finish",
+    en: { open: "Start workout", tab: "Workout", openS: "Live speed and distance, heart rate from your watch", start: "Start", pause: "Pause", resume: "Resume", finish: "Finish", finishSure: "Tap again to finish",
       speed: "Speed", kmh: "km/h", time: "Time", dist: "Distance", km: "km", avg: "Average", max: "Max", hr: "Heart", bpm: "bpm", cad: "Cadence", rpm: "rpm", power: "Power", w: "W", climb: "Climb", m: "m",
       hrBtn: "Connect watch / heart sensor", cscBtn: "Speed & cadence sensor", pwrBtn: "Power meter", connected: "Connected: {n}", lost: "Disconnected: {n}",
       noBt: "Bluetooth sensors work in Chrome on Android or a computer. On iPhone they come with the phone app.", gpsWait: "Waiting for GPS…", gpsDenied: "Location access is off.",
@@ -3463,6 +3468,7 @@ Their upcoming rides: ${next}.`;
   const hrZone = (bpm) => { const mx = 190; const p = bpm / mx; return p < .6 ? 1 : p < .7 ? 2 : p < .8 ? 3 : p < .9 ? 4 : 5; };
   function openWorkout() {
     $("#workout").hidden = false; document.body.style.overflow = "hidden"; W.done = null; paintWorkout();
+    if (!navigator.geolocation) { W.gpsErr = wo("gpsDenied"); paintWorkout(); }
     if (!W.watch && navigator.geolocation) {
       W.watch = navigator.geolocation.watchPosition(onGps, (e) => { W.gpsErr = e.code === 1 ? wo("gpsDenied") : ""; paintWorkout(); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
     }
@@ -4145,7 +4151,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
     $("#tabClipsT").textContent = cl("tab");
     $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides"; renderHomeAd();
-    $("#woWrap").hidden = !(state.tab === "rides" && geo && navigator.geolocation && state.mode === "live"); $("#woOpenT").textContent = wo("open"); $("#woOpenS").textContent = wo("openS");
+    $("#woOpenT").textContent = wo("tab"); $("#woOpen").setAttribute("aria-label", wo("open"));
     const roomsT = $("#tabRoomsT"); if (roomsT) roomsT.textContent = rm("tab"); // the Rooms tab is gone while FEATURES.rooms is off
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
@@ -4213,7 +4219,8 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   });
 
   // Sections switched off: their tab leaves the bar, and the bar closes up.
-  if (!FEATURES.rooms) { document.querySelector('[data-tab="rooms"]')?.remove(); document.querySelector(".tabbar .in").style.gridTemplateColumns = "repeat(5, 1fr)"; }
+  if (!FEATURES.rooms) { document.querySelector('[data-tab="rooms"]')?.remove(); }
+  document.querySelector(".tabbar .in").style.gridTemplateColumns = `repeat(${document.querySelectorAll(".tabbar .in > button").length}, 1fr)`;
 
   // ---------- Events ----------
   for (const b of document.querySelectorAll("[data-tab]")) b.addEventListener("click", () => {
