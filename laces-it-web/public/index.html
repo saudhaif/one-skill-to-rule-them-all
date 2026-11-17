@@ -704,6 +704,37 @@ button.pp { cursor: pointer; }
 .smap .mride .btn { grid-row: 1 / span 2; grid-column: 2; padding: 8px 14px; }
 .smap .mgo { display: flex; gap: 8px; }
 .smap .mgo a, .smap .mgo button { flex: 1; text-align: center; text-decoration: none; }
+/* Earning: Pro, featured listings, sponsors, revenue panel */
+.probadge { display: inline-block; vertical-align: middle; font: 900 11px/1 var(--font); letter-spacing: .06em; color: #1a0b06; background: linear-gradient(135deg, #ffd24a, #ff9f43); padding: 4px 7px; border-radius: 6px; }
+.probadge.big { font-size: 15px; padding: 7px 11px; border-radius: 9px; }
+.procard, .admincard { display: grid; gap: 12px; }
+.procard .prohead { display: flex; align-items: center; gap: 12px; }
+.procard .prohead b { display: block; font: 800 18px var(--font); }
+.procard .prohead span:not(.probadge) { font-size: 13px; color: var(--muted); }
+.procard .perks { margin: 0; padding-inline-start: 20px; display: grid; gap: 4px; font-size: 14px; }
+.procard .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.procard .plan { display: grid; gap: 6px; padding: 12px; border-radius: 16px; border: 2px solid var(--line); }
+.procard .plan.best { border-color: var(--accent); }
+.procard .plan span { font-size: 12px; color: var(--muted); font-weight: 700; }
+.procard .plan b { font: 800 17px var(--font); }
+.item { position: relative; }
+.item.featured { box-shadow: 0 0 0 2px #ffd24a, 0 6px 18px rgba(255, 159, 67, .25); }
+.featbadge { position: absolute; top: 10px; inset-inline-start: 10px; z-index: 2; font: 800 12px var(--font); background: #ffd24a; color: #1a0b06; padding: 4px 9px; border-radius: 999px; }
+.featbuy { display: block; margin: 8px 12px 0; font: 700 12px var(--font); color: var(--accent-text); text-decoration: none; }
+.sponsor { display: grid; gap: 4px; text-decoration: none; color: var(--ink); border: 1px dashed var(--line); grid-column: 1 / -1; }
+.sponsor .spl { font: 800 11px var(--font); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.sponsor b { font: 800 16px var(--font); }
+.sponsor .spt { font-size: 14px; }
+.sponsor .spv { font: 700 13px var(--font); color: var(--accent-text); }
+.admincard h3 { margin: 6px 0 0; font: 800 15px var(--font); }
+.admincard .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.admincard .kpis div { background: var(--bg); border-radius: 14px; padding: 10px; display: grid; gap: 2px; }
+.admincard .kpis .wide { grid-column: 1 / -1; background: #10202e; color: #fff; }
+.admincard .kpis b { font: 800 20px var(--font); }
+.admincard .kpis span { font-size: 11px; color: var(--muted); }
+.admincard .kpis .wide span { color: rgba(255, 255, 255, .7); }
+.admincard .adlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.admincard .adlist li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; background: var(--bg); padding: 8px 10px; border-radius: 10px; }
 /* Clips: full-screen vertical video feed */
 .clips { position: fixed; inset: 0; z-index: 6; background: #000; color: #fff; }
 .clips .feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
@@ -839,6 +870,8 @@ button.pp { cursor: pointer; }
 
     <section class="screen" id="tab-me" hidden>
       <div class="card me-card" id="meCard"></div>
+      <div class="card procard" id="proCard" hidden></div>
+      <div class="card admincard" id="adminCard" hidden></div>
       <div class="card season" id="season" hidden></div>
     </section>
 
@@ -1376,12 +1409,12 @@ button.pp { cursor: pointer; }
   const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
 
   const state = {
-    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], clips: [], roomCat: "all", roomLang: "all", me: null, canWrite: true,
+    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], clips: [], ents: {}, featured: {}, sponsors: [], admin: false, roomCat: "all", roomLang: "all", me: null, canWrite: true,
     sport: "all", emirate: "all", day: "all", mine: false, ai: {}, open: {}, gpx: null,
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" && FEATURES.rooms ? "rooms" : /^#clips?\b/.test(location.hash) ? "clips" : "rides",
     m: { sport: "all", cat: "all", q: "" }
   };
-  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, gmaps = null, writeChain = Promise.resolve();
+  let db = null, user = null, sample = null, assets = null, downloads = null, geo = null, weather = null, voice = null, gmaps = null, pay = null, writeChain = Promise.resolve();
   const sportOf = (r) => r.sport === "run" ? "run" : "bike";
 
   function haversine(a, b) {
@@ -2102,7 +2135,7 @@ Their upcoming rides: ${next}.`;
     const p = prof(state.me), ps = user ? await user.profiles([state.me]) : {};
     const base = ps[state.me] || {};
     $("#meAvatar").src = p.avatar ? photoSrc(p.avatar) : (base.avatarUrl || PH);
-    $("#meName").textContent = p.nick || base.name || t("you");
+    $("#meName").innerHTML = esc(p.nick || base.name || t("you")) + proBadge(state.me);
     $("#meSub").textContent = [p.home ? t("em_" + p.home) : "", (p.sports || []).map((k) => t(k)).join(" · ")].filter(Boolean).join(" · ");
   }
   async function saveProfile(extra) {
@@ -3101,14 +3134,149 @@ Their upcoming rides: ${next}.`;
   view.addEventListener("dblclick", (e) => { if (map.g || e.target.closest("[data-spot]")) return; const [x, y] = vpos(e.clientX, e.clientY); zoomAnim(1, x, y); });
   addEventListener("resize", () => { drawMap(); if (state.tab === "rides") renderMiniMap(); });
 
+  // ---------- Earning: Laces It Pro, featured listings, sponsors, and the owner's revenue panel ----------
+  // Who is Pro, which listings are featured and which sponsors run live in entitlements/, featured/ and
+  // sponsors/. Only an admin can write them (database rules), so nobody can grant themselves anything:
+  // a payment link (firebase-config.js → payments) takes the money, and an admin turns it on here.
+  const PRICES = { proMonthly: 14.99, proYearly: 119, featured: 10, featuredDays: 7 };
+  const FREE = { listings: 3, clipSeconds: 60 }, PRO = { clipSeconds: 180 };
+  const MO = {
+    ar: { pro: "ليز ات Pro", proOn: "أنت عضو Pro ✓", proUntil: "مفعّل لين {d}", perks: ["شارة PRO بجانب اسمك", "إعلانات بلا حدود في السوق (المجاني 3)", "لقطات لين 3 دقايق (المجاني دقيقة)", "تدعم الكرو وتطوير التطبيق"],
+      monthly: "شهري", yearly: "سنوي", perMonth: "{p} د.إ / شهر", perYear: "{p} د.إ / سنة", save: "وفّر 34%", subscribe: "اشترك", soon: "الدفع داخل التطبيق قريباً. تواصل مع إدارة الكرو للاشتراك.", contact: "تواصل للاشتراك",
+      featured: "مميّز", featureMine: "ميّز إعلانك: {p} د.إ لـ {n} أيام", featuredUntil: "مميّز لين {d}", sponsored: "مُموَّل", visit: "زيارة",
+      limitList: "وصلت حدّ {n} إعلانات نشطة. علّم واحد «انباع» أو اشترك في Pro لإعلانات بلا حدود.", clipLimitPro: "اشترك في Pro لنشر لقطات لين 3 دقايق.",
+      admin: "لوحة الأرباح", adminSub: "تظهر لك بس كمسؤول.", stats: "الملخص", proMembers: "أعضاء Pro", monthlyN: "شهري", yearlyN: "سنوي", featuredN: "إعلانات مميّزة", sponsorsN: "رعاة نشطين", mrr: "الدخل الشهري المتوقع", aed: "د.إ",
+      grant: "تفعيل Pro لعضو", member: "العضو", plan: "الباقة", activate: "فعّل", revoke: "إلغاء", proList: "أعضاء Pro الحاليين", none: "ما فيه للحين.",
+      featureT: "تمييز إعلان", listing: "الإعلان", days: "الأيام", featureBtn: "ميّز",
+      sponsorT: "إضافة راعي", sName: "اسم الراعي", sText: "نص الإعلان", sLink: "الرابط", sWhere: "المكان", sPrice: "المبلغ المدفوع (د.إ)", whereRides: "الطلعات", whereMarket: "السوق", addSponsor: "أضف الراعي", sponsorList: "الرعاة",
+      done: "تم ✓", errAdmin: "ما انحفظ. تأكد إنك مسؤول وإن الاتصال شغّال.", payNote: "الدفع يصير عن طريق رابط الدفع. بعد ما يوصل المبلغ فعّل الباقة من هني." },
+    en: { pro: "Laces It Pro", proOn: "You're Pro ✓", proUntil: "Active until {d}", perks: ["PRO badge next to your name", "Unlimited market listings (free: 3)", "Clips up to 3 minutes (free: 1)", "Supports the crew and the app"],
+      monthly: "Monthly", yearly: "Yearly", perMonth: "AED {p} / month", perYear: "AED {p} / year", save: "Save 34%", subscribe: "Subscribe", soon: "In-app payment is coming soon. Contact the crew admins to subscribe.", contact: "Contact to subscribe",
+      featured: "Featured", featureMine: "Feature your listing: AED {p} for {n} days", featuredUntil: "Featured until {d}", sponsored: "Sponsored", visit: "Visit",
+      limitList: "You've reached {n} active listings. Mark one sold, or go Pro for unlimited listings.", clipLimitPro: "Go Pro to post clips up to 3 minutes.",
+      admin: "Revenue panel", adminSub: "Only you see this, as an admin.", stats: "Summary", proMembers: "Pro members", monthlyN: "monthly", yearlyN: "yearly", featuredN: "Featured listings", sponsorsN: "Active sponsors", mrr: "Expected monthly revenue", aed: "AED",
+      grant: "Give a member Pro", member: "Member", plan: "Plan", activate: "Activate", revoke: "Remove", proList: "Current Pro members", none: "None yet.",
+      featureT: "Feature a listing", listing: "Listing", days: "Days", featureBtn: "Feature",
+      sponsorT: "Add a sponsor", sName: "Sponsor name", sText: "Ad text", sLink: "Link", sWhere: "Where", sPrice: "Amount paid (AED)", whereRides: "Rides", whereMarket: "Market", addSponsor: "Add sponsor", sponsorList: "Sponsors",
+      done: "Done ✓", errAdmin: "Not saved. Check you're an admin and online.", payNote: "Payment goes through the payment link. Once the money arrives, switch the plan on here." }
+  };
+  const mo = (k, v) => { let x = (MO[lang] || MO.en)[k] ?? MO.en[k]; if (v && typeof x === "string") for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  const live_ = (until) => !until || Date.parse(until) > Date.now();
+  const isPro = (uid) => !!uid && !!state.ents[uid]?.pro && live_(state.ents[uid].until);
+  const isFeatured = (id) => !!state.featured[id] && live_(state.featured[id].until);
+  const activeSponsors = (where) => state.sponsors.filter((s) => s.active !== false && live_(s.until) && (!where || s.where === where));
+  const clipMax = () => (isPro(state.me) ? PRO.clipSeconds : FREE.clipSeconds);
+  const proBadge = (uid) => (isPro(uid) ? ` <span class="probadge">PRO</span>` : "");
+  const dayStr = (iso) => new Intl.DateTimeFormat(I18N[lang].locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
+  const addDays = (n) => new Date(Date.now() + n * 864e5).toISOString();
+  function sponsorCard(where) {
+    const list = activeSponsors(where); if (!list.length) return "";
+    const s = list[Math.floor(Date.now() / 36e5) % list.length]; // a different sponsor each hour
+    const href = /^https?:\/\//.test(s.url || "") ? s.url : "";
+    return `<a class="card sponsor"${href ? ` href="${esc(href)}" target="_blank" rel="noopener sponsored"` : ""}><span class="spl">${esc(mo("sponsored"))}</span><b>${esc(s.name || "")}</b><span class="spt">${esc(s.text || "")}</span>${href ? `<span class="spv">${esc(mo("visit"))} ↗</span>` : ""}</a>`;
+  }
+  // Payment links come from the standalone app's firebase-config.js (payments); on the Claude page there are none.
+  function payHref(kind) {
+    const u = pay?.[kind]; if (!u) return "";
+    return u + (u.includes("?") ? "&" : "?") + "client_reference_id=" + encodeURIComponent(state.me || "");
+  }
+  function renderPro() {
+    const el = $("#proCard"); if (!el) return;
+    if (state.mode !== "live" || !state.me) { el.hidden = true; return; }
+    el.hidden = false;
+    if (isPro(state.me)) {
+      const e = state.ents[state.me];
+      el.innerHTML = `<div class="prohead"><span class="probadge big">PRO</span><div><b>${esc(mo("proOn"))}</b>${e.until ? `<span>${esc(mo("proUntil", { d: dayStr(e.until) }))}</span>` : ""}</div></div>
+        <ul class="perks">${mo("perks").map((p) => `<li>${esc(p)}</li>`).join("")}</ul>`;
+      return;
+    }
+    const btn = (kind, label) => { const h = payHref(kind); return h ? `<a class="btn block" href="${esc(h)}" target="_blank" rel="noopener">${esc(label)}</a>` : ""; };
+    const wa = pay?.whatsapp ? `https://wa.me/${String(pay.whatsapp).replace(/\D/g, "")}?text=${encodeURIComponent(mo("pro") + " · " + (prof(state.me).nick || ""))}` : "";
+    el.innerHTML = `<div class="prohead"><span class="probadge big">PRO</span><div><b>${esc(mo("pro"))}</b></div></div>
+      <ul class="perks">${mo("perks").map((p) => `<li>${esc(p)}</li>`).join("")}</ul>
+      <div class="plans">
+        <div class="plan"><span>${esc(mo("monthly"))}</span><b>${esc(mo("perMonth", { p: PRICES.proMonthly }))}</b>${btn("proMonthly", mo("subscribe"))}</div>
+        <div class="plan best"><span>${esc(mo("yearly"))} · ${esc(mo("save"))}</span><b>${esc(mo("perYear", { p: PRICES.proYearly }))}</b>${btn("proYearly", mo("subscribe"))}</div>
+      </div>
+      ${pay?.proMonthly || pay?.proYearly ? "" : `<p class="sub">${esc(mo("soon"))}</p>${wa ? `<a class="btn soft block" href="${esc(wa)}" target="_blank" rel="noopener">${esc(mo("contact"))}</a>` : ""}`}`;
+  }
+  function renderAdmin() {
+    const el = $("#adminCard"); if (!el) return;
+    if (!state.admin || state.mode !== "live") { el.hidden = true; return; }
+    el.hidden = false;
+    const ids = [...new Set([...Object.keys(state.profiles), ...state.joins.map((j) => j.id)])];
+    const nameOf = (id) => prof(id).nick || (id === state.me ? t("you") : id.slice(0, 6));
+    const pros = Object.entries(state.ents).filter(([id]) => isPro(id));
+    const monthly = pros.filter(([, e]) => e.plan !== "yearly").length, yearly = pros.length - monthly;
+    const feats = Object.entries(state.featured).filter(([id]) => isFeatured(id));
+    const spons = activeSponsors();
+    const sponsorMonthly = spons.reduce((a, s) => a + (+s.price || 0) / Math.max(1, (+s.days || 30) / 30), 0);
+    const mrr = monthly * PRICES.proMonthly + yearly * PRICES.proYearly / 12 + feats.length * PRICES.featured * (30 / PRICES.featuredDays) + sponsorMonthly;
+    const open = state.listings.filter((x) => !x.sold);
+    el.innerHTML = `<h2 class="h2">${esc(mo("admin"))}</h2><p class="sub">${esc(mo("adminSub"))}</p>
+      <div class="kpis">
+        <div><b>${pros.length}</b><span>${esc(mo("proMembers"))} · ${monthly} ${esc(mo("monthlyN"))} · ${yearly} ${esc(mo("yearlyN"))}</span></div>
+        <div><b>${feats.length}</b><span>${esc(mo("featuredN"))}</span></div>
+        <div><b>${spons.length}</b><span>${esc(mo("sponsorsN"))}</span></div>
+        <div class="wide"><b>${Math.round(mrr).toLocaleString(I18N[lang].locale)} ${esc(mo("aed"))}</b><span>${esc(mo("mrr"))}</span></div>
+      </div>
+      <p class="sub">${esc(mo("payNote"))}</p>
+      <h3>${esc(mo("grant"))}</h3>
+      <div class="two"><label><span>${esc(mo("member"))}</span><select id="adMember">${ids.map((id) => `<option value="${esc(id)}">${esc(nameOf(id))}</option>`).join("")}</select></label>
+        <label><span>${esc(mo("plan"))}</span><select id="adPlan"><option value="monthly">${esc(mo("monthly"))}</option><option value="yearly">${esc(mo("yearly"))}</option></select></label></div>
+      <button type="button" class="btn block" data-ad="grant">${esc(mo("activate"))}</button>
+      <h3>${esc(mo("proList"))}</h3>
+      <ul class="adlist">${pros.map(([id, e]) => `<li><span>${esc(nameOf(id))} · ${esc(e.plan === "yearly" ? mo("yearly") : mo("monthly"))}${e.until ? " · " + esc(dayStr(e.until)) : ""}</span><button type="button" class="linkbtn danger" data-ad="revoke" data-id="${esc(id)}">${esc(mo("revoke"))}</button></li>`).join("") || `<li class="sub">${esc(mo("none"))}</li>`}</ul>
+      <h3>${esc(mo("featureT"))}</h3>
+      <div class="two"><label><span>${esc(mo("listing"))}</span><select id="adListing">${open.map((x) => `<option value="${esc(x.id)}">${esc(x.title)}</option>`).join("")}</select></label>
+        <label><span>${esc(mo("days"))}</span><input id="adDays" type="number" min="1" max="60" value="${PRICES.featuredDays}"></label></div>
+      <button type="button" class="btn block" data-ad="feature"${open.length ? "" : " disabled"}>${esc(mo("featureBtn"))}</button>
+      <ul class="adlist">${feats.map(([id, f]) => `<li><span>⭐ ${esc(state.listings.find((x) => x.id === id)?.title || id)} · ${esc(dayStr(f.until))}</span><button type="button" class="linkbtn danger" data-ad="unfeature" data-id="${esc(id)}">${esc(mo("revoke"))}</button></li>`).join("")}</ul>
+      <h3>${esc(mo("sponsorT"))}</h3>
+      <div class="fields">
+        <label><span>${esc(mo("sName"))}</span><input id="adSName" maxlength="40"></label>
+        <label><span>${esc(mo("sText"))}</span><input id="adSText" maxlength="90"></label>
+        <label><span>${esc(mo("sLink"))}</span><input id="adSLink" type="url" placeholder="https://"></label>
+        <div class="two"><label><span>${esc(mo("sWhere"))}</span><select id="adSWhere"><option value="rides">${esc(mo("whereRides"))}</option><option value="market">${esc(mo("whereMarket"))}</option></select></label>
+          <label><span>${esc(mo("days"))}</span><input id="adSDays" type="number" min="1" max="365" value="30"></label></div>
+        <label><span>${esc(mo("sPrice"))}</span><input id="adSPrice" type="number" min="0" step="1" value="299"></label>
+      </div>
+      <button type="button" class="btn block" data-ad="sponsor">${esc(mo("addSponsor"))}</button>
+      <h3>${esc(mo("sponsorList"))}</h3>
+      <ul class="adlist">${state.sponsors.map((s) => `<li><span>${esc(s.name)} · ${esc(s.where === "market" ? mo("whereMarket") : mo("whereRides"))} · ${esc(dayStr(s.until))}${live_(s.until) ? "" : " ✕"}</span><button type="button" class="linkbtn danger" data-ad="unsponsor" data-id="${esc(s.id)}">${esc(mo("revoke"))}</button></li>`).join("") || `<li class="sub">${esc(mo("none"))}</li>`}</ul>
+      <p class="err" id="adErr" role="alert">${esc(adminMsg)}</p>`;
+  }
+  // The panel redraws when the data changes, so the last result is kept here and shown for a few seconds.
+  let adminMsg = "", adminMsgT = 0;
+  function sayAdmin(msg) { adminMsg = msg; const el = $("#adErr"); if (el) el.textContent = msg; clearTimeout(adminMsgT); adminMsgT = setTimeout(() => { adminMsg = ""; const e = $("#adErr"); if (e) e.textContent = ""; }, 5000); }
+  async function adminAct(b) {
+    const act = b.dataset.ad, now = new Date().toISOString();
+    b.disabled = true; sayAdmin("");
+    try {
+      if (act === "grant") { const plan = $("#adPlan").value; await db.doc("entitlements/" + $("#adMember").value).set({ pro: true, plan, until: addDays(plan === "yearly" ? 365 : 31), at: now, by: state.me }); }
+      else if (act === "revoke") await db.doc("entitlements/" + b.dataset.id).delete();
+      else if (act === "feature") await db.doc("featured/" + $("#adListing").value).set({ until: addDays(Math.max(1, Math.min(60, +$("#adDays").value || PRICES.featuredDays))), at: now, by: state.me });
+      else if (act === "unfeature") await db.doc("featured/" + b.dataset.id).delete();
+      else if (act === "sponsor") {
+        const name = $("#adSName").value.trim(), text = $("#adSText").value.trim(), url = $("#adSLink").value.trim(), days = Math.max(1, +$("#adSDays").value || 30);
+        if (!name || !text) { sayAdmin(mo("sName") + " / " + mo("sText")); b.disabled = false; return; }
+        await db.collection("sponsors").add({ name, text, url: /^https?:\/\//.test(url) ? url : "", where: $("#adSWhere").value, days, until: addDays(days), price: +$("#adSPrice").value || 0, active: true, at: now, by: state.me });
+      }
+      else if (act === "unsponsor") await db.doc("sponsors/" + b.dataset.id).delete();
+      sayAdmin(mo("done"));
+    } catch { sayAdmin(mo("errAdmin")); }
+    finally { b.disabled = false; }
+  }
+  document.addEventListener("click", (e) => { const b = e.target.closest("#adminCard [data-ad]"); if (b) adminAct(b); });
+
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
-    ar: { tab: "لقطات", fy: "لك", fol: "تتابعهم", add: "لقطة جديدة", pick: "اختر فيديو", pickS: "لين 60 ثانية و 20 ميجا", cap: "الوصف", capPh: "وش صار في الطلعة؟ #فجر #القدرة", sport: "الرياضة", post: "انشر اللقطة", posting: "يرفع الفيديو…",
-      errFile: "اختر فيديو أول.", errLong: "الفيديو أطول من 60 ثانية. قصّه وجرّب مرة ثانية.", errBig: "الفيديو أكبر من 20 ميجا.", errType: "هذا الملف مو فيديو.", errRead: "ما قدرنا نقرأ الفيديو. جرّب ملف ثاني (MP4).", noUpload: "رفع الفيديو ما يشتغل هني. سجّل دخولك أو افتح التطبيق على الكمبيوتر.",
+    ar: { tab: "لقطات", fy: "لك", fol: "تتابعهم", add: "لقطة جديدة", pick: "اختر فيديو", pickS: "لين {n} ثانية و 20 ميجا", cap: "الوصف", capPh: "وش صار في الطلعة؟ #فجر #القدرة", sport: "الرياضة", post: "انشر اللقطة", posting: "يرفع الفيديو…",
+      errFile: "اختر فيديو أول.", errLong: "الفيديو أطول من {n} ثانية. قصّه وجرّب مرة ثانية.", errBig: "الفيديو أكبر من 20 ميجا.", errType: "هذا الملف مو فيديو.", errRead: "ما قدرنا نقرأ الفيديو. جرّب ملف ثاني (MP4).", noUpload: "رفع الفيديو ما يشتغل هني. سجّل دخولك أو افتح التطبيق على الكمبيوتر.",
       empty: "<strong>ما فيه لقطات للحين.</strong>اضغط + وانشر أول لقطة من طلعتك أو جريك.", emptyF: "<strong>ما تتابع أحد للحين.</strong>اضغط + على صورة أي عضو في «لك» عشان تتابعه.", exNote: "<strong>اللقطات تشتغل مع قاعدة البيانات.</strong>أول ما ينربط التطبيق تقدر تنشر فيديوهات طلعاتك هني.",
       like: "إعجاب", com: "تعليقات", save: "حفظ", share: "شارك", del: "احذف", follow: "تابع", unfollow: "إلغاء المتابعة", comments: "التعليقات", comPh: "أضف تعليق…", sndOn: "شغّل الصوت", sndOff: "اكتم الصوت", shareText: "لقطة من {name} على Laces It: {cap}", followed: "تتابع {name} الحين ✓", deleted: "انحذفت اللقطة." },
-    en: { tab: "Clips", fy: "For you", fol: "Following", add: "New clip", pick: "Choose a video", pickS: "Up to 60 seconds and 20 MB", cap: "Caption", capPh: "How was the ride? #dawn #AlQudra", sport: "Sport", post: "Post clip", posting: "Uploading video…",
-      errFile: "Choose a video first.", errLong: "The video is longer than 60 seconds. Trim it and try again.", errBig: "The video is larger than 20 MB.", errType: "That file isn't a video.", errRead: "Couldn't read the video. Try another file (MP4).", noUpload: "Video upload isn't available here. Sign in or open the app on a computer.",
+    en: { tab: "Clips", fy: "For you", fol: "Following", add: "New clip", pick: "Choose a video", pickS: "Up to {n} seconds and 20 MB", cap: "Caption", capPh: "How was the ride? #dawn #AlQudra", sport: "Sport", post: "Post clip", posting: "Uploading video…",
+      errFile: "Choose a video first.", errLong: "The video is longer than {n} seconds. Trim it and try again.", errBig: "The video is larger than 20 MB.", errType: "That file isn't a video.", errRead: "Couldn't read the video. Try another file (MP4).", noUpload: "Video upload isn't available here. Sign in or open the app on a computer.",
       empty: "<strong>No clips yet.</strong>Tap + and post the first clip from your ride or run.", emptyF: "<strong>You're not following anyone yet.</strong>Tap + on a member's photo in For you to follow them.", exNote: "<strong>Clips need the database.</strong>Once the app is connected you can post videos of your rides here.",
       like: "Like", com: "Comments", save: "Save", share: "Share", del: "Delete", follow: "Follow", unfollow: "Unfollow", comments: "Comments", comPh: "Add a comment…", sndOn: "Sound on", sndOff: "Mute", shareText: "A clip from {name} on Laces It: {cap}", followed: "You're following {name} ✓", deleted: "Clip deleted." },
     fil: { tab: "Clips", fy: "Para sa iyo", fol: "Sinusundan", add: "Bagong clip", pick: "Pumili ng video", pickS: "Hanggang 60 segundo at 20 MB", cap: "Caption", capPh: "Kumusta ang ride? #dawn #AlQudra", sport: "Sport", post: "I-post ang clip", posting: "Ina-upload ang video…",
@@ -3279,7 +3447,7 @@ Their upcoming rides: ${next}.`;
     }, 300);
   });
   $("#clipAdd").addEventListener("click", () => {
-    $("#clipFormT").textContent = cl("add"); $("#cPick").textContent = cl("pick"); $("#cPickS").textContent = cl("pickS");
+    $("#clipFormT").textContent = cl("add"); $("#cPick").textContent = cl("pick"); $("#cPickS").textContent = cl("pickS", { n: clipMax() });
     $("#cfCap").textContent = cl("cap"); $("#c-cap").placeholder = cl("capPh"); $("#cfSport").textContent = cl("sport");
     $("#c-sport").innerHTML = ["bike", "run"].map((k) => `<option value="${k}">${esc(t(k))}</option>`).join("");
     $("#clipBtn").textContent = cl("post"); $("#clipErr").textContent = "";
@@ -3296,7 +3464,7 @@ Their upcoming rides: ${next}.`;
     if (!/^video\//.test(f.type)) { err.textContent = cl("errType"); return; }
     if (f.size > MAX_CLIP_B) { err.textContent = cl("errBig"); return; }
     v.onloadedmetadata = () => {
-      if (!(v.duration <= MAX_CLIP_S + 0.5)) { err.textContent = cl("errLong"); v.hidden = true; return; }
+      if (!(v.duration <= clipMax() + 0.5)) { err.textContent = cl("errLong", { n: clipMax() }) + (isPro(state.me) ? "" : " " + mo("clipLimitPro")); v.hidden = true; return; }
       clipState.file = f; clipState.dur = Math.round(v.duration); v.hidden = false; v.play().catch(() => {});
     };
     v.onerror = () => { err.textContent = cl("errRead"); };
@@ -3450,7 +3618,8 @@ Their upcoming rides: ${next}.`;
     const now = Date.now();
     const list = visibleRides().slice().sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const ordered = [...list.filter((r) => Date.parse(r.startAt) >= now), ...list.filter((r) => Date.parse(r.startAt) < now).reverse()];
-    $("#rides").innerHTML = ordered.map(rideCard).join("") ||
+    const rcards = ordered.map(rideCard); if (rcards.length) rcards.splice(Math.min(2, rcards.length), 0, sponsorCard("rides"));
+    $("#rides").innerHTML = rcards.join("") ||
       (state.mode === "live" && state.rides.length ? `<p class="notice">${esc(t("noMatch"))}</p>` : "");
     fillRoster();
     syncLive();
@@ -3604,7 +3773,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (m.sport !== "all") list = list.filter((x) => x.sport === m.sport || x.sport === "both");
     if (m.cat !== "all") list = list.filter((x) => x.category === m.cat);
     if (m.q) { const q = m.q.toLowerCase(); list = list.filter((x) => (txt(x, "title") + " " + (txt(x, "desc") || "")).toLowerCase().includes(q)); }
-    return list.slice().sort((a, b) => (a.sold ? 1 : 0) - (b.sold ? 1 : 0) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    return list.slice().sort((a, b) => (a.sold ? 1 : 0) - (b.sold ? 1 : 0) || (isFeatured(b.id) - isFeatured(a.id)) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
   }
   function itemCard(x) {
     const mine = state.mode === "live" && x.sellerId && x.sellerId === state.me;
@@ -3612,7 +3781,8 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     const wa = waDigits(x.phone);
     const sp = x.sport === "both" ? "both" : x.sport === "run" ? "run" : "bike";
     const desc = txt(x, "desc");
-    return `<article class="card item ${sp}${x.sold ? " sold" : ""}${x.photo ? "" : " nophoto"}" data-id="${esc(x.id)}">
+    const feat = !x.sold && isFeatured(x.id), featHref = mine && !feat && !x.sold ? payHref("featured") : "";
+    return `<article class="card item ${sp}${x.sold ? " sold" : ""}${x.photo ? "" : " nophoto"}${feat ? " featured" : ""}" data-id="${esc(x.id)}">${feat ? `<span class="featbadge">⭐ ${esc(mo("featured"))}</span>` : ""}${featHref ? `<a class="featbuy" href="${esc(featHref)}" target="_blank" rel="noopener">⭐ ${esc(mo("featureMine", { p: PRICES.featured, n: PRICES.featuredDays }))}</a>` : ""}
       <div class="ph">${photo}${x.photo && downloads && !x.example ? `<button type="button" class="save-ph" data-act="savePhoto" aria-label="${esc(t("savePhoto"))}" title="${esc(t("savePhoto"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>` : ""}${x.sold ? `<span class="badge sold">${esc(t("sold"))}</span>` : x.example ? `<span class="badge">${esc(t("example"))}</span>` : ""}</div>
       <div class="body">
         <h3>${esc(txt(x, "title"))}</h3>
@@ -3635,7 +3805,8 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       `<select class="chip" id="mCat" aria-label="${esc(t("sCat"))}"><option value="all">${esc(t("allCats"))}</option>` +
       CATS.map((c) => `<option value="${c}"${c === state.m.cat ? " selected" : ""}>${esc(t("cat_" + c))}</option>`).join("") + `</select>`;
     const list = visibleListings();
-    $("#market").innerHTML = list.map(itemCard).join("") ||
+    const cards = list.map(itemCard); if (cards.length) cards.splice(Math.min(2, cards.length), 0, sponsorCard("market"));
+    $("#market").innerHTML = cards.join("") ||
       (state.mode === "live" && state.listings.length ? `<p class="notice" style="grid-column:1/-1">${esc(t("noMatch"))}</p>` : "");
     for (const img of document.querySelectorAll("#market img[data-ph]")) img.addEventListener("error", () => { img.src = PH; }, { once: true });
   }
@@ -3652,7 +3823,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (state.tab === "rides") { renderRides(); renderMapBtn(); } else if (state.tab === "market") renderMarket(); else if (state.tab === "me") renderMe(); else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
+    if (state.tab === "rides") { renderRides(); renderMapBtn(); } else if (state.tab === "market") renderMarket(); else if (state.tab === "me") { renderMe(); renderPro(); renderAdmin(); } else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
     if (state.tab !== "clips") pauseClips(); else resumeClip();
     moveInd(!document.querySelector("#tabInd").style.width);
   }
@@ -4067,6 +4238,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     if (!title || !phone || !(price >= 0)) { err.textContent = t("errSellReq"); $(!title ? "#s-title" : !(price >= 0) ? "#s-price" : "#s-phone").focus(); return; }
     if (title.length < 6 || !$("#s-desc").value.trim()) { err.textContent = AD_HINT[lang]; $(title.length < 6 ? "#s-title" : "#s-desc").focus(); return; }
     if (waDigits(phone).length < 8 || waDigits(phone).length > 15) { err.textContent = t("errPhone"); $("#s-phone").focus(); return; }
+    if (!isPro(state.me) && state.listings.filter((x) => x.sellerId === state.me && !x.sold).length >= FREE.listings) { err.textContent = mo("limitList", { n: FREE.listings }); return; }
     if ($("#s-photo").files.length && !photoBlob) { err.textContent = t("errPhotoType"); $("#s-photo").focus(); return; }
     err.textContent = "";
     const btn = $("#sellBtn"); btn.disabled = true;
@@ -4092,7 +4264,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   applyLang();
   (async () => {
     if (!window.claude?.use) { state.mode = "example"; render(); return; }
-    [db, user, sample, assets, downloads, geo, weather, voice, gmaps] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather", "voice", "gmaps"].map((n) => claude.use(n)));
+    [db, user, sample, assets, downloads, geo, weather, voice, gmaps, pay] = await Promise.all(["db", "user", "sample", "assets", "downloads", "geo", "weather", "voice", "gmaps", "pay"].map((n) => claude.use(n)));
     if (!db) { state.mode = "example"; render(); return; }
     state.me = user ? await user.id() : null;
     const cw = user ? await user.can("data.write") : null;
@@ -4125,6 +4297,16 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       state.clips = s.docs.map((d) => ({ id: d.id, ...d.data() }));
       if (state.mode === "live" && state.tab === "clips") renderClips();
     }, () => {});
+    const moneyRender = () => { if (state.mode === "live" && ["me", "market", "rides", "clips"].includes(state.tab)) render(); };
+    db.collection("entitlements").onSnapshot((s) => { state.ents = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
+    db.collection("featured").onSnapshot((s) => { state.featured = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
+    db.collection("sponsors").onSnapshot((s) => { state.sponsors = s.docs.map((d) => ({ id: d.id, ...d.data() })); moneyRender(); }, () => {});
+    // Admins: the page's editors on Claude; in the standalone app, accounts listed in admins/<uid> (set in the Firebase console).
+    (async () => {
+      try { state.admin = !!(await user?.canEdit?.()); } catch {}
+      if (!state.admin && state.me) try { state.admin = !!(await db.doc("admins/" + state.me).get()).exists; } catch {}
+      if (state.admin) moneyRender();
+    })();
     db.collection("rooms").onSnapshot((s) => {
       state.rooms = s.docs.map((d) => ({ id: d.id, ...d.data() }));
       if (chatRide.room) { const x = state.rooms.find((r) => r.id === chatRide.room.id); if (x) { chatRide.room = x; if (isLiveRoom(x) && !$("#chatSheet").hidden) paintVoice(); } }

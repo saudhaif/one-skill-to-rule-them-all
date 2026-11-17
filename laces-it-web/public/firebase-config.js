@@ -32,3 +32,13 @@ export const iceServers = [
 // Google Cloud console → APIs & Services → Credentials → Create API key, and limit it to this site's address
 // (HTTP referrers). Empty = the map uses Esri satellite imagery instead.
 export const googleMapsKey = "";
+
+// Earning: payment links (e.g. Stripe Payment Links, Telr or Network International pay-by-link) for Laces It Pro
+// and featured listings, and a WhatsApp number members can message to subscribe. Leave empty to hide them.
+// After a payment arrives, an admin switches the plan on in the app (Me → Revenue panel).
+export const payments = {
+  proMonthly: "",   // link for AED 14.99 / month
+  proYearly: "",    // link for AED 119 / year
+  featured: "",     // link for a featured listing, AED 10 for 7 days
+  whatsapp: ""      // e.g. "9715XXXXXXXX"
+};

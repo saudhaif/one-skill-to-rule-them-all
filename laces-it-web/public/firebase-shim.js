@@ -265,5 +265,7 @@ function api(u, F, fs, S, st) {
   const voice = window.RTCPeerConnection && navigator.mediaDevices?.getUserMedia ? { iceServers: iceServers || [] } : null;
   // Google Maps for the satellite map, when a key is set in firebase-config.js.
   const gmaps = CFG.googleMapsKey ? { key: CFG.googleMapsKey } : null;
-  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation, weather, voice, gmaps };
+  // Payment links and the subscribe contact, when set in firebase-config.js.
+  const pay = CFG.payments && Object.values(CFG.payments).some(Boolean) ? CFG.payments : null;
+  return { db, user, assets, sample: null, downloads, geo: !!navigator.geolocation, weather, voice, gmaps, pay };
 }
