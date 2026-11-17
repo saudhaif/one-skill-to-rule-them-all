@@ -19,6 +19,16 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
+    // Listing fees: which listings are paid (and until when), and which are paid for the home-screen spot.
+    // Members pay the admins (cash or transfer); only admins mark a listing paid.
+    match /adpaid/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+    match /adhome/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
     match /sponsors/{id} {
       allow read: if signedIn();
       allow write: if isAdmin();

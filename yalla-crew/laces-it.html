@@ -727,6 +727,32 @@ button.pp { cursor: pointer; }
 .admincard .kpis .wide span { color: rgba(255, 255, 255, .7); }
 .admincard .adlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .admincard .adlist li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; background: var(--bg); padding: 8px 10px; border-radius: 10px; }
+/* Listing fee, cash note, home-screen ad */
+.cashnote { margin: 6px 0 0; font: 700 12px var(--font); color: var(--muted); }
+.cashtips { font-size: 12px; }
+.adstat { margin: 8px 0 0; font-size: 12px; border-radius: 12px; padding: 8px 10px; display: grid; gap: 3px; }
+.adstat.live { background: rgba(18, 184, 134, .12); color: #0b7a59; font-weight: 700; }
+.adstat.wait { background: rgba(255, 159, 67, .14); color: #8a4b08; }
+.adstat.wait b { font: 800 13px var(--font); }
+.adstat.wait a { font-weight: 800; color: inherit; }
+.adstat small { opacity: .8; }
+.vatnote { margin: 0; font-size: 12px; }
+.adplan { display: grid; gap: 8px; margin-bottom: 10px; }
+.adplan .lab { font: 700 13px var(--font); }
+.adplan .plans3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.adplan .plans3 label { position: relative; border: 2px solid var(--line); border-radius: 12px; padding: 10px 6px; text-align: center; font: 700 12px var(--font); cursor: pointer; }
+.adplan .plans3 input { position: absolute; opacity: 0; }
+.adplan .plans3 label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.adplan .homeopt { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.homead { display: grid; grid-template-columns: 94px 1fr auto; align-items: center; gap: 12px; width: 100%; height: 118px; border: 0; border-radius: 18px; padding: 10px; background: linear-gradient(135deg, #1a0b06, #3a1a0e); color: #fff; text-align: start; font: inherit; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+.homead img, .homead .noimg { width: 94px; height: 98px; border-radius: 12px; object-fit: cover; background: rgba(255, 255, 255, .1); display: grid; place-items: center; font-size: 34px; }
+.homead .ht { display: grid; gap: 3px; min-width: 0; }
+.homead .ht small { font: 800 11px var(--font); color: #ffd24a; letter-spacing: .04em; }
+.homead .ht b { font: 800 16px var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.homead .ht em { font-style: normal; font-size: 13px; opacity: .85; }
+.homead .hs { background: var(--accent); color: #fff; font: 800 13px var(--font); padding: 8px 12px; border-radius: 999px; }
+.item.flash { animation: yc-flash 1.6s ease-out; }
+@keyframes yc-flash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
 /* Clips: full-screen vertical video feed */
 .clips { position: fixed; inset: 0; z-index: 6; background: #000; color: #fff; }
 .clips .feed { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
@@ -825,6 +851,7 @@ button.pp { cursor: pointer; }
     </select>
     </div>
   </div>
+  <div class="mmwrap" id="homeAd" hidden></div>
   <div class="mmwrap" id="mmWrap">
     <button type="button" class="minimap" id="mapOpen"><span class="mm-tiles" id="mmTiles" aria-hidden="true"></span><span class="mm-pins" id="mmPins" aria-hidden="true"></span><span class="mm-lab"><b id="mapOpenT"></b><small id="mapOpenS"></small></span><span class="mm-exp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></span></button>
   </div>
@@ -851,6 +878,7 @@ button.pp { cursor: pointer; }
       <div class="chips" id="mFilters"></div>
       <div class="grid2" id="market" aria-live="polite"></div>
       <p class="foot" data-i18n="marketFoot"></p>
+      <p class="foot cashtips" id="cashTips"></p>
       <input id="itemPhoto" class="vh" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
     </section>
 
@@ -1010,6 +1038,7 @@ button.pp { cursor: pointer; }
         <label><span data-i18n="sDesc"></span><textarea id="s-desc" maxlength="600" data-i18n-ph="sDescPh"></textarea></label>
       </div>
       <p class="err" id="sellErr" role="alert"></p>
+      <div class="adplan" id="adPlanBox" hidden></div>
       <button class="btn block" type="submit" id="sellBtn" data-i18n="publishAd"></button>
     </form>
   </div>
@@ -1339,7 +1368,7 @@ button.pp { cursor: pointer; }
   const LANGS = ["ar", "en"];
   // Sections that are switched off for now. Their code and their data in the database stay as they are;
   // set a section to true to bring it back (Rooms brings voice rooms and live video with it).
-  const FEATURES = { rooms: false, money: false }; // money: Pro, featured listings, sponsors, revenue panel
+  const FEATURES = { rooms: false, money: false, adFee: true }; // money: Pro, featured listings, sponsors, revenue panel
   const EMIRATES = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"];
   const LEVELS = ["beg", "int", "adv"];
   const CATS = ["bikes", "parts", "apparel", "shoes", "watches", "helmets", "nutrition", "other"];
@@ -1388,7 +1417,7 @@ button.pp { cursor: pointer; }
   const txt = (r, f) => r[f + "Key"] ? t(r[f + "Key"]) : r[f];
 
   const state = {
-    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], clips: [], ents: {}, featured: {}, sponsors: [], admin: false, roomCat: "all", roomLang: "all", me: null, canWrite: true,
+    mode: "pending", rides: [], joins: [], listings: [], profiles: {}, msgs: [], rooms: [], clips: [], ents: {}, featured: {}, sponsors: [], admin: false, adpaid: {}, adhome: {}, roomCat: "all", roomLang: "all", me: null, canWrite: true,
     sport: "all", emirate: "all", day: "all", mine: false, ai: {}, open: {}, gpx: null,
     tab: location.hash === "#market" ? "market" : location.hash === "#ranking" ? "board" : location.hash === "#me" ? "me" : location.hash === "#rooms" && FEATURES.rooms ? "rooms" : /^#clips?\b/.test(location.hash) ? "clips" : "rides",
     m: { sport: "all", cat: "all", q: "" }
@@ -3248,6 +3277,116 @@ Their upcoming rides: ${next}.`;
   }
   document.addEventListener("click", (e) => { const b = e.target.closest("#adminCard [data-ad]"); if (b) adminAct(b); });
 
+  // ---------- Listing fee: the first 100 sellers list free; after that a listing is paid for 7, 15 or 30 days ----------
+  // Any seller can also pay to show a listing in the rectangle at the top of the home screen.
+  // The fee is paid to the app's admins (cash or transfer). An admin then marks it paid, which writes adpaid/<listing>;
+  // only admins can write there (database rules). Buyers pay sellers cash on pickup; the app takes nothing from sales.
+  const ADFEE = { freeSellers: 100, plans: [{ days: 7, price: 10 }, { days: 15, price: 18 }, { days: 30, price: 30 }], home: { days: 7, price: 25 } };
+  const planOf = (x) => ADFEE.plans.find((p) => p.days === +x.plan) || ADFEE.plans[0];
+  // Prices are final: they include UAE VAT (5%). The split is shown and kept with each payment.
+  const VAT = 0.05;
+  const vatSplit = (total) => { const net = Math.round(total / (1 + VAT) * 100) / 100; return { net, vat: Math.round((total - net) * 100) / 100, total }; };
+  const money2 = (n) => n.toLocaleString(I18N[lang].locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const vatLine = (total) => { const v = vatSplit(total); return af("vatLine", { net: money2(v.net), vat: money2(v.vat), total: money2(v.total) }); };
+  if (/[?&]emu\b/.test(location.search)) { const n = +new URLSearchParams(location.search).get("freeSellers"); if (n >= 0 && location.search.includes("freeSellers")) ADFEE.freeSellers = n; }
+  const AF = {
+    ar: { cash: "💵 الدفع كاش عند الاستلام", tips: "نصيحة: عاين الغرض قبل ما تدفع، وتلاقوا في مكان عام، ولا تحوّل فلوس قبل الاستلام. ليز ات ما يتدخل في البيع.",
+      pending: "بانتظار رسوم النشر", pendingNote: "إعلانك محفوظ ويظهر لك بس. ادفع {p} درهم للإدارة (كاش أو تحويل)، وينشر لمدة {n} يوم.",
+      vatLine: "{net} + ضريبة 5% {vat} = {total} د.إ", vatNote: "الأسعار شاملة ضريبة القيمة المضافة 5%.", vatN: "منها ضريبة", planT: "مدة الإعلان", planOpt: "{n} يوم · {p} د.إ", homeOpt: "اعرض إعلاني في أعلى الشاشة الرئيسية ({n} أيام · {p} د.إ)", homeWait: "بانتظار رسوم الشاشة الرئيسية ({p} د.إ)", homeLive: "في الشاشة الرئيسية لين {d}",
+      homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
+      liveUntil: "منشور لين {d}", expired: "انتهت مدة النشر. ادفع {p} درهم لتجديده {n} يوم.", free: "أول {n} بائع إعلاناتهم مجانية.",
+      saved: "انحفظ إعلانك. ينشر بعد دفع رسوم {p} درهم.", panel: "رسوم الإعلانات", panelSub: "إعلانات تنتظر الدفع. لما يوصلك المبلغ اضغط «تم الدفع».", paidBtn: "تم الدفع، انشر {n} يوم",
+      noPending: "ما فيه إعلانات تنتظر الدفع.", activeN: "إعلانات مدفوعة نشطة", monthN: "رسوم هالشهر", freeN: "بائعين مجانيين", aed: "د.إ", done: "تم ✓", err: "ما انحفظ. تأكد إنك مسؤول وإن الاتصال شغّال.", remove: "إلغاء النشر" },
+    en: { cash: "💵 Cash on pickup", tips: "Tip: check the item before you pay, meet in a public place, and don't transfer money before pickup. Laces It isn't part of the sale.",
+      pending: "Waiting for the listing fee", pendingNote: "Your listing is saved and only you can see it. Pay AED {p} to the admins (cash or transfer) and it goes live for {n} days.",
+      vatLine: "AED {net} + 5% VAT {vat} = {total}", vatNote: "Prices include 5% VAT.", vatN: "of which VAT", planT: "Listing time", planOpt: "{n} days · AED {p}", homeOpt: "Show my listing at the top of the home screen ({n} days · AED {p})", homeWait: "Waiting for the home-screen fee (AED {p})", homeLive: "On the home screen until {d}",
+      homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
+      liveUntil: "Live until {d}", expired: "This listing's time is up. Pay AED {p} to renew it for {n} days.", free: "The first {n} sellers list for free.",
+      saved: "Listing saved. It goes live once the AED {p} fee is paid.", panel: "Listing fees", panelSub: "Listings waiting for payment. When the money arrives, tap Paid.", paidBtn: "Paid, publish {n} days",
+      noPending: "No listings are waiting for payment.", activeN: "Active paid listings", monthN: "Fees this month", freeN: "Free sellers", aed: "AED", done: "Done ✓", err: "Not saved. Check you're an admin and online.", remove: "Unpublish" }
+  };
+  const af = (k, v) => { let x = (AF[lang] || AF.en)[k] ?? AF.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  // Sellers in the order they first listed; the first ADFEE.freeSellers of them never pay.
+  function freeSellerSet() {
+    const first = {};
+    for (const x of state.listings) if (x.sellerId && (!first[x.sellerId] || String(x.createdAt) < first[x.sellerId])) first[x.sellerId] = String(x.createdAt || "");
+    return new Set(Object.entries(first).sort((a, b) => a[1].localeCompare(b[1])).slice(0, ADFEE.freeSellers).map(([id]) => id));
+  }
+  const sellerIsFree = (uid, set = freeSellerSet()) => set.has(uid) || (!state.listings.some((x) => x.sellerId === uid) && set.size < ADFEE.freeSellers);
+  const paidUntil = (id) => state.adpaid[id]?.until;
+  // Whether a listing shows in the market: free sellers always; others while their fee is paid.
+  function listingLive(x, set) {
+    if (!FEATURES.adFee || state.mode !== "live" || x.example) return true;
+    if (sellerIsFree(x.sellerId, set)) return true;
+    const u = paidUntil(x.id); return !!u && Date.parse(u) > Date.now();
+  }
+  function listingStatus(x, set) {
+    if (!FEATURES.adFee || state.mode !== "live" || x.example || sellerIsFree(x.sellerId, set)) return "";
+    const u = paidUntil(x.id);
+    if (u && Date.parse(u) > Date.now()) return `<p class="adstat live">${esc(af("liveUntil", { d: dayStr(u) }))}</p>`;
+    const wa = pay?.whatsapp ? `https://wa.me/${String(pay.whatsapp).replace(/\D/g, "")}?text=${encodeURIComponent(af("pending") + ": " + (x.title || ""))}` : "";
+    const pl = planOf(x);
+    return `<div class="adstat wait"><b>${esc(af("pending"))}</b><span>${esc(u ? af("expired", { p: pl.price, n: pl.days }) : af("pendingNote", { p: pl.price, n: pl.days }))}</span><small>${esc(vatLine(pl.price))}</small>${wa ? `<a href="${esc(wa)}" target="_blank" rel="noopener">${esc(af("payWa"))}</a>` : ""}</div>`;
+  }
+  // The top-of-home-screen spot: listings whose home fee is paid.
+  const homeUntil = (id) => state.adhome[id]?.until;
+  const homeLive = (id) => !!homeUntil(id) && Date.parse(homeUntil(id)) > Date.now();
+  function homeStatus(x) {
+    if (!FEATURES.adFee || state.mode !== "live" || x.example || x.sellerId !== state.me) return "";
+    if (homeLive(x.id)) return `<p class="adstat live">🏠 ${esc(af("homeLive", { d: dayStr(homeUntil(x.id)) }))}</p>`;
+    return x.home ? `<p class="adstat wait">🏠 ${esc(af("homeWait", { p: ADFEE.home.price }))}</p>` : "";
+  }
+  let homeIdx = 0, homeT = 0;
+  function renderHomeAd() {
+    const el = $("#homeAd"); if (!el) return;
+    const set = freeSellerSet();
+    const ads = !FEATURES.adFee || state.mode !== "live" ? [] : state.listings.filter((x) => !x.sold && homeLive(x.id) && listingLive(x, set));
+    el.hidden = !ads.length || state.tab !== "rides";
+    clearInterval(homeT);
+    if (!ads.length) return;
+    const show = () => {
+      const x = ads[homeIdx % ads.length];
+      el.innerHTML = `<button type="button" class="homead" data-homead="${esc(x.id)}">${x.photo ? `<img src="${esc(photoSrc(x.photo))}" alt="">` : `<span class="noimg">🛒</span>`}<span class="ht"><small>${esc(af("homeTag"))}${ads.length > 1 ? ` · ${homeIdx % ads.length + 1}/${ads.length}` : ""}</small><b>${esc(x.title)}</b><em>${esc(Number(x.price).toLocaleString(I18N[lang].locale))} ${esc(af("aed"))} · ${esc(t("em_" + x.emirate))}</em></span><span class="hs">${esc(af("homeSee"))}</span></button>`;
+    };
+    show();
+    if (ads.length > 1) homeT = setInterval(() => { homeIdx++; show(); }, 6000);
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-homead]"); if (!b) return;
+    state.tab = "market"; render();
+    const card = document.querySelector(`#market .item[data-id="${CSS.escape(b.dataset.homead)}"]`); card?.scrollIntoView({ block: "center" }); card?.classList.add("flash");
+  });
+  function renderAdFeeAdmin() {
+    const el = $("#adminCard"); if (!el || FEATURES.money) return;
+    if (!FEATURES.adFee || !state.admin || state.mode !== "live") { el.hidden = true; return; }
+    el.hidden = false;
+    const set = freeSellerSet(), now = Date.now(), month = new Date().toISOString().slice(0, 7);
+    const waiting = state.listings.filter((x) => !x.sold && !sellerIsFree(x.sellerId, set) && !(paidUntil(x.id) && Date.parse(paidUntil(x.id)) > now));
+    const active = Object.values(state.adpaid).filter((p) => Date.parse(p.until) > now).length;
+    const homeWait = state.listings.filter((x) => !x.sold && x.home && !homeLive(x.id));
+    const monthPays = [...Object.values(state.adpaid), ...Object.values(state.adhome)].filter((p) => String(p.at || "").startsWith(month));
+    const thisMonth = monthPays.reduce((a, p) => a + (+p.amount || 0), 0), monthVat = monthPays.reduce((a, p) => a + (+p.vat || vatSplit(+p.amount || 0).vat), 0);
+    const nameOf = (id) => prof(id).nick || id.slice(0, 6);
+    el.innerHTML = `<h2 class="h2">${esc(af("panel"))}</h2><p class="sub">${esc(af("panelSub"))}</p>
+      <div class="kpis"><div><b>${waiting.length}</b><span>${esc(af("pending"))}</span></div><div><b>${active}</b><span>${esc(af("activeN"))}</span></div><div><b>${Math.min(set.size, ADFEE.freeSellers)}/${ADFEE.freeSellers}</b><span>${esc(af("freeN"))}</span></div>
+        <div class="wide"><b>${money2(thisMonth)} ${esc(af("aed"))}</b><span>${esc(af("monthN"))} · ${esc(af("vatN"))} ${money2(monthVat)}</span></div></div>
+      <ul class="adlist">${waiting.map((x) => { const pl = planOf(x); return `<li><span>${esc(x.title)} · ${esc(nameOf(x.sellerId))} · ${esc(af("planOpt", { n: pl.days, p: pl.price }))}${paidUntil(x.id) ? " ↻" : ""}</span><button type="button" class="btn" data-adfee="paid" data-id="${esc(x.id)}">${esc(af("paidBtn", { n: pl.days }))}</button></li>`; }).join("") || `<li class="sub">${esc(af("noPending"))}</li>`}</ul>
+      <h3>🏠 ${esc(af("homeWantN"))} · ${homeWait.length}</h3>
+      <ul class="adlist">${homeWait.map((x) => `<li><span>${esc(x.title)} · ${esc(nameOf(x.sellerId))} · ${ADFEE.home.price} ${esc(af("aed"))}</span><button type="button" class="btn" data-adfee="home" data-id="${esc(x.id)}">${esc(af("homeBtn", { n: ADFEE.home.days }))}</button></li>`).join("") || `<li class="sub">${esc(af("noPending"))}</li>`}</ul>
+      <p class="err" id="adErr" role="alert">${esc(adminMsg)}</p>`;
+  }
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("#adminCard [data-adfee]"); if (!b) return;
+    b.disabled = true;
+    const x = state.listings.find((l) => l.id === b.dataset.id), pl = x ? planOf(x) : ADFEE.plans[0], now = new Date().toISOString();
+    try {
+      if (b.dataset.adfee === "home") { const v = vatSplit(ADFEE.home.price); await db.doc("adhome/" + b.dataset.id).set({ until: addDays(ADFEE.home.days), at: now, amount: v.total, net: v.net, vat: v.vat, by: state.me }); }
+      else { const v = vatSplit(pl.price); await db.doc("adpaid/" + b.dataset.id).set({ until: addDays(pl.days), at: now, amount: v.total, net: v.net, vat: v.vat, days: pl.days, by: state.me }); }
+      sayAdmin(af("done"));
+    }
+    catch { sayAdmin(af("err")); b.disabled = false; }
+  });
+
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
     ar: { tab: "لقطات", fy: "لك", fol: "تتابعهم", add: "لقطة جديدة", pick: "اختر فيديو", pickS: "لين {n} ثانية و 20 ميجا", cap: "الوصف", capPh: "وش صار في الطلعة؟ #فجر #القدرة", sport: "الرياضة", post: "انشر اللقطة", posting: "يرفع الفيديو…",
@@ -3748,6 +3887,8 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   }
   function visibleListings() {
     let list = state.mode === "live" ? state.listings : EXAMPLE_ITEMS;
+    const freeSet = freeSellerSet();
+    list = list.filter((x) => x.sellerId === state.me || listingLive(x, freeSet));
     const m = state.m;
     if (m.sport !== "all") list = list.filter((x) => x.sport === m.sport || x.sport === "both");
     if (m.cat !== "all") list = list.filter((x) => x.category === m.cat);
@@ -3769,6 +3910,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
         <span class="tag">${esc(t(sp))}</span>
         <div class="meta">${esc(t("cat_" + x.category))} · ${esc(t("cond_" + x.condition))} · ${esc(t("em_" + x.emirate))}</div>
         ${desc ? `<p class="desc">${esc(shown("m" + x.id, desc))}</p>${x.example ? "" : trBtn("m" + x.id, desc)}` : ""}
+        ${x.sold || mine ? "" : `<p class="cashnote">${esc(af("cash"))}</p>`}${mine ? listingStatus(x) + homeStatus(x) : ""}
         ${x.sold ? "" : wa.length >= 8 && !x.example
           ? `<div class="contact"><div class="acts"><a class="wa" href="https://wa.me/${wa}?text=${encodeURIComponent(f("waMsg", { title: txt(x, "title"), price: x.price }))}" target="_blank" rel="noopener">${esc(t("whatsapp"))}</a></div></div>`
           : `<div class="contact"><span class="num">${esc(x.phone)}</span><div class="acts"><button type="button" class="cp" data-act="copynum">${esc(t("copyNum"))}</button></div></div>`}
@@ -3780,6 +3922,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     </article>`;
   }
   function renderMarket() {
+    $("#cashTips").textContent = FEATURES.adFee ? af("tips") + " " + af("free", { n: ADFEE.freeSellers }) : "";
     $("#mFilters").innerHTML = sportChips(state.m.sport, "data-f") +
       `<select class="chip" id="mCat" aria-label="${esc(t("sCat"))}"><option value="all">${esc(t("allCats"))}</option>` +
       CATS.map((c) => `<option value="${c}"${c === state.m.cat ? " selected" : ""}>${esc(t("cat_" + c))}</option>`).join("") + `</select>`;
@@ -3796,13 +3939,13 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
     renderHero();
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
     $("#tabClipsT").textContent = cl("tab");
-    $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides";
+    $("#hero").hidden = state.tab !== "rides"; $("#mmWrap").hidden = state.tab !== "rides"; renderHomeAd();
     const roomsT = $("#tabRoomsT"); if (roomsT) roomsT.textContent = rm("tab"); // the Rooms tab is gone while FEATURES.rooms is off
     $("#tabMeT").textContent = so("tabMe");
     for (const b of document.querySelectorAll("[data-tab]")) {
       if (b.dataset.tab === state.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (state.tab === "rides") { renderRides(); renderMapBtn(); } else if (state.tab === "market") renderMarket(); else if (state.tab === "me") { renderMe(); renderPro(); renderAdmin(); } else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
+    if (state.tab === "rides") { renderRides(); renderMapBtn(); } else if (state.tab === "market") renderMarket(); else if (state.tab === "me") { renderMe(); renderPro(); renderAdmin(); renderAdFeeAdmin(); } else if (state.tab === "rooms") renderRooms(); else if (state.tab === "clips") renderClips(); else renderBoard();
     if (state.tab !== "clips") pauseClips(); else resumeClip();
     moveInd(!document.querySelector("#tabInd").style.width);
   }
@@ -3893,6 +4036,10 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       $("#s-photo-wrap").hidden = false; $("#s-photo-off").hidden = true; $("#pickHelp").hidden = true;
       diag("diagReady");
       applyAiVisibility(); $("#aiAdOut").textContent = "";
+      const box = $("#adPlanBox"), free = sellerIsFree(state.me);
+      box.hidden = !(FEATURES.adFee && state.mode === "live");
+      box.innerHTML = (free ? `<p class="sub">${esc(af("free", { n: ADFEE.freeSellers }))}</p>` : `<span class="lab">${esc(af("planT"))}</span><div class="plans3">${ADFEE.plans.map((pl, i) => `<label><input type="radio" name="adplan" value="${pl.days}"${i === 0 ? " checked" : ""}><span>${esc(af("planOpt", { n: pl.days, p: pl.price }))}</span></label>`).join("")}</div>`) +
+        `<label class="homeopt"><input type="checkbox" id="adHome"> <span>🏠 ${esc(af("homeOpt", { n: ADFEE.home.days, p: ADFEE.home.price }))}</span></label><p class="sub vatnote">${esc(af("vatNote"))}</p>`;
       openSheet("#sellSheet", "#s-title");
     } else {
       if (!$("#f-date").value) $("#f-date").value = nextFriday().slice(0, 10);
@@ -4232,8 +4379,10 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
         title, sport: $("#s-sport").value, category: $("#s-cat").value, condition: $("#s-cond").value,
         price: Math.round(price), emirate: $("#s-emirate").value, phone,
         description: $("#s-desc").value.trim(), photo, sold: false,
-        sellerId: state.me, createdAt: new Date().toISOString()
+        sellerId: state.me, createdAt: new Date().toISOString(),
+        ...(FEATURES.adFee ? { plan: sellerIsFree(state.me) ? 0 : +($("#adPlanBox [name=adplan]:checked")?.value || ADFEE.plans[0].days), home: !!$("#adHome")?.checked } : {})
       });
+      if (FEATURES.adFee && !sellerIsFree(state.me)) flash(af("saved", { p: planOf({ plan: +($("#adPlanBox [name=adplan]:checked")?.value || 0) }).price }));
       sellForm.reset(); clearPhoto(); closeSheets();
     } catch (ex) { err.textContent = writeErr(ex); }
     finally { btn.disabled = false; }
@@ -4277,15 +4426,20 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
       if (state.mode === "live" && state.tab === "clips") renderClips();
     }, () => {});
     const moneyRender = () => { if (state.mode === "live" && ["me", "market", "rides", "clips"].includes(state.tab)) render(); };
+    if (FEATURES.adFee) {
+      const adRender = () => { if (state.mode === "live") render(); };
+      db.collection("adpaid").onSnapshot((s) => { state.adpaid = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); adRender(); }, () => {});
+      db.collection("adhome").onSnapshot((s) => { state.adhome = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); adRender(); }, () => {});
+    }
     if (FEATURES.money) db.collection("entitlements").onSnapshot((s) => { state.ents = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
     if (FEATURES.money) db.collection("featured").onSnapshot((s) => { state.featured = Object.fromEntries(s.docs.map((d) => [d.id, d.data()])); moneyRender(); }, () => {});
     if (FEATURES.money) db.collection("sponsors").onSnapshot((s) => { state.sponsors = s.docs.map((d) => ({ id: d.id, ...d.data() })); moneyRender(); }, () => {});
     // Admins: the page's editors on Claude; in the standalone app, accounts listed in admins/<uid> (set in the Firebase console).
     (async () => {
       try { state.admin = !!(await user?.canEdit?.()); } catch {}
-      if (!FEATURES.money) return;
+      if (!FEATURES.money && !FEATURES.adFee) return;
       if (!state.admin && state.me) try { state.admin = !!(await db.doc("admins/" + state.me).get()).exists; } catch {}
-      if (state.admin) moneyRender();
+      if (state.admin) { moneyRender(); if (state.tab === "me") render(); }
     })();
     db.collection("rooms").onSnapshot((s) => {
       state.rooms = s.docs.map((d) => ({ id: d.id, ...d.data() }));
