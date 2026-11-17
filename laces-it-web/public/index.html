@@ -3350,14 +3350,14 @@ Their upcoming rides: ${next}.`;
     ar: { cash: "💵 تدفع للبائع مباشرة كاش عند الاستلام. ما في شراء داخل التطبيق", tips: "نصيحة: عاين الغرض قبل ما تدفع، وتلاقوا في مكان عام، ولا تحوّل فلوس قبل الاستلام. ليز ات ما يتدخل في البيع.",
       pending: "بانتظار رسوم النشر", pendingNote: "إعلانك محفوظ ويظهر لك بس. ادفع {p} درهم للإدارة (كاش أو تحويل)، وينشر لمدة {n} يوم.",
       vatLine: "{net} + ضريبة 5% {vat} = {total} د.إ", vatNote: "الأسعار شاملة ضريبة القيمة المضافة 5%.", vatN: "منها ضريبة", planT: "مدة الإعلان", planOpt: "{n} يوم · {p} د.إ", homeOpt: "اعرض إعلاني في أعلى الشاشة الرئيسية ({n} أيام · {p} د.إ)", homeWait: "بانتظار رسوم الشاشة الرئيسية ({p} د.إ)", homeLive: "في الشاشة الرئيسية لين {d}",
-      homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
+      homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeStar: "⭐ إعلان مميز", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
       liveUntil: "منشور لين {d}", expired: "انتهت مدة النشر. ادفع {p} درهم لتجديده {n} يوم.", free: "أول {n} بائع إعلاناتهم مجانية.",
       saved: "انحفظ إعلانك. ينشر بعد دفع رسوم {p} درهم.", panel: "رسوم الإعلانات", panelSub: "إعلانات تنتظر الدفع. لما يوصلك المبلغ اضغط «تم الدفع».", paidBtn: "تم الدفع، انشر {n} يوم",
       noPending: "ما فيه إعلانات تنتظر الدفع.", activeN: "إعلانات مدفوعة نشطة", monthN: "رسوم هالشهر", freeN: "بائعين مجانيين", aed: "د.إ", done: "تم ✓", err: "ما انحفظ. تأكد إنك مسؤول وإن الاتصال شغّال.", remove: "إلغاء النشر" },
     en: { cash: "💵 Pay the seller directly in cash at pickup. Nothing is bought inside the app", tips: "Tip: check the item before you pay, meet in a public place, and don't transfer money before pickup. Laces It isn't part of the sale.",
       pending: "Waiting for the listing fee", pendingNote: "Your listing is saved and only you can see it. Pay AED {p} to the admins (cash or transfer) and it goes live for {n} days.",
       vatLine: "AED {net} + 5% VAT {vat} = {total}", vatNote: "Prices include 5% VAT.", vatN: "of which VAT", planT: "Listing time", planOpt: "{n} days · AED {p}", homeOpt: "Show my listing at the top of the home screen ({n} days · AED {p})", homeWait: "Waiting for the home-screen fee (AED {p})", homeLive: "On the home screen until {d}",
-      homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
+      homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeStar: "⭐ Featured", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
       liveUntil: "Live until {d}", expired: "This listing's time is up. Pay AED {p} to renew it for {n} days.", free: "The first {n} sellers list for free.",
       saved: "Listing saved. It goes live once the AED {p} fee is paid.", panel: "Listing fees", panelSub: "Listings waiting for payment. When the money arrives, tap Paid.", paidBtn: "Paid, publish {n} days",
       noPending: "No listings are waiting for payment.", activeN: "Active paid listings", monthN: "Fees this month", freeN: "Free sellers", aed: "AED", done: "Done ✓", err: "Not saved. Check you're an admin and online.", remove: "Unpublish" }
@@ -3397,13 +3397,15 @@ Their upcoming rides: ${next}.`;
   function renderHomeAd() {
     const el = $("#homeAd"); if (!el) return;
     const set = freeSellerSet();
-    const ads = !FEATURES.adFee || state.mode !== "live" ? [] : state.listings.filter((x) => !x.sold && homeLive(x.id) && listingLive(x, set));
+    // Every live listing rotates here; paid home-screen spots go first and carry a star
+    const live = !FEATURES.adFee || state.mode !== "live" ? [] : state.listings.filter((x) => !x.sold && listingLive(x, set));
+    const ads = [...live.filter((x) => homeLive(x.id)), ...live.filter((x) => !homeLive(x.id)).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))];
     el.hidden = !ads.length || state.tab !== "rides";
     clearInterval(homeT);
     if (!ads.length) return;
     const show = () => {
       const x = ads[homeIdx % ads.length];
-      el.innerHTML = `<button type="button" class="homead" data-homead="${esc(x.id)}">${x.photo ? `<img src="${esc(photoSrc(x.photo))}" alt="">` : `<span class="noimg">🛒</span>`}<span class="ht"><small>${esc(af("homeTag"))}${ads.length > 1 ? ` · ${homeIdx % ads.length + 1}/${ads.length}` : ""}</small><b>${esc(x.title)}</b><em>${esc(Number(x.price).toLocaleString(I18N[lang].locale))} ${esc(af("aed"))} · ${esc(t("em_" + x.emirate))}</em></span><span class="hs">${esc(af("homeSee"))}</span></button>`;
+      el.innerHTML = `<button type="button" class="homead" data-homead="${esc(x.id)}">${x.photo ? `<img src="${esc(photoSrc(x.photo))}" alt="">` : `<span class="noimg">🛒</span>`}<span class="ht"><small>${esc(homeLive(x.id) ? af("homeStar") : af("homeTag"))}${ads.length > 1 ? ` · ${homeIdx % ads.length + 1}/${ads.length}` : ""}</small><b>${esc(x.title)}</b><em>${esc(Number(x.price).toLocaleString(I18N[lang].locale))} ${esc(af("aed"))} · ${esc(t("em_" + x.emirate))}</em></span><span class="hs">${esc(af("homeSee"))}</span></button>`;
     };
     show();
     if (ads.length > 1) homeT = setInterval(() => { homeIdx++; show(); }, 6000);
@@ -3467,7 +3469,9 @@ Their upcoming rides: ${next}.`;
   const hms = (s) => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
   const hrZone = (bpm) => { const mx = 190; const p = bpm / mx; return p < .6 ? 1 : p < .7 ? 2 : p < .8 ? 3 : p < .9 ? 4 : 5; };
   function openWorkout() {
-    $("#workout").hidden = false; document.body.style.overflow = "hidden"; W.done = null; paintWorkout();
+    $("#workout").hidden = false; document.body.style.overflow = "hidden"; W.done = null;
+    if (!W.on) Object.assign(W, { moving: 0, dist: 0, max: 0, climb: 0, speed: 0, pts: [], last: null });
+    paintWorkout();
     if (!navigator.geolocation) { W.gpsErr = wo("gpsDenied"); paintWorkout(); }
     if (!W.watch && navigator.geolocation) {
       W.watch = navigator.geolocation.watchPosition(onGps, (e) => { W.gpsErr = e.code === 1 ? wo("gpsDenied") : ""; paintWorkout(); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
@@ -3596,7 +3600,7 @@ Their upcoming rides: ${next}.`;
     else if (["hr", "csc", "pwr"].includes(a)) connectSensor(a);
   });
   $("#woOpen").addEventListener("click", openWorkout);
-  if (/[?&]emu\b/.test(location.search)) window.__wo = () => ({ on: W.on, km: +(W.dist / 1000).toFixed(3), speed: +W.speed.toFixed(1), hr: W.hr, cad: W.cad, pwr: W.pwr, pts: W.pts.length, done: W.done });
+  if (/[?&]emu\b/.test(location.search)) window.__wo = () => ({ on: W.on, paused: W.paused, moving: +W.moving.toFixed(2), km: +(W.dist / 1000).toFixed(3), speed: +W.speed.toFixed(1), hr: W.hr, cad: W.cad, pwr: W.pwr, pts: W.pts.length, done: W.done });
 
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
