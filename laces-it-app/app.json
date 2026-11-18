@@ -39,7 +39,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Laces It shows your position on the meeting-points map. / يعرض ليز ات موقعك على خريطة التجمعات."
+          "locationWhenInUsePermission": "Laces It uses your location to measure workout speed and distance.",
+          "locationAlwaysAndWhenInUsePermission": "Laces It uses background location while a workout is running.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ],
       "expo-localization"

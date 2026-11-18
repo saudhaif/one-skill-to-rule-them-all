@@ -27,6 +27,7 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="map" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
               <Stack.Screen name="ride/[id]" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="workout" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
             </Stack.Protected>
             <Stack.Protected guard={!user && !demo}>
               <Stack.Screen name="sign-in" />
