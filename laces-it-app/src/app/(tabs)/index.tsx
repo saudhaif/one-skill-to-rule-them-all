@@ -25,6 +25,9 @@ export default function Rides() {
   const header = (
     <View style={{ gap: 12, marginBottom: 12 }}>
       <Text style={s.logo}>{t('appName')}</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/workout')} style={s.workout}>
+        <Text style={s.workoutT}>▶  {t('workout')}</Text>
+      </Pressable>
       {/* Map preview: a still satellite view with a dot per meeting point; tap to open the full map. */}
       <Pressable accessibilityRole="button" accessibilityLabel={t('mapTitle')} onPress={() => router.push('/map')} style={s.mini}>
         <RideMapPreview region={region} spots={sp} />
@@ -74,6 +77,8 @@ function dayWord(iso: string, t: ReturnType<typeof useApp.getState>['t']) {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: C.bg },
   logo: { fontSize: 28, fontWeight: '900', color: C.ink },
+  workout: { height: 54, borderRadius: 18, backgroundColor: C.night, alignItems: 'center', justifyContent: 'center' },
+  workoutT: { color: '#fff', fontSize: 16, fontWeight: '900' },
   mini: { height: CARD_H, borderRadius: 18, overflow: 'hidden', backgroundColor: C.night },
   dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#fff' },
   miniShade: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 14, paddingTop: 20, paddingBottom: 10, backgroundColor: 'rgba(5,12,20,.55)' },

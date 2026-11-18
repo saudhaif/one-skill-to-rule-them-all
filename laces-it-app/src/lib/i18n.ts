@@ -38,6 +38,11 @@ const ar = {
   close: 'إغلاق', zoomIn: 'قرّب', zoomOut: 'بعّد', fit: 'كل النقاط', locate: 'موقعي',
   tryDemo: 'جرّب بأمثلة (بدون حساب)',
   terms: 'الشروط والأحكام', privacy: 'سياسة الخصوصية', errSave: 'ما انحفظ. تأكد من الاتصال وجرّب مرة ثانية.',
+  workout: 'تمرين مباشر', workoutStart: 'ابدأ', workoutPause: 'إيقاف مؤقت', workoutResume: 'كمّل', workoutFinish: 'إنهاء',
+  workoutHeart: 'نبض القلب', workoutCadence: 'الكادنس', workoutPower: 'الطاقة', workoutConnect: 'ربط حساس', workoutConnecting: 'جارٍ البحث…',
+  workoutGps: 'الموقع', workoutDistance: 'المسافة', workoutSpeed: 'السرعة', workoutTime: 'الوقت',
+  workoutSave: 'حفظ التمرين', workoutSaved: 'انحفظ التمرين', workoutPermission: 'فعّل إذن الموقع لقياس التمرين.',
+  workoutBle: 'فعّل Bluetooth واربط حساساً متوافقاً.', workoutNoBle: 'Bluetooth غير متاح في هذا الإصدار.',
 };
 type Dict = typeof ar;
 
@@ -64,6 +69,11 @@ const en: Dict = {
   close: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fit: 'All points', locate: 'My location',
   tryDemo: 'Try it with examples (no account)',
   terms: 'Terms and conditions', privacy: 'Privacy policy', errSave: "Couldn't save. Check your connection and try again.",
+  workout: 'Live workout', workoutStart: 'Start', workoutPause: 'Pause', workoutResume: 'Resume', workoutFinish: 'Finish',
+  workoutHeart: 'Heart rate', workoutCadence: 'Cadence', workoutPower: 'Power', workoutConnect: 'Connect sensor', workoutConnecting: 'Scanning…',
+  workoutGps: 'Location', workoutDistance: 'Distance', workoutSpeed: 'Speed', workoutTime: 'Time',
+  workoutSave: 'Save workout', workoutSaved: 'Workout saved', workoutPermission: 'Enable location permission to track your workout.',
+  workoutBle: 'Enable Bluetooth and connect a compatible sensor.', workoutNoBle: 'Bluetooth is unavailable in this build.',
 };
 
 const fil: Dict = {
