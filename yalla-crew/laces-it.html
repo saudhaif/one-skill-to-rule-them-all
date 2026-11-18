@@ -3329,14 +3329,14 @@ Their upcoming rides: ${next}.`;
     ar: { cash: "💵 تدفع للبائع مباشرة كاش عند الاستلام. ما في شراء داخل التطبيق", tips: "نصيحة: عاين الغرض قبل ما تدفع، وتلاقوا في مكان عام، ولا تحوّل فلوس قبل الاستلام. ليز ات ما يتدخل في البيع.",
       pending: "بانتظار رسوم النشر", pendingNote: "إعلانك محفوظ ويظهر لك بس. ادفع {p} درهم للإدارة (كاش أو تحويل)، وينشر لمدة {n} يوم.",
       vatLine: "{net} + ضريبة 5% {vat} = {total} د.إ", vatNote: "الأسعار شاملة ضريبة القيمة المضافة 5%.", vatN: "منها ضريبة", planT: "مدة الإعلان", planOpt: "{n} يوم · {p} د.إ", homeOpt: "اعرض إعلاني في أعلى الشاشة الرئيسية ({n} أيام · {p} د.إ)", homeWait: "بانتظار رسوم الشاشة الرئيسية ({p} د.إ)", homeLive: "في الشاشة الرئيسية لين {d}",
-      homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeStar: "⭐ إعلان مميز", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
+      homeBtn: "تم دفع الشاشة الرئيسية ({n} أيام)", homeSee: "شوف الإعلان", homeStar: "إعلان مميز", homeTag: "إعلان", homeWantN: "طلبات الشاشة الرئيسية", payWa: "تواصل مع الإدارة للدفع",
       liveUntil: "منشور لين {d}", expired: "انتهت مدة النشر. ادفع {p} درهم لتجديده {n} يوم.", free: "أول {n} بائع إعلاناتهم مجانية.",
       saved: "انحفظ إعلانك. ينشر بعد دفع رسوم {p} درهم.", panel: "رسوم الإعلانات", panelSub: "إعلانات تنتظر الدفع. لما يوصلك المبلغ اضغط «تم الدفع».", paidBtn: "تم الدفع، انشر {n} يوم",
       noPending: "ما فيه إعلانات تنتظر الدفع.", activeN: "إعلانات مدفوعة نشطة", monthN: "رسوم هالشهر", freeN: "بائعين مجانيين", aed: "د.إ", done: "تم ✓", err: "ما انحفظ. تأكد إنك مسؤول وإن الاتصال شغّال.", remove: "إلغاء النشر" },
     en: { cash: "💵 Pay the seller directly in cash at pickup. Nothing is bought inside the app", tips: "Tip: check the item before you pay, meet in a public place, and don't transfer money before pickup. Laces It isn't part of the sale.",
       pending: "Waiting for the listing fee", pendingNote: "Your listing is saved and only you can see it. Pay AED {p} to the admins (cash or transfer) and it goes live for {n} days.",
       vatLine: "AED {net} + 5% VAT {vat} = {total}", vatNote: "Prices include 5% VAT.", vatN: "of which VAT", planT: "Listing time", planOpt: "{n} days · AED {p}", homeOpt: "Show my listing at the top of the home screen ({n} days · AED {p})", homeWait: "Waiting for the home-screen fee (AED {p})", homeLive: "On the home screen until {d}",
-      homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeStar: "⭐ Featured", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
+      homeBtn: "Home screen paid ({n} days)", homeSee: "See listing", homeStar: "Featured", homeTag: "Ad", homeWantN: "Home-screen requests", payWa: "Contact the admins to pay",
       liveUntil: "Live until {d}", expired: "This listing's time is up. Pay AED {p} to renew it for {n} days.", free: "The first {n} sellers list for free.",
       saved: "Listing saved. It goes live once the AED {p} fee is paid.", panel: "Listing fees", panelSub: "Listings waiting for payment. When the money arrives, tap Paid.", paidBtn: "Paid, publish {n} days",
       noPending: "No listings are waiting for payment.", activeN: "Active paid listings", monthN: "Fees this month", freeN: "Free sellers", aed: "AED", done: "Done ✓", err: "Not saved. Check you're an admin and online.", remove: "Unpublish" }
@@ -3376,7 +3376,7 @@ Their upcoming rides: ${next}.`;
   function renderHomeAd() {
     const el = $("#homeAd"); if (!el) return;
     const set = freeSellerSet();
-    // Every live listing rotates here; paid home-screen spots go first and carry a star
+    // Every live listing rotates here; paid home-screen spots go first, marked as featured
     const live = !FEATURES.adFee || state.mode !== "live" ? [] : state.listings.filter((x) => !x.sold && listingLive(x, set));
     const ads = [...live.filter((x) => homeLive(x.id)), ...live.filter((x) => !homeLive(x.id)).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))];
     el.hidden = !ads.length || state.tab !== "rides";
