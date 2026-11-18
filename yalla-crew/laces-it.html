@@ -753,6 +753,20 @@ button.pp { cursor: pointer; }
 .homead .hs { background: var(--accent); color: #fff; font: 800 13px var(--font); padding: 8px 12px; border-radius: 999px; }
 .item.flash { animation: yc-flash 1.6s ease-out; }
 @keyframes yc-flash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: none; } }
+/* Social accounts and member card */
+.socials-in { display: grid; gap: 8px; }
+.socials-in .sin { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 8px; }
+.socials-in .sin span { font: 800 12px var(--font); color: var(--sc); filter: saturate(1.1); }
+.socials-in .sin input { direction: ltr; text-align: left; }
+.slinks { display: flex; flex-wrap: wrap; gap: 8px; }
+.slinks a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; border: 1.5px solid var(--sc); color: inherit; text-decoration: none; font-size: 13px; min-height: 40px; }
+.slinks a b { color: var(--sc); font: 800 13px var(--font); }
+.slinks a span { color: var(--muted); }
+#personSheet .pav { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; }
+#personSheet .plv { display: flex; justify-content: space-between; align-items: center; background: var(--accent-soft); border-radius: 14px; padding: 10px 14px; font-weight: 700; }
+#personSheet .plv b { font: 800 22px var(--font); }
+#personSheet .pbio { margin: 0; white-space: pre-line; }
+[data-person], #tab-clips [data-pp], #tab-clips [data-pn] { cursor: pointer; }
 /* Workout: live ride screen */
 .tabbar .wotab { color: var(--text, inherit); font-weight: 800; }
 .tabbar .wotab i { position: relative; display: grid; place-items: center; width: 52px; height: 52px; margin: -26px 0 -4px; border-radius: 50%; background: #12b886; box-shadow: 0 6px 18px rgba(18, 184, 134, .45), 0 0 0 4px var(--card); }
@@ -1093,6 +1107,24 @@ button.pp { cursor: pointer; }
         <p class="sub" id="posterHelp"></p>
         <button type="button" class="btn block" id="posterSave"></button>
       </div>
+    </div>
+  </div>
+
+  <!-- Member card -->
+  <div class="sheet-bg" id="personSheet" hidden>
+    <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="personT">
+      <div class="grab"></div>
+      <header><span></span><button type="button" class="close" data-close data-i18n-aria="cancel">✕</button></header>
+      <div class="fields" id="personBody"></div>
+    </div>
+  </div>
+
+  <!-- First sign-in welcome -->
+  <div class="sheet-bg" id="welcomeSheet" hidden>
+    <div class="sheet pad" role="dialog" aria-modal="true" aria-labelledby="welcomeT">
+      <div class="grab"></div>
+      <header><h2 class="h2" id="welcomeT"></h2></header>
+      <div class="fields" id="welcomeBody"></div>
     </div>
   </div>
 
@@ -2164,6 +2196,7 @@ Their upcoming rides: ${next}.`;
           <label><span>${esc(so("bio"))}</span><textarea id="meBio" maxlength="200" placeholder="${esc(so("bioPh"))}"></textarea></label>
           <div class="two"><label><span>${esc(so("home"))}</span><select id="meHome">${EMIRATES.map((e) => `<option value="${e}">${esc(t("em_" + e))}</option>`).join("")}</select></label>
           <div><span class="sub">${esc(so("sports"))}</span><div class="sport-pick" id="meSports">${["bike", "run"].map((k) => `<button type="button" class="chip" data-sp="${k}" aria-pressed="false">${esc(t(k))}</button>`).join("")}</div></div></div>
+          ${socialFields("meS", p.socials)}
         </div>
         <p class="err" id="meErr" role="alert"></p>
         <button type="button" class="btn block" id="meSave">${esc(so("save"))}</button>`;
@@ -2185,7 +2218,8 @@ Their upcoming rides: ${next}.`;
   async function saveProfile(extra) {
     const err = $("#meErr"), btn = $("#meSave");
     const sports = [...document.querySelectorAll("#meSports [data-sp]")].filter((b) => b.getAttribute("aria-pressed") === "true").map((b) => b.dataset.sp);
-    const body = { ...prof(state.me), nick: $("#meNick").value.trim(), bio: $("#meBio").value.trim(), home: $("#meHome").value, sports, updatedAt: new Date().toISOString(), ...extra };
+    let socials; try { socials = readSocials("meS"); } catch (e) { err.textContent = e.message; return; }
+    const body = { ...prof(state.me), nick: $("#meNick").value.trim(), bio: $("#meBio").value.trim(), home: $("#meHome").value, sports, socials, updatedAt: new Date().toISOString(), ...extra };
     btn.disabled = true;
     try { await db.doc("profiles/" + state.me).set(body); state.profiles[state.me] = body; btn.textContent = so("saved"); err.textContent = ""; paintMeHead(); setTimeout(() => { btn.textContent = so("save"); }, 1500); }
     catch (e) { err.textContent = writeErr(e); }
@@ -3486,7 +3520,7 @@ Their upcoming rides: ${next}.`;
   }
   function finishWorkout() {
     clearInterval(W.tick); W.on = false; W.lock?.release?.().catch(() => {}); W.lock = null;
-    const avg = W.moving > 0 ? W.dist / W.moving * 3.6 : 0;
+    const avg = W.moving > 0 ? Math.min(W.dist / W.moving * 3.6, W.max || Infinity) : 0; // same as the live screen
     const mean = (a) => (a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null);
     W.done = { sport: W.sport, startAt: new Date(W.t0).toISOString(), seconds: Math.round(W.moving), km: +(W.dist / 1000).toFixed(2), avgKmh: +avg.toFixed(1), maxKmh: +W.max.toFixed(1), climbM: Math.round(W.climb), hrAvg: mean(W.hrs), hrMax: W.hrs.length ? Math.max(...W.hrs) : null, powerAvg: mean(W.pwrs), points: W.pts.length };
     paintWorkout();
@@ -3580,6 +3614,94 @@ Their upcoming rides: ${next}.`;
   });
   $("#woOpen").addEventListener("click", openWorkout);
   if (/[?&]emu\b/.test(location.search)) window.__wo = () => ({ on: W.on, paused: W.paused, moving: +W.moving.toFixed(2), km: +(W.dist / 1000).toFixed(3), speed: +W.speed.toFixed(1), hr: W.hr, cad: W.cad, pwr: W.pwr, pts: W.pts.length, done: W.done });
+
+  // ---------- Social accounts on profiles: added at sign-up or in the Me tab, shown to everyone on the member's card ----------
+  const SOCIAL = [
+    { k: "instagram", n: "Instagram", url: (h) => "https://instagram.com/" + h, host: /instagram\.com\/([^/?#]+)/i, c: "#d6249f" },
+    { k: "tiktok", n: "TikTok", url: (h) => "https://www.tiktok.com/@" + h, host: /tiktok\.com\/@?([^/?#]+)/i, c: "#111" },
+    { k: "snapchat", n: "Snapchat", url: (h) => "https://www.snapchat.com/add/" + h, host: /snapchat\.com\/add\/([^/?#]+)/i, c: "#b08d00" },
+    { k: "x", n: "X", url: (h) => "https://x.com/" + h, host: /(?:x|twitter)\.com\/([^/?#]+)/i, c: "#000" },
+    { k: "strava", n: "Strava", url: (h) => "https://www.strava.com/athletes/" + h, host: /strava\.com\/athletes\/([^/?#]+)/i, c: "#fc4c02" },
+    { k: "youtube", n: "YouTube", url: (h) => "https://www.youtube.com/@" + h, host: /youtube\.com\/@?([^/?#]+)/i, c: "#e00" },
+  ];
+  const SC = {
+    ar: { title: "حساباتك على التواصل", hint: "اكتب اسم المستخدم بس، أو الصق الرابط. تطلع للأعضاء في صفحتك.", bad: "اسم المستخدم في {n} فيه حروف ما تنقبل.",
+      welcome: "هلا فيك في ليز ات 👋", welcomeS: "عرّف الكرو عليك. تقدر تعدّل هذا بعدين من «حسابي».", go: "احفظ وكمّل", later: "بعدين",
+      none: "ما أضاف حسابات تواصل.", edit: "عدّل ملفي", member: "عضو في الكرو" },
+    en: { title: "Your social accounts", hint: "Type the username or paste the link. Members see them on your profile.", bad: "The {n} username has characters that aren't allowed.",
+      welcome: "Welcome to Laces It 👋", welcomeS: "Tell the crew who you are. You can change this later in Me.", go: "Save and continue", later: "Later",
+      none: "No social accounts added.", edit: "Edit my profile", member: "Crew member" }
+  };
+  const sc = (k, v) => { let x = (SC[lang] || SC.en)[k] ?? SC.en[k]; if (v) for (const [a, b] of Object.entries(v)) x = x.split("{" + a + "}").join(b); return x; };
+  // "@name", "name" or a full link → "name"; null when it isn't a valid handle.
+  function socialHandle(s, raw) {
+    let v = String(raw || "").trim(); if (!v) return "";
+    const m = v.match(s.host); if (m) v = decodeURIComponent(m[1]);
+    v = v.replace(/^@+/, "").replace(/\/+$/, "");
+    return /^[A-Za-z0-9._-]{1,40}$/.test(v) ? v : null;
+  }
+  const socialFields = (pre, vals = {}) => `<div class="socials-in"><span class="sub">${esc(sc("title"))}</span>${SOCIAL.map((s) => `<label class="sin"><span style="--sc:${s.c}">${esc(s.n)}</span><input id="${pre}-${s.k}" dir="ltr" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="@username" value="${esc(vals[s.k] || "")}"></label>`).join("")}<small class="sub">${esc(sc("hint"))}</small></div>`;
+  function readSocials(pre) {
+    const out = {};
+    for (const s of SOCIAL) { const h = socialHandle(s, $(`#${pre}-${s.k}`)?.value); if (h === null) throw new Error(sc("bad", { n: s.n })); if (h) out[s.k] = h; }
+    return out;
+  }
+  const socialLinks = (p) => { const so_ = p.socials || {}; const list = SOCIAL.filter((s) => so_[s.k] && /^[A-Za-z0-9._-]{1,40}$/.test(so_[s.k]));
+    return list.length ? `<div class="slinks">${list.map((s) => `<a href="${esc(s.url(so_[s.k]))}" target="_blank" rel="noopener noreferrer" style="--sc:${s.c}"><b>${esc(s.n)}</b><span dir="ltr">${/^\d+$/.test(so_[s.k]) ? "" : "@"}${esc(so_[s.k])}</span></a>`).join("")}</div>` : `<p class="sub">${esc(sc("none"))}</p>`; };
+  // Member card, opened from any avatar or name.
+  async function openPerson(uid) {
+    if (!uid || state.mode !== "live") return;
+    const p = prof(uid), base = (user ? await user.profiles([uid]) : {})[uid] || {};
+    const name = p.nick || base.name || t("member"), photo = p.avatar ? photoSrc(p.avatar) : (base.avatarUrl || PH);
+    $("#personBody").innerHTML = `<div class="me-head"><img class="pav" src="${esc(photo)}" alt=""><div><h2 id="personT">${esc(name)}${proBadge(uid)}</h2><p>${esc([p.home ? t("em_" + p.home) : "", (p.sports || []).map((k) => t(k)).join(" · ")].filter(Boolean).join(" · ") || sc("member"))}</p></div></div>
+      <div class="plv"><span>${esc(LVL_WORD[lang] || "Level")}</span><b>${levelOf(uid).toFixed(1)}</b></div>
+      ${p.bio ? `<p class="pbio">${esc(p.bio)}</p>` : ""}
+      ${socialLinks(p)}
+      ${uid === state.me ? `<button type="button" class="btn block soft" id="personEdit">${esc(sc("edit"))}</button>` : ""}`;
+    openSheet("#personSheet", "#personSheet .close");
+  }
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-person], #tab-clips [data-pp], #tab-clips [data-pn]");
+    if (!el || el.closest("button.fol") || state.mode !== "live") return;
+    e.stopPropagation(); e.preventDefault();
+    openPerson(el.dataset.person || el.dataset.pp || el.dataset.pn);
+  }, true);
+  document.addEventListener("click", (e) => { if (e.target.closest("#personEdit")) { closeSheets(); document.querySelector('[data-tab="me"]').click(); } });
+  // First sign-in: a short welcome with name, emirate and social accounts. Shown once; "Later" also counts.
+  let welcomeFor = null;
+  async function maybeWelcome() {
+    if (/[?&]emu\b/.test(location.search) && /[?&]nowelcome\b/.test(location.search)) return; // tests that start mid-app
+    // New = never finished or skipped this, and never filled a profile (sign-in itself stores name and photo).
+    const fresh = (p) => !p || !(p.welcomed || p.nick || p.socials || p.bio);
+    const me = state.me;
+    if (welcomeFor === me || state.mode !== "live" || !me || !db || !fresh(state.profiles[me])) return;
+    welcomeFor = me;
+    // Right after sign-in the local copy can hold only the name and photo, so confirm twice, a moment apart, from the server.
+    for (let ok = 0, tries = 0; ok < 2; tries++) {
+      if (tries > 8) { welcomeFor = null; return; }
+      await new Promise((r) => setTimeout(r, 1500));
+      if (state.me !== me || !fresh(state.profiles[me])) return;
+      try { const d = await db.doc("profiles/" + me).get(); if (!fresh(d.data?.())) return; if (!d.metadata?.fromCache && !d.metadata?.hasPendingWrites) ok++; } catch { welcomeFor = null; return; }
+    }
+    const gate = $("#gate");
+    if (document.querySelector(".sheet-bg:not([hidden])") || (gate && !gate.hidden)) { welcomeFor = null; setTimeout(maybeWelcome, 4000); return; }
+    $("#welcomeBody").innerHTML = `<p class="sub">${esc(sc("welcomeS"))}</p>
+      <label><span>${esc(so("nick"))}</span><input id="wNick" maxlength="40"></label>
+      <label><span>${esc(so("home"))}</span><select id="wHome">${EMIRATES.map((x) => `<option value="${x}">${esc(t("em_" + x))}</option>`).join("")}</select></label>
+      ${socialFields("wS")}
+      <p class="err" id="wErr" role="alert"></p>
+      <div class="two"><button type="button" class="btn soft" id="wLater">${esc(sc("later"))}</button><button type="button" class="btn" id="wGo">${esc(sc("go"))}</button></div>`;
+    $("#welcomeT").textContent = sc("welcome");
+    (async () => { const b = (user ? await user.profiles([state.me]) : {})[state.me]; if (b?.name && !$("#wNick").value) $("#wNick").value = b.name; })();
+    openSheet("#welcomeSheet", "#wNick");
+  }
+  async function saveWelcome(skip) {
+    let body = { welcomed: true, updatedAt: new Date().toISOString() };
+    if (!skip) { try { body = { ...body, nick: $("#wNick").value.trim(), home: $("#wHome").value, socials: readSocials("wS") }; } catch (e) { $("#wErr").textContent = e.message; return; } }
+    try { body = { ...prof(state.me), ...body }; await db.doc("profiles/" + state.me).set(body); state.profiles[state.me] = { ...prof(state.me), ...body }; closeSheets(); if (state.tab === "me") { delete $("#meCard").dataset.ready; renderMe(); } }
+    catch (e) { $("#wErr").textContent = writeErr(e); }
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest("#wGo")) saveWelcome(false); else if (e.target.closest("#wLater")) saveWelcome(true); });
 
   // ---------- Clips: short videos from rides and runs, in a vertical feed ----------
   const CL = {
@@ -4128,7 +4250,7 @@ Forecast for the ride hours: ${weatherForAi(r)}. If a forecast is given, base th
   }
 
   function render() {
-    renderStatus();
+    renderStatus(); setTimeout(maybeWelcome, 0);
     paintAsk();
     renderHero();
     for (const id of ["rides", "clips", "market", "board", "rooms", "me"]) $("#tab-" + id).hidden = state.tab !== id;
